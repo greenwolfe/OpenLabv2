@@ -1,0 +1,26 @@
+.Unit {
+  background: #efefef;
+  max-height: auto; /*185px to scroll*/
+  overflow-y:auto;
+}
+#activities {
+  width: 100%; 
+
+}
+#activities a {
+  padding-right: 1px;
+}
+#activities .Unit p {
+  float: left;
+  margin: 1px 1% 1px 0; /* T R B L */
+  padding: 1px; 
+  width: 48%; 
+}
+#activities i.fa-caret-right {
+  float: left; 
+  margin-left: 10px; 
+  margin-top: 8px;
+}
+#activitiesListTitle span, #activities h3 a span {
+  font-weight: normal;
+}

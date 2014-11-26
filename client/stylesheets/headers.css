@@ -1,0 +1,30 @@
+.navbar { /* overriding defaults from bootstrap */
+  margin-bottom: 10px;
+}
+.navbar .navbar-default {
+    border-radius: 0px 0px 3px 3px; 
+}
+.headerInfo {
+  font-size: 14pt;
+  display:inline-block;
+  padding-top:12px;
+  padding-left:8px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.headerInfo.small, .headerInfo .small {
+  font-size: 12pt;
+}
+#viewAs {
+  padding: 20px;
+  padding-bottom: 20px;
+  width: 500px;
+}
+#viewAs li a.selected  {
+  background-image: none;
+  background: #f5f5f5;
+}
+#btnTEstate a[selected] {
+  background-image: none;
+  background: #c9c9c9;
+}

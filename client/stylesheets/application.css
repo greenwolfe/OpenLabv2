@@ -1,0 +1,9 @@
+body {
+  background: #efefef;
+}
+.placeholder {
+  color: #e6e6e6; /* color from ui-state-default provided by /packages/jquery-ui-bootstrap/css/jquery-ui-1.9.2.custom.css*/
+}
+i.remove:hover, i.fa-check-square-o, i.fa-square-o {
+    cursor: default;
+}
