@@ -1,26 +1,44 @@
 <template name = 'activitiesList'> 
-   <h5 id='activitiesListTitle'>activities <span>(completed/expected/total)</span></h5>
-   <div id='activities'>
-    {{#each units}}
-      {{> activitiesSublist }}
-    {{/each}}
-    </div>
+   <div id="activitiesListTitle">
+     <h4 >activities</h4>
+     <span class="progress-bar-warning"> expected progress </span>
+     <span class="progress-bar-info"> your progress </span>
+   </div>
+   <ul id='units' class="nav nav-pills nav-justified">
+      {{#each units}}
+        {{> unitTitle}}
+      {{/each}}
+    </ul>
+    {{#with activeUnit}}
+      {{> activityList}}
+    {{/with}}
 </template>
 
-<template name='activitiesSublist'>
-      <h3> <a href="#" title="{{longname}}"> {{title}} </a></h3> 
-      <div class = 'Unit'>
-        {{#each activities}}
-          {{> activityItem}}
-        {{/each}}
-      </div>
+<template name="unitTitle">
+  <li class="{{active}}">
+    <div class="progress">
+      <div class="progress-bar progress-bar-warning" style="width: 70%;" title="18/20"></div>
+    </div>
+    <div class="progress">
+      <div class="progress-bar progress-bar-info" style="width: 30%;" title="15/18"></div>
+    </div>
+    <a href="#" title="{{longname}}">
+      {{title}}
+    </a>
+  </li>
+</template>
+
+<template name='activityList'>
+  <div id='activityList'>
+    {{#each activities}}
+      {{> activityItem}}
+    {{/each}}
+  </div>
 </template>
 
 <template name = 'activityItem'>
-    <div>
-    <p data-activityid={{_id}} class="ui-state-default col-md-3">
+    <p class="aItem col-md-3">
       <a href="#">{{title}}</a> 
     </p>
-    </div>
 </template>
 

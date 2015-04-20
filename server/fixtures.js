@@ -7,6 +7,15 @@ Meteor.startup(function () {
     });
   };
 
+  UploadServer.init({
+    tmpDir: process.env.PWD + '/.uploads/tmp',
+    uploadDir: process.env.PWD + '/.uploads/',
+    checkCreateDirectories: true //create the directories for you
+    /*finished: function(fileInfo) {
+      console.log(fileInfo);
+    }*/
+  })
+
   /*  define the teacher account and assign role*/
 
   if (Meteor.users.find().count() == 0) {
@@ -33,7 +42,7 @@ Meteor.startup(function () {
   if (Activities.find().count() == 0) {
     var units = Units.find().fetch();
     units.forEach( function(u) {
-      for (i = 1; i <= (20-2*u.rank); i++) {
+      for (i = 1+u.rank%2; i <= (20-2*u.rank); i++) {
         Activities.insert({
           title: 'activity' + i,
           unitID: u._id,
