@@ -5,12 +5,10 @@
 
 meteor-platform
 insecure
-mizzao:bootstrap-3
 underscore
 natestrauser:x-editable-bootstrap
 wizonesolutions:underscore-string
 iron:router
-mizzao:jquery-ui
 sacha:spin
 ian:accounts-ui-bootstrap-3
 accounts-password
@@ -18,3 +16,8 @@ alanning:roles
 mrt:moment
 linto:fontawesome
 
+twbs:bootstrap
+rubaxa:sortable
+tomi:upload-server
+tomi:upload-jquery
+audit-argument-checks

@@ -7,3 +7,6 @@ body {
 i.remove:hover, i.fa-check-square-o, i.fa-square-o {
     cursor: default;
 }
+.bottom12 {
+  margin-bottom: 12px;
+}

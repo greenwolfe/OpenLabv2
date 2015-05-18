@@ -1,26 +1,36 @@
-.Unit {
-  background: #efefef;
-  max-height: auto; /*185px to scroll*/
-  overflow-y:auto;
+#activitiesListTitle h4 {
+  display: inline-block;
 }
-#activities {
-  width: 100%; 
+#activitiesListTitle span {
+  margin-right: 4px;
+  font-size: small;
+}
 
+#units li a {
+  color: black;
+  border: thin;
+  text-align: center;
 }
-#activities a {
-  padding-right: 1px;
+#units li div.progress {
+  margin-bottom: 0;
+  height: 10px;
 }
-#activities .Unit p {
-  float: left;
-  margin: 1px 1% 1px 0; /* T R B L */
-  padding: 1px; 
-  width: 48%; 
+
+
+#activityList {
+  outline: 1px solid #AAA;
 }
-#activities i.fa-caret-right {
-  float: left; 
-  margin-left: 10px; 
-  margin-top: 8px;
+#activityList p {
+
+  background-color: #e6e6e6;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#e6e6e6));
+  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #e6e6e6);
+  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+  background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
 }
-#activitiesListTitle span, #activities h3 a span {
-  font-weight: normal;
+#activityList p a {
+    color: #555555;
+    font-size: small;
 }

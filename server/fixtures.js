@@ -7,6 +7,15 @@ Meteor.startup(function () {
     });
   };
 
+  UploadServer.init({
+    tmpDir: process.env.PWD + '/.uploads/tmp',
+    uploadDir: process.env.PWD + '/.uploads/',
+    checkCreateDirectories: true //create the directories for you
+    /*finished: function(fileInfo) {
+      console.log(fileInfo);
+    }*/
+  })
+
   /*  define the teacher account and assign role*/
 
   if (Meteor.users.find().count() == 0) {
@@ -24,29 +33,23 @@ Meteor.startup(function () {
         title: 'unit' + i,
         longname: 'unit of instruction' + i,
         description:  '',
-        rank: i,
+        order: i,
         visible: true
       });
     };
   }
 
-  if (Activities.find().count() == 0) {
+ /* if (Activities.find().count() == 0) {
     var units = Units.find().fetch();
     units.forEach( function(u) {
-      for (i = 1; i <= (20-2*u.rank); i++) {
-        Activities.insert({
+      for (i = 0; i <= (20-2*u.order-u.order%2); i++) {
+        Meteor.call('insertActivity',{
           title: 'activity' + i,
           unitID: u._id,
-          description: '',
-          ownerID: '',
-          standardIDs: [],
-          rank: i,
-          visible: true,
-          dueDate: null
         });
       };
     });
-  }
+  }*/
 
   //put code to convert models to units and categories here
 
