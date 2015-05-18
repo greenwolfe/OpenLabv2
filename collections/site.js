@@ -1,4 +1,4 @@
-Site = new Meteor.Collection('site');
+Site = new Meteor.Collection('Site');
 
 /* Site.insert({
   title: 'Open Lab',

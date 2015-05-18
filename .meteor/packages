@@ -20,3 +20,4 @@ twbs:bootstrap
 rubaxa:sortable
 tomi:upload-server
 tomi:upload-jquery
+audit-argument-checks

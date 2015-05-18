@@ -29,16 +29,23 @@
 </template>
 
 <template name='activityList'>
-  <div id='activityList'>
-    {{#each activities}}
-      {{> activityItem}}
-    {{/each}}
+  <div id='activityList' class="row">
+    <div class = 'activityColumn column col-md-6'>
+      {{#sortable1c items=activities0 options=sortableOpts}}
+        {{> activityItem}}
+      {{/sortable1c}}
+    </div>
+    <div class = 'activityColumn column col-md-6'>
+      {{#sortable1c items=activities1 options=sortableOpts}}
+        {{> activityItem}}
+      {{/sortable1c}}
+    </div>
   </div>
 </template>
 
 <template name = 'activityItem'>
-    <p class="aItem col-md-3">
-      <a href="#">{{title}}</a> 
+    <p class="aItem">
+      <a href="#">{{title}}  order:{{order}}</a> 
     </p>
 </template>
 

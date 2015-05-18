@@ -8,7 +8,7 @@
 
 Template.activitiesList.helpers({
   units: function() {
-    return Units.find({visible:true},{sort: {rank: 1}});
+    return Units.find({visible:true},{sort: {order: 1}});
   },
   activeUnit: function() {
     return Units.findOne(Session.get('activeUnit'));
@@ -23,7 +23,7 @@ Template.unitTitle.helpers({
   active: function() {
     var activeUnit = Session.get('activeUnit');
     if (!activeUnit) {
-      var units = Units.find({visible:true},{sort: {rank: 1}}).fetch();
+      var units = Units.find({visible:true},{sort: {order: 1}}).fetch();
       var cU = Meteor.user();
       activeUnit = units[0]._id;
       if (cU && ('profile' in cU) && ('lastOpened' in cU.profile) && 
@@ -51,35 +51,42 @@ Template.unitTitle.events({
  /** ACTIVITY LIST  **/
 /*************************/
 
-//Template.activitiesSublist.rendered = function() {
-//  if ($( "#activities" ).data('ui-accordion')) //if accordion already applied
-//    $('#activities').accordion("refresh");
-//};
-
-Template.activityList.onRendered(function() {
-  var el = this.find('#activityList');
-  Sortable.create(el,{
-    draggable:'.aItem'
-  });
-});
+/*** HELPERS ****/
 
 Template.activityList.helpers({
-  activities: function() {
-    var Acts = Activities.find({unitID: this._id, 
+  activities0: function() {
+    var columns = [];
+    columns[1] = Activities.find({unitID: this._id, 
       ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
       visible: true},
-      {sort: {rank: 1}}).fetch(); 
-    Acts.forEach(function(A,i) {
-      A.irank = i;
-    })
-    var max = Acts.length - 1;
-    var half = Math.floor(max/2);
-    Acts.sort(function(A,B) {
-      var Ai = (A.irank <= half) ? 2*A.irank : 2*A.irank - max + max%2 - 1;
-      var Bi = (B.irank <= half) ? 2*B.irank : 2*B.irank - max + max%2 - 1;      
-      return Ai-Bi;
-    });
-    return Acts;
+      {sort: {order: 1}}).fetch(); 
+    var half = Math.ceil(columns[1].length/2)
+    columns[0] = columns[1].splice(0,half); 
+    return columns[0];
+  },
+  activities1: function() {
+    var columns = [];
+    columns[1] = Activities.find({unitID: this._id, 
+      ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+      visible: true},
+      {sort: {order: 1}}).fetch(); 
+    var half = Math.ceil(columns[1].length/2)
+    columns[0] = columns[1].splice(0,half); 
+    return columns[1];
+  },
+  sortableOpts: function() {
+    return {
+      draggable:'.aItem',
+      //handle: '.blockSortableHandle',
+      group: 'activityColumn',
+      collection: 'Activities',
+      selectField: 'unitID',
+      selectValue: this._id //,
+      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
+      //onAdd: function(evt) {
+      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
+      //}
+    }
   },
   reassessments: function() {
     var userToShow = Meteor.userId();
