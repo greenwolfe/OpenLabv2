@@ -1,0 +1,18 @@
+/* summernote */
+
+.note-air-editor, .blue-outlined {
+    border-style: dashed;
+    border-color: DeepSkyBlue;
+    border-width: thin;
+}
+.note-popover .popover {
+    max-width: 350px;
+}
+
+div.summernote {
+    min-width: 100px;
+    min-height: 14pt;
+}
+div.note-editor textarea.note-codable {
+    min-height: 72pt;
+}

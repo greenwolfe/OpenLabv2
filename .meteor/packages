@@ -6,7 +6,6 @@
 meteor-platform
 insecure
 underscore
-natestrauser:x-editable-bootstrap
 wizonesolutions:underscore-string
 iron:router
 sacha:spin
@@ -21,3 +20,4 @@ rubaxa:sortable
 tomi:upload-server
 tomi:upload-jquery
 audit-argument-checks
+summernote:summernote

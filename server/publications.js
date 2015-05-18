@@ -4,6 +4,7 @@ Meteor.publish('activities',function(userID) {  //change to user or section ID i
   if (!userToShow) return Acts;
   if (Roles.userIsInRole(userToShow,'teacher')) 
     return Activities.find();  */
+  check(userID,Match.idString);
   return Activities.find();
 });
 
@@ -13,6 +14,7 @@ Meteor.publish('units',function(showHidden) {
   } else {
     return Units.find({visible:true});
   }*/
+  check(showHidden,Boolean);
   return Units.find();
 });
 

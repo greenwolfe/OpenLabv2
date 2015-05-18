@@ -33,7 +33,15 @@ Template.unitTitle.helpers({
       Session.set('activeUnit', activeUnit);
     }
     return (this._id == activeUnit) ? 'active' : '';
-  }
+  },
+  hidden: function() {
+    var activeUnit = Session.get('activeUnit');
+    return (this._id == activeUnit) ? '' : 'hidden';
+  },
+  editable: function() {
+    var activeUnit = Session.get('activeUnit');
+    return (this._id == activeUnit) ? 'true' : '';
+  }  
 });
 
 Template.unitTitle.events({
@@ -44,8 +52,28 @@ Template.unitTitle.events({
     if (cU && ('profile' in cU)) {
       Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":tmpl.data._id} });
     }
+  },
+  "blur div[contenteditable='true'][class~='editUnitTitle']": function(event,tmpl) {
+    var $element = $(event.target);
+    var title = _.trim(_.stripTags($element.text()));
+    Meteor.call('updateUnit',{
+      _id:tmpl.data._id,
+      title: title
+    },function(error,unitID) {
+      if (error) {
+        alert(error.reason)
+      } else { //reset displayed text
+        $element.text(title); 
+      }
+    });                          
   }
 })
+
+Template.unitTitle.onRendered(function() {
+  console.log(this);
+  $editTitleElement = $(this.find('.editUnitTitle'));
+  $editTitleElement.text(this.data.title);
+});
 
   /*************************/
  /** ACTIVITY LIST  **/

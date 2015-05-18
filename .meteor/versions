@@ -17,6 +17,7 @@ deps@1.0.7
 ejson@1.0.6
 email@1.0.6
 fastclick@1.0.3
+fortawesome:fontawesome@4.2.0_2
 geojson-utils@1.0.3
 html-tools@1.0.4
 htmljs@1.0.4
@@ -46,7 +47,6 @@ minimongo@1.0.8
 mobile-status-bar@1.0.3
 mongo@1.1.0
 mrt:moment@2.8.1
-natestrauser:x-editable-bootstrap@1.5.2_2
 npm-bcrypt@0.7.8_2
 observe-sequence@1.0.6
 ordered-dict@1.0.3
@@ -65,6 +65,7 @@ spacebars@1.0.6
 spacebars-compiler@1.0.6
 srp@1.0.3
 stylus@1.0.7
+summernote:summernote@0.6.7
 templating@1.1.1
 tomi:upload-jquery@2.1.5
 tomi:upload-server@1.2.3

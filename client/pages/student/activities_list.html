@@ -1,17 +1,17 @@
 <template name = 'activitiesList'> 
-   <div id="activitiesListTitle">
-     <h4 >activities</h4>
-     <span class="progress-bar-warning"> expected progress </span>
-     <span class="progress-bar-info"> your progress </span>
-   </div>
-   <ul id='units' class="nav nav-pills nav-justified">
-      {{#each units}}
-        {{> unitTitle}}
-      {{/each}}
-    </ul>
-    {{#with activeUnit}}
-      {{> activityList}}
-    {{/with}}
+  <div id="activitiesListTitle">
+    <h4 >activities</h4>
+    <span class="progress-bar-warning"> expected progress </span>
+    <span class="progress-bar-info"> your progress </span>
+  </div>
+  <ul id='units' class="nav nav-pills nav-justified">
+    {{#each units}}
+      {{> unitTitle}}
+    {{/each}}
+  </ul>
+  {{#with activeUnit}}
+    {{> activityList}}
+  {{/with}}
 </template>
 
 <template name="unitTitle">
@@ -23,8 +23,17 @@
       <div class="progress-bar progress-bar-info" style="width: 30%;" title="15/18"></div>
     </div>
     <a href="#" title="{{longname}}">
-      {{title}}
+      {{{title}}}
     </a>
+    <div class="row" {{hidden}}>
+      <div class="editUnitTitle" contenteditable={{editable}}></div>
+    </div>
+    {{#if active}}
+      <div class="row">
+        <!--{{>summernote collection='Units' field='title' _id=_id enabled=active options=summernotePlainText}}-->
+        {{>summernote collection='Units' field='longname' _id=_id enabled=active options=summernotePlainText}}
+      </div>
+    {{/if}}
   </li>
 </template>
 
