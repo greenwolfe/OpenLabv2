@@ -3,11 +3,13 @@
     <h4 >activities</h4>
     <span class="progress-bar-warning"> expected progress </span>
     <span class="progress-bar-info"> your progress </span>
+    <i class="fa fa-question-circle" title="Click on a unit name to see its activities.  Ctrl-click to see another unit side-by-side the first."></i>
   </div>
   <ul id='units' class="nav nav-pills nav-justified">
-    {{#each units}}
+    {{#sortable items=units sortField="order" options=sortableOpts}}
       {{> unitTitle}}
-    {{/each}}
+    {{/sortable}}
+    {{>newUnit}}
   </ul>
   {{#with activeUnit}}
     {{> activityList}}
@@ -15,46 +17,74 @@
 </template>
 
 <template name="unitTitle">
-  <li class="{{active}}">
+  <li class="unittitle {{active}} {{active2}}">
     <div class="progress">
       <div class="progress-bar progress-bar-warning" style="width: 70%;" title="18/20"></div>
     </div>
     <div class="progress">
       <div class="progress-bar progress-bar-info" style="width: 30%;" title="15/18"></div>
     </div>
-    <a href="#" title="{{longname}}">
+    <div>
+        {{>showHide collection='Units' itemName='unit' item=this}}
+    </div>
+    <a href="#" class="unitSortableHandle" title="{{longname}}">      
       {{{title}}}
     </a>
     <div class="row" {{hidden}}>
-      <div class="editUnitTitle" contenteditable={{editable}}></div>
+      {{>plaintexteditor collection='Units' field='title' _id=_id editable=editable}}
+      {{>plaintexteditor collection='Units' field='longname' _id=_id placeholder = 'add hover text' editable=editable}}
     </div>
-    {{#if active}}
-      <div class="row">
-        <!--{{>summernote collection='Units' field='title' _id=_id enabled=active options=summernotePlainText}}-->
-        {{>summernote collection='Units' field='longname' _id=_id enabled=active options=summernotePlainText}}
-      </div>
-    {{/if}}
+  </li>
+</template>
+
+<template name="newUnit">
+  <li class="disabled">
+    <a href="#">
+      {{>plaintexteditor collection='Units' field='title' editable='true' placeholder='type title to create new unit' clearOnSave=true}}
+    </a>
   </li>
 </template>
 
 <template name='activityList'>
   <div id='activityList' class="row">
-    <div class = 'activityColumn column col-md-6'>
+    <div class = 'activityColumn column col-md-6 {{bgprimary}}'>
       {{#sortable1c items=activities0 options=sortableOpts}}
         {{> activityItem}}
       {{/sortable1c}}
+      {{#if activities2}}
+        {{>newActivity}}
+      {{/if}}
     </div>
-    <div class = 'activityColumn column col-md-6'>
-      {{#sortable1c items=activities1 options=sortableOpts}}
-        {{> activityItem}}
-      {{/sortable1c}}
+    <div class = 'activityColumn column col-md-6 {{bgsuccess}}'>
+      {{#if activities2}}
+        {{#sortable1c items=activities2 options=sortableOpts2}}
+          {{> activityItem}}
+        {{/sortable1c}}
+        {{#with activeUnit2}}
+          {{>newActivity}}
+        {{/with}}
+      {{else}}
+        {{#sortable1c items=activities1 options=sortableOpts}}
+          {{> activityItem}}
+        {{/sortable1c}}
+        {{>newActivity}}
+      {{/if}}
     </div>
   </div>
 </template>
 
 <template name = 'activityItem'>
     <p class="aItem">
-      <a href="#">{{title}}  order:{{order}}</a> 
+      <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder or move to another model (in side-by-side view)."></a>
+      {{>showHide collection='Activities' itemName='activity' item=this}}
+      <!--put in a tag when not in edit mode, enable editor without tag when editing-->
+      <!--<a href="#">-->{{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}<!--</a>--> 
     </p>
+</template>
+
+<template name='newActivity'>
+  <p class='aItem newItem'>
+    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='type title to create new activity' clearOnSave=true fixedFields=fixedFields}}
+  </p>
 </template>
 

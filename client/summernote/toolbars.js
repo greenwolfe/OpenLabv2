@@ -37,13 +37,3 @@ Template.registerHelper('summernoteTitleOptions',function() {
       ]      
     }
 });
-
-Template.registerHelper('summernotePlainText',function() {
-  return {
-      airMode:true,
-      airPopover: [],
-      onChange: function(contents,$editable) {
-        $editable.code(_.stripTags(contents));
-      }      
-    }
-});

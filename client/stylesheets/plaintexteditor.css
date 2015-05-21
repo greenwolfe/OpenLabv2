@@ -1,0 +1,14 @@
+div.plaintexteditor[contenteditable="true"] {
+  overflow: hidden;
+  border-style: dashed;
+  border-color: DeepSkyBlue;
+  border-width: thin;
+  background-color: inherit;
+  height: auto;
+  min-height: 14pt;
+  width: 100%;
+}
+div.plaintexteditor[contenteditable="true"][placeholder]:empty:before {
+  content: attr(placeholder);
+  color: #555; 
+}

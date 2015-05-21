@@ -8,10 +8,19 @@
 
 Template.activitiesList.helpers({
   units: function() {
-    return Units.find({visible:true},{sort: {order: 1}});
+    return Units.find({}/*{visible:true}*/,{sort: {order: 1}});
   },
   activeUnit: function() {
     return Units.findOne(Session.get('activeUnit'));
+  },
+  activeUnit2: function() {
+    return Units.findOne(Session.get('activeUnit2'));
+  },
+  sortableOpts: function() {
+    return {
+      draggable:'.unittitle',
+      handle: '.unitSortableHandle',
+    }
   }
 });
 
@@ -34,6 +43,9 @@ Template.unitTitle.helpers({
     }
     return (this._id == activeUnit) ? 'active' : '';
   },
+  active2: function() {
+    return (this._id == Session.get('activeUnit2')) ? 'active2':'';
+  },
   hidden: function() {
     var activeUnit = Session.get('activeUnit');
     return (this._id == activeUnit) ? '' : 'hidden';
@@ -47,65 +59,107 @@ Template.unitTitle.helpers({
 Template.unitTitle.events({
   'click li a': function(event,tmpl) {
     event.preventDefault();
-    Session.set('activeUnit',tmpl.data._id);
-    var cU = Meteor.user();
-    if (cU && ('profile' in cU)) {
-      Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":tmpl.data._id} });
-    }
-  },
-  "blur div[contenteditable='true'][class~='editUnitTitle']": function(event,tmpl) {
-    var $element = $(event.target);
-    var title = _.trim(_.stripTags($element.text()));
-    Meteor.call('updateUnit',{
-      _id:tmpl.data._id,
-      title: title
-    },function(error,unitID) {
-      if (error) {
-        alert(error.reason)
-      } else { //reset displayed text
-        $element.text(title); 
+    if (event.ctrlKey) {
+      var activeUnit2 = Session.get('activeUnit2');
+      var activeUnit = Session.get('activeUnit');
+      if (tmpl.data._id == activeUnit2) {
+        Session.set('activeUnit2',null);
+      } else if (tmpl.data._id == activeUnit){
+        return;
+      } else if ((activeUnit2) && (tmpl.data._id == activeUnit)) {
+        Session.set('activeUnit',activeUnit2);
+        Session.set('activeUnit2',null);
+        var cU = Meteor.user();
+        if (cU && ('profile' in cU)) {
+          Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":activeUnit2} });
+        }
+      } else {
+        Session.set('activeUnit2',tmpl.data._id);
       }
-    });                          
+    } else {
+      Session.set('activeUnit',tmpl.data._id);
+      if (tmpl.data._id == Session.get('activeUnit2'))
+        Session.set('activeUnit2',null);
+      var cU = Meteor.user();
+      if (cU && ('profile' in cU)) {
+        Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":tmpl.data._id} });
+      }
+    }
   }
 })
 
-Template.unitTitle.onRendered(function() {
-  console.log(this);
-  $editTitleElement = $(this.find('.editUnitTitle'));
-  $editTitleElement.text(this.data.title);
-});
-
   /*************************/
- /** ACTIVITY LIST  **/
+ /** ACTIVITY LIST  *******/
 /*************************/
-
-/*** HELPERS ****/
 
 Template.activityList.helpers({
   activities0: function() {
+    var activeUnit2 = Session.get('activeUnit2');
     var columns = [];
     columns[1] = Activities.find({unitID: this._id, 
-      ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
-      visible: true},
+        ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+        //visible: true
+      },
       {sort: {order: 1}}).fetch(); 
+    if (activeUnit2)
+      return columns[1];
     var half = Math.ceil(columns[1].length/2)
     columns[0] = columns[1].splice(0,half); 
     return columns[0];
   },
   activities1: function() {
+    var activeUnit2 = Session.get('activeUnit2');
     var columns = [];
     columns[1] = Activities.find({unitID: this._id, 
-      ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
-      visible: true},
+        ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+        //visible: true
+      },
       {sort: {order: 1}}).fetch(); 
+    if (activeUnit2)
+      return null;
     var half = Math.ceil(columns[1].length/2)
     columns[0] = columns[1].splice(0,half); 
     return columns[1];
   },
+  bgsuccess: function() {
+    return Session.get('activeUnit2') ? 'bgsuccess' : '';
+  },
+  bgprimary: function() {
+    return Session.get('activeUnit2') ? 'bgprimary' : '';
+  },
+  activities2: function() {
+    var activeUnit2 = Session.get('activeUnit2');
+    if (!activeUnit2) return null;
+    return Activities.find({unitID: activeUnit2, 
+        ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+        //visible: true
+      },
+      {sort: {order: 1}}); 
+  },
+  activeUnit2: function() {
+    var id = Session.get('activeUnit2');
+    if (!id) return null;
+    return Units.findOne(id);
+  },
+  sortableOpts2: function() {
+    var activeUnit2 = Session.get('activeUnit2');
+    return {
+      draggable:'.aItem',
+      handle: '.sortActivity',
+      group: 'activityColumn',
+      collection: 'Activities',
+      selectField: 'unitID',
+      selectValue: activeUnit2 //,
+      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
+      //onAdd: function(evt) {
+      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
+      //}
+    }    
+  },
   sortableOpts: function() {
     return {
       draggable:'.aItem',
-      //handle: '.blockSortableHandle',
+      handle: '.sortActivity',
       group: 'activityColumn',
       collection: 'Activities',
       selectField: 'unitID',
@@ -128,3 +182,13 @@ Template.activityList.helpers({
       {sort: {rank: 1}});
   }
 });
+
+  /*************************/
+ /*** NEW ACTIVITY  *******/
+/*************************/
+
+Template.newActivity.helpers({
+  fixedFields: function() {
+    return {unitID:this._id}
+  }
+})

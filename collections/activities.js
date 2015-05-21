@@ -76,7 +76,7 @@ Meteor.methods({
       unitID: Match.Optional(Match.idString), //excluded below
       studentID: Match.Optional(String), //excluded below
       order: Match.Optional(Match.Integer), //excluded below
-      title: Match.Optional(String), 
+      title: Match.Optional(Match.nonEmptyString), 
       visible:  Match.Optional(Boolean),
       dueDate: Match.Optional(Date),
       //description:  Match.Optional(String), //deprecated

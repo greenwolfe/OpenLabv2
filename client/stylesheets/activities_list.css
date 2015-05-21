@@ -15,19 +15,20 @@
   margin-bottom: 0;
   height: 10px;
 }
-#units div[contenteditable="true"][class~='editUnitTitle'] {
-  overflow: hidden;
-  border-style: dashed;
-  border-color: DeepSkyBlue;
-  border-width: thin;
-  background-color: inherit;
-  height: auto;
-  width: 100%;
-}
-
 
 #activityList {
   outline: 1px solid #AAA;
+}
+li.unittitle.active2 > a {
+  background-color: #DFF0D8;
+  border: thin none;
+  border-radius: 4px;
+}
+#activityList div.activityColumn.bgprimary {
+  background-color: #337AB7
+}
+#activityList div.activityColumn.bgsuccess {
+  background-color: #DFF0D8;
 }
 #activityList p {
   background-color: #e6e6e6;
@@ -41,4 +42,22 @@
 #activityList p a {
     color: #555555;
     font-size: small;
+}
+#activityList p a.glyphicon {
+  font-size: medium;
+}
+#activityList p div[contenteditable="true"][class~='plaintexteditor'] {
+  width: 80%;
+  float: right;
+  cursor: text;
+  background: inherit;
+}
+#activityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor']{
+  width: 100%;
+}
+#activityList p a.glyphicon.glyphicon-move:hover {
+    cursor: move;
+}
+#activitiesListTitle i.fa.fa-question-circle:hover {
+  cursor: help;
 }
