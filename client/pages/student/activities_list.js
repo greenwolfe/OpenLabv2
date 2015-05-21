@@ -57,7 +57,7 @@ Template.unitTitle.helpers({
 });
 
 Template.unitTitle.events({
-  'click li a': function(event,tmpl) {
+  'click li > a': function(event,tmpl) {
     event.preventDefault();
     if (event.ctrlKey) {
       var activeUnit2 = Session.get('activeUnit2');

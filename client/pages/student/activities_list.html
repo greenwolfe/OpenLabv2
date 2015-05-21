@@ -3,7 +3,7 @@
     <h4 >activities</h4>
     <span class="progress-bar-warning"> expected progress </span>
     <span class="progress-bar-info"> your progress </span>
-    <i class="fa fa-question-circle" title="Click to select a unit.  Ctrl-click to view a second unit side-by-side the first."></i>
+    <i class="fa fa-question-circle" title="Click title to select unit.  Ctrl-click to view a second unit side-by-side the first."></i>
   </div>
   <ul id='units' class="nav nav-pills">
     {{#sortable items=units sortField="order" options=sortableOpts}}
@@ -18,14 +18,14 @@
 
 <template name="unitTitle">
   <li class="unittitle {{active}} {{active2}}">
+    <div>
+        {{>showHide collection='Units' itemName='unit' item=this}}
+    </div>
     <div class="progress">
       <div class="progress-bar progress-bar-warning" style="width: 70%;" title="18/20"></div>
     </div>
     <div class="progress">
       <div class="progress-bar progress-bar-info" style="width: 30%;" title="15/18"></div>
-    </div>
-    <div>
-        {{>showHide collection='Units' itemName='unit' item=this}}
     </div>
     <a href="#" class="unitSortableHandle" title="{{longname}}">      
       {{{title}}}

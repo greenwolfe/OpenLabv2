@@ -1,3 +1,11 @@
+a.glyphicon.glyphicon-asterisk {
+  color: black !important;
+  cursor: default;
+}
 a.glyphicon.glyphicon-asterisk.yellow {
     color: yellow !important;
+    cursor: default;
+}
+a.glyphicon.glyphicon-asterisk:hover {
+  text-decoration: none;
 }

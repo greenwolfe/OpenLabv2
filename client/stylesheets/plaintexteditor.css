@@ -8,7 +8,7 @@ div.plaintexteditor[contenteditable="true"] {
   min-height: 14pt;
   width: 100%;
 }
-div.plaintexteditor[contenteditable="true"][placeholder]:empty:before {
+div.plaintexteditor[contenteditable="true"][placeholder]:empty:not(:focus):before {
   content: attr(placeholder);
   color: #555; 
 }
