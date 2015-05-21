@@ -5,7 +5,7 @@
     <span class="progress-bar-info"> your progress </span>
     <i class="fa fa-question-circle" title="Click on a unit name to see its activities.  Ctrl-click to see another unit side-by-side the first."></i>
   </div>
-  <ul id='units' class="nav nav-pills nav-justified">
+  <ul id='units' class="nav nav-pills">
     {{#sortable items=units sortField="order" options=sortableOpts}}
       {{> unitTitle}}
     {{/sortable}}

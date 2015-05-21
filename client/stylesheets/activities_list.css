@@ -5,7 +5,9 @@
   margin-right: 4px;
   font-size: small;
 }
-
+#units li {
+  margin-bottom: 10px;
+}
 #units li a {
   color: black;
   border: thin;
@@ -13,8 +15,22 @@
 }
 #units li div.progress {
   margin-bottom: 0;
+  margin-top: 1.5pt;
   height: 10px;
+  /*transform: rotate(-90deg);*/
 }
+#units > li:nth-child(odd) {
+  background-color: #eaeaea;
+}
+#units > li:nth-child(even) {
+  background-color: #e4e4e4;
+}
+#units li div[contenteditable="true"][class~='plaintexteditor'] {
+  width: 80%;
+  cursor: text;
+  margin-left: 10%;
+}
+
 
 #activityList {
   outline: 1px solid #AAA;
