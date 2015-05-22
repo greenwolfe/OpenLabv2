@@ -4,10 +4,19 @@
 #activitiesListTitle span {
   margin-right: 4px;
   font-size: small;
+  border-radius: 5px;
 }
 
+#units {
+  display: flex;
+  flex-wrap: wrap;
+}
 #units li {
   margin-bottom: 10px;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 3px;
+  padding-right: 3px;
 }
 #units li > a {
   color: black;
@@ -16,7 +25,9 @@
   border-width: thin;
   border-color: black;
   text-align: center;
-  min-width: 120px;
+}
+#units li > a.newunit {
+  margin-top: 44px;
 }
 #units li div.progress {
   margin-bottom: 0;
@@ -30,9 +41,9 @@
   background-color: #e4e4e4;
 }
 #units li div[contenteditable="true"][class~='plaintexteditor'] {
-  width: 80%;
+  width: 78%;
   cursor: text;
-  margin-left: 10%;
+  margin-left: 12%;
 }
 
 
