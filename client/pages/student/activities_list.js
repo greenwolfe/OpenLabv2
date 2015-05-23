@@ -8,7 +8,10 @@
 
 Template.activitiesList.helpers({
   units: function() {
-    return Units.find({}/*{visible:true}*/,{sort: {order: 1}});
+    var selector = {};
+    if (!editingMainPage(true,false)())
+      selector.visible = true; //show only visible units
+    return Units.find(selector,{sort: {order: 1}});
   },
   activeUnit: function() {
     return Units.findOne(Session.get('activeUnit'));
@@ -19,7 +22,11 @@ Template.activitiesList.helpers({
   sortableOpts: function() {
     return {
       draggable:'.unittitle',
-      handle: '.unitSortableHandle',
+      handle: '.sortUnit',
+      collection: 'Units',
+      selectField: 'app', //selects all units
+      selectValue: 'openlab', //as openlab is only allowed value of app field
+      disabled: !editingMainPage(true,false)() 
     }
   }
 });
@@ -85,6 +92,12 @@ Template.unitTitle.events({
         Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":tmpl.data._id} });
       }
     }
+  },
+  'dragstart li > a': function(event,tmpl) {
+    //bootstrap navs are draggable by default
+    //disabling this behavior so you have to grab
+    //the draggable handle to sort the units
+    event.preventDefault();
   }
 })
 
@@ -96,11 +109,13 @@ Template.activityList.helpers({
   activities0: function() {
     var activeUnit2 = Session.get('activeUnit2');
     var columns = [];
-    columns[1] = Activities.find({unitID: this._id, 
-        ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
-        //visible: true
-      },
-      {sort: {order: 1}}).fetch(); 
+    var selector = {
+      unitID: this._id,
+      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+    };
+    if (!editingMainPage(true,false)())
+      selector.visible = true; //show only visible activities
+    columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); 
     if (activeUnit2)
       return columns[1];
     var half = Math.ceil(columns[1].length/2)
@@ -110,11 +125,13 @@ Template.activityList.helpers({
   activities1: function() {
     var activeUnit2 = Session.get('activeUnit2');
     var columns = [];
-    columns[1] = Activities.find({unitID: this._id, 
-        ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
-        //visible: true
-      },
-      {sort: {order: 1}}).fetch(); 
+    var selector = {
+      unitID: this._id,
+      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+    };
+    if (!editingMainPage(true,false)())
+      selector.visible = true; //show only visible activities
+    columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); 
     if (activeUnit2)
       return null;
     var half = Math.ceil(columns[1].length/2)
@@ -130,11 +147,13 @@ Template.activityList.helpers({
   activities2: function() {
     var activeUnit2 = Session.get('activeUnit2');
     if (!activeUnit2) return null;
-    return Activities.find({unitID: activeUnit2, 
-        ownerID: {$in: [null,'']}, //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
-        //visible: true
-      },
-      {sort: {order: 1}}); 
+    var selector = {
+      unitID: activeUnit2,
+      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
+    };
+    if (!editingMainPage(true,false)())
+      selector.visible = true; //show only visible activities
+    return Activities.find(selector,{sort: {order: 1}})
   },
   activeUnit2: function() {
     var id = Session.get('activeUnit2');
@@ -149,7 +168,8 @@ Template.activityList.helpers({
       group: 'activityColumn',
       collection: 'Activities',
       selectField: 'unitID',
-      selectValue: activeUnit2 //,
+      selectValue: activeUnit2,
+      disabled: !editingMainPage(true,false)() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
@@ -163,7 +183,8 @@ Template.activityList.helpers({
       group: 'activityColumn',
       collection: 'Activities',
       selectField: 'unitID',
-      selectValue: this._id //,
+      selectValue: this._id,
+      disabled: !editingMainPage(true,false)() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);

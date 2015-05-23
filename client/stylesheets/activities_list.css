@@ -7,7 +7,7 @@
   border-radius: 5px;
 }
 
-#units {
+#units { /* makes bootstrap nav-pills equal height so they wrap in distinct rows */
   display: flex;
   flex-wrap: wrap;
 }
@@ -17,6 +17,14 @@
   margin-right: 0;
   padding-left: 3px;
   padding-right: 3px;
+  user-drag: none;
+}
+#units > li > div >a.glyphicon.glyphicon-move.sortUnit {
+  color: #555555;
+}
+#units > li > div >a.glyphicon.glyphicon-move.sortUnit:hover {
+  cursor: move; 
+  text-decoration: none;
 }
 #units li > a {
   color: black;
@@ -27,7 +35,7 @@
   text-align: center;
 }
 #units li > a.newunit {
-  margin-top: 44px;
+  margin-top: 15pt;
 }
 #units li div.progress {
   margin-bottom: 0;
@@ -45,7 +53,6 @@
   cursor: text;
   margin-left: 12%;
 }
-
 
 #activityList {
   outline: 1px solid #AAA;
@@ -88,6 +95,7 @@ li.unittitle.active2 > a {
 }
 #activityList p a.glyphicon.glyphicon-move:hover {
     cursor: move;
+    text-decoration: none;
 }
 #activitiesListTitle i.fa.fa-question-circle:hover {
   cursor: help;

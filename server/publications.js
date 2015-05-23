@@ -1,10 +1,10 @@
-Meteor.publish('activities',function(userID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+Meteor.publish('activities',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
   /*var userToShow = Meteor.users.findOne(userID);
   var Acts = Activities.find({visible:true});
   if (!userToShow) return Acts;
   if (Roles.userIsInRole(userToShow,'teacher')) 
     return Activities.find();  */
-  check(userID,Match.idString);
+  //check(userID,Match.oneOf(Match.idString,null));
   return Activities.find();
 });
 

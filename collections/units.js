@@ -11,6 +11,7 @@ Meteor.methods({
     });
     unit.visible = unit.visible || true;
     unit.longname = unit.longname || '';
+    unit.app = 'openlab'; //redundant field, the same for all units, because sortable 1c needs a field to match to find a subset of items in a collection
     //don't want order passed in.  Always add new unit at end of list
     var LastUnit = Units.findOne({},{
         fields:{order:1},
@@ -60,6 +61,7 @@ Meteor.methods({
       title: Match.Optional(Match.nonEmptyString),
       longname:  Match.Optional(String), 
       visible:  Match.Optional(Boolean),
+      app: Match.Optional(Match.OneOf('openlab'))
     });
 
     var cU = Meteor.user(); //currentUser
