@@ -1,0 +1,201 @@
+body {
+  background: #efefef;
+}
+body div.container {
+    margin-bottom: 25px;
+}
+
+.navbar-nav a { /* center navbar elements */
+ line-height: 50px;
+}
+
+.embed-responsive p, .embed-responsive a {
+    float: right;
+}
+
+.jqDropZone {
+    background: lightgrey;
+    width: 150px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-weight: bold;
+}
+.jqDropZone.in {
+    width: 600px;
+    height: 200px;
+    line-height: 200px;
+    font-size: larger;
+}
+.jqDropZone.hover {
+    background: lawngreen;
+}
+.jqDropZone.fade {
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    opacity: 1;
+}
+
+/* walls */
+.wall div.panel-heading div.wallSortableHandle {
+    cursor: move;
+    min-width: 100%;
+}
+.wall div.panel-body {
+    min-height: 125px;
+}
+.wall .dropdown {
+    margin-left: 20px;
+}
+/* wall-student */
+.wall.wall-student div.panel-heading {
+    background-color: #FFE376;
+}
+.wall.wall-student div.panel-heading button {
+    background-color: cornsilk;
+    vertical-align: center;
+}
+.wall.wall-student div.panel-body {
+    background-color: cornsilk; /* #FFF8DC */
+}
+.wall.wall-student .column.empty {
+    background-color: #FFE376;
+    border-style: solid;
+    border-width: 3%;
+    border-color: cornsilk; /* #FFF8DC */
+}
+/* wall-group */
+.wall.wall-group div.panel-heading {
+    background-color: #76FFE3;
+}
+.wall.wall-group div.panel-body {
+    background-color: #DCFFF8;
+}
+.wall.wall-group .column.empty {
+    background-color: #76FFE3;
+    border-style: solid;
+    border-width: 3%;
+    border-color: #DCFFF8;
+}
+/* wall-section */
+.wall.wall-section div.panel-heading {
+    background-color: #E376FF;
+}
+.wall.wall-section div.panel-body {
+    background-color: #F8DCFF;
+}
+.wall.wall-section .column.empty {
+    background-color: #E376FF;
+    border-style: solid;
+    border-width: 3%;
+    border-color: #F8DCFF;
+}
+
+/* columns */
+.wall .column {
+    min-height: 100px;
+}
+
+/* blocks */
+.wall .column .block {
+    margin-right: auto;
+    margin-left: auto;
+}
+.wall .column .block div.panel-heading {
+    background-color: #F8F8F8 !important;
+}
+.wall .column .block div.panel-heading div.blockSortableHandle {
+    min-width: 100%;
+}
+.wall .column .block div.panel-heading div.blockSortableHandle.editing {
+    cursor: move;
+}
+.wall .column .block div.panel-heading div.blockTitle {
+    min-width: 100px;
+    min-height: 14pt;
+}
+.wall .column .block div.panel-body {
+    overflow: hidden;
+    background-color: #FFF !important;
+}
+.wall .column .block div.panel-body img {
+    max-width: 100%;
+}
+.wall .column .block div.panel-footer {
+    background-color: #F8F8F8 !important;
+    font-size: small;
+    padding: 0;
+}
+.block a.copyBlock, .column a.copyBlocks, 
+.column a.pasteBlock,
+.wall a.showHide { /*covers column and block*/
+    font-size: x-large;
+}
+.block i.fa-question-circle {
+    font-size: large;
+    cursor: pointer;
+}
+.block p.file a.showHide {
+  font-size: large;
+}
+
+/* virtual work */
+i.icon-virtual-work {
+  background: url('VirtualWork.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 72px;
+  width: 72px;
+  float: left;
+}
+i.icon-raise-virtual-hand {
+  background: url('RaiseVirtualHand.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 72px;
+  width: 72px;
+  float: left;
+}
+i.icon-virtual-help {
+  background: url('VirtualHelp.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 72px;
+  width: 72px;
+  float: left;
+}
+.buttonRaiseVirtualHand {
+  cursor: url('cursorRaiseVirtualHand.png'), auto;
+}
+.wall .column .block div.panel-heading div.blockSortableHandle.editing div.pull-right {
+  margin-top: -16px; /* compensates for use of image below */
+}
+i.icon-raise-virtual-hand-small {
+  background: url('cursorRaiseVirtualHand.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 32px;
+  width: 32px;  
+  display: inline-block;
+  overflow-y: hidden;
+}
+i.transparentBox {
+  background: url('transparentBox.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 32px;
+  width: 32px;  
+  display: inline-block;
+  overflow-y: hidden;
+}
+div.raiseHands {
+  overflow-y: hidden;
+  max-height: 0px;
+  transition: max-height 2s ease-in;
+}
+div.raiseHands.visible {
+  max-height: 72px;
+}

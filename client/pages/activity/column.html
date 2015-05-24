@@ -1,0 +1,47 @@
+<Template name='column'>
+  <div class='column col-md-{{width}} {{empty}}'>
+    {{#if inEditedWall}}
+      <nav class="navbar navbar-default">
+        <ul class="nav navbar-nav pull-right">
+          <a class="glyphicon glyphicon-copy copyBlocks" title='Copy all blocks in this column to clipboard.  Holding "Ctrl" adds to existing list.'></a>
+          {{#if blocksInClipboard}}
+            <a class="glyphicon glyphicon-paste pasteBlock" title="Paste Block(s) from clipboard"></a>
+          {{/if}}
+          {{>showHide collection='Columns' itemName='column' item=this}}
+        </ul>
+        <ul class="nav navbar-nav">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              modify
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li class="{{disableExpand}}"><a href="#" class="expandColumn">expand</a></li>
+              <li class="{{disableShrink}}"><a href="#" class="shrinkColumn">shrink</a></li>
+              <li class="{{disableDelete}}"><a href="#" class="deleteColumn">delete</a></li>
+              <li class="{{disableAdd}}"><a href="#" class="addRight">add column right</a></li>
+              <li class="{{disableAdd}}"><a href="#" class="addLeft">add column left</a></li>
+            </ul>
+          </li>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              Add Block
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#" class="addWorkSubmitBlock">submit work</a></li>
+              <li><a href="#" class='addTextBlock'>text</a></li>
+              <li><a href="#" class="addFileBlock">files</a></li>
+              <li><a href="#" class="addEmbedBlock">embed</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    {{/if}}
+    {{#if visibleOrEditing}}
+      {{#sortable1c items=blocks options=sortableOpts}}
+        {{> block}}
+      {{/sortable1c}}
+    {{/if}}
+  </div>
+</Template>

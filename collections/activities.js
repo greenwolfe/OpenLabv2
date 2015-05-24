@@ -42,7 +42,39 @@ Meteor.methods({
     if (!unit)
        throw new Meteor.Error(421, "Cannot post activity.  Improper unit.")
 
-    return Activities.insert(activity);
+    return Activities.insert(activity, function( error, _id) { 
+      if ( error ) console.log ( error ); //info about what went wrong
+      if ( _id ) {
+        Meteor.call('insertWall',{
+          activityID: _id,
+          type: 'teacher',
+          //owner: 'teacher', //probably no need for wall's owner?
+          visible: true,
+          order: 0
+        });
+        Meteor.call('insertWall',{
+          activityID: _id,
+          type: 'student',
+          //owner: 'st1',
+          visible: true,
+          order: 1
+        });
+        Meteor.call('insertWall',{
+          activityID: _id,
+          type: 'group',
+          //owner: ['st1','st2','st3'],
+          visible: true,
+          order: 2
+        });
+        Meteor.call('insertWall',{
+          activityID: _id,
+          type: 'section',
+          //owner: 'Bblock',
+          visible: true,
+          order: 3
+        });
+      }
+    });
   },  
 
   /***** DELETE ACTIVITY ****/

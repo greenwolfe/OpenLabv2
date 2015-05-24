@@ -1,6 +1,9 @@
 body {
   background: #efefef;
 }
+body div.container {
+    margin-bottom: 25px;
+}
 .placeholder {
   color: #e6e6e6; /* color from ui-state-default provided by /packages/jquery-ui-bootstrap/css/jquery-ui-1.9.2.custom.css*/
 }
@@ -9,4 +12,28 @@ i.remove:hover, i.fa-check-square-o, i.fa-square-o {
 }
 .bottom12 {
   margin-bottom: 12px;
+}
+a.glyphicon.glyphicon-remove, a.glyphicon.glyphicon-asterisk, a.glyphicon.glyphicon-move {
+    color: black;
+}
+a.glyphicon.glyphicon-remove:hover, a.glyphicon.glyphicon-asterisk:hover, a.glyphicon.glyphicon-copy:hover, a.glyphicon.glyphicon-paste:hover, a.glyphicon.glyphicon-move:hover,
+i.fa.fa-download:hover, i.fa.fa-upload:hover {
+    cursor: pointer;
+    cursor: hand;
+}
+a.glyphicon.glyphicon-asterisk.yellow{
+    color: yellow;
+}
+a.glyphicon.glyphicon-move:hover {
+    cursor: move;
+    text-decoration: none;
+}
+i.fa.fa-question-circle:hover {
+  cursor: help;
+}
+.avoidwrap {
+    display: inline-block;
+}
+.fullwidth {
+    width: 100%;
 }

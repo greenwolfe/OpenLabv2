@@ -1,0 +1,1 @@
+ClipboardBlocks = new Meteor.Collection(null);
