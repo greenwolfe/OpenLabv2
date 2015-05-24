@@ -9,7 +9,7 @@
 Template.activitiesList.helpers({
   units: function() {
     var selector = {};
-    if (!editingMainPage(true,false)())
+    if (!editingMainPage())
       selector.visible = true; //show only visible units
     return Units.find(selector,{sort: {order: 1}});
   },
@@ -26,7 +26,7 @@ Template.activitiesList.helpers({
       collection: 'Units',
       selectField: 'app', //selects all units
       selectValue: 'openlab', //as openlab is only allowed value of app field
-      disabled: !editingMainPage(true,false)() 
+      disabled: !editingMainPage() 
     }
   }
 });
@@ -113,7 +113,7 @@ Template.activityList.helpers({
       unitID: this._id,
       ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
     };
-    if (!editingMainPage(true,false)())
+    if (!editingMainPage())
       selector.visible = true; //show only visible activities
     columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); 
     if (activeUnit2)
@@ -129,7 +129,7 @@ Template.activityList.helpers({
       unitID: this._id,
       ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
     };
-    if (!editingMainPage(true,false)())
+    if (!editingMainPage())
       selector.visible = true; //show only visible activities
     columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); 
     if (activeUnit2)
@@ -151,7 +151,7 @@ Template.activityList.helpers({
       unitID: activeUnit2,
       ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string
     };
-    if (!editingMainPage(true,false)())
+    if (!editingMainPage())
       selector.visible = true; //show only visible activities
     return Activities.find(selector,{sort: {order: 1}})
   },
@@ -169,7 +169,7 @@ Template.activityList.helpers({
       collection: 'Activities',
       selectField: 'unitID',
       selectValue: activeUnit2,
-      disabled: !editingMainPage(true,false)() //currently not working
+      disabled: !editingMainPage() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
@@ -184,7 +184,7 @@ Template.activityList.helpers({
       collection: 'Activities',
       selectField: 'unitID',
       selectValue: this._id,
-      disabled: !editingMainPage(true,false)() //currently not working
+      disabled: !editingMainPage() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);

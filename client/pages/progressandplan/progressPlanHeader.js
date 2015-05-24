@@ -1,10 +1,10 @@
-Template.studentHeader.helpers({
+Template.progressPlanHeader.helpers({
   title: function() {
       return Site.findOne().title;
   }
 });
 
-Template.studentHeader.events({
+Template.progressPlanHeader.events({
   'click #editButton' : function() {
     var userID = Meteor.userId();
     if (!Roles.userIsInRole(userID,'teacher')) {
