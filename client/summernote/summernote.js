@@ -77,7 +77,9 @@ Template.summernote.onRendered(function() {
     //and console.log(event) shows Arguments {0:Object,1:callee, 2: prototype}
     //with the Object being the actual event ... why?
     //and why different in the two apps?
-    var elementID = event.target.id;
+    //console.log(event);
+    var elementID = event[0].target.id || event.target.id || null;
+    //var elementID = (_.isArray(event)) ? event[0].target.id : event.target.id;
     var popoverVisible = false;
     ['#note-popover-','#note-dialog-'].forEach(function(s) {
       var selector = elementID.replace('note-editor-',s);
@@ -113,6 +115,12 @@ Template.summernote.onRendered(function() {
   //check for clicks outside open popover
   //and make sure popover is closed and save is called
   // ... second-order correction to false blur handler in save function
+  /*$(element).blur(function(event) {
+    var elementID = element.attr('id') || '';
+    if ($(event.target).closest('#'+elementID).length)
+      console.log(elementID + ' blurred.');
+
+  });*/
   $(document).click(function(event) { 
     var elementID = element.attr('id') || '';
     if (!elementID) return; //summernote editor disabled?
