@@ -19,13 +19,6 @@
   padding-right: 3px;
   user-drag: none;
 }
-#units > li > div >a.glyphicon.glyphicon-move.sortUnit {
-  color: #555555;
-}
-#units > li > div >a.glyphicon.glyphicon-move.sortUnit:hover {
-  cursor: move; 
-  text-decoration: none;
-}
 #units li > a {
   color: black;
   border-style: solid;
@@ -92,11 +85,4 @@ li.unittitle.active2 > a {
 }
 #activityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor']{
   width: 100%;
-}
-#activityList p a.glyphicon.glyphicon-move:hover {
-    cursor: move;
-    text-decoration: none;
-}
-#activitiesListTitle i.fa.fa-question-circle:hover {
-  cursor: help;
 }

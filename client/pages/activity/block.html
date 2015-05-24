@@ -1,0 +1,174 @@
+<Template name='block'>
+  <div class="raiseHands avoidwrap {{raiseHand}}">
+      <i class="{{virtualWorkStatus}}"></i>
+  </div>
+  <div class="block block-{{type}} panel panel-default row">
+    <div class="panel-heading">
+      <div class="blockSortableHandle {{editingActivity}}">
+        {{#if inEditedWall}} 
+          <div class="pull-right">
+            <a class="glyphicon glyphicon-copy copyBlock" title='Copy to clipboard.  Holding "Ctrl" adds to existing list.'></a>
+            {{>showHide collection='Blocks' itemName='block' item=this}}
+            {{#unless fileCount}}
+              <a class="glyphicon glyphicon-remove deleteBlock" title="Delete Block"></a>
+            {{/unless}}
+            <i class="icon-raise-virtual-hand-small buttonRaiseVirtualHand"></i>
+          </div>
+          <div>&nbsp;</div>
+        {{else}}
+          <div class="pull-right">
+            <i class="transparentBox buttonRaiseVirtualHand"></i>
+          </div>
+          <div class="blockTitle">{{{title}}}</div>
+          <!--is there a better way to get the raise hand and drag functions to work together, especially on those walls that aren't currently being edited themselves, but whose blocks are draggable because another wall is being edited-->
+        {{/if}}
+      </div>
+      <div>
+        {{#if inEditedWall}}
+          {{>summernote collection='Blocks' field='title' _id=_id enabled=inEditedWall options=summernoteTitleOptions}}
+        {{/if}}
+      </div>
+    </div>
+    <div class="panel-body fullwidth"> <!-- fullwidth corrects mysterious bug that only seems to affect workSubmitBlock and not other -->
+      {{> blockType}}
+    </div>
+    <div class="panel-footer">
+      {{#if inEditedWall}}
+        <span class="avoidwrap">created 9:30pm 3/29/15  by Matt Greenwolfe, </span>
+        <span class="avoidwrap">last modified 10:05am 3/30/15 by Matt Greenwolfe</span>
+      {{/if}}
+    </div>
+  </div>
+</Template>
+
+<Template name="textBlock">
+  {{>summernote collection='Blocks' field='text' _id=_id enabled=inEditedWall options=summernoteOptions}}
+</Template>
+
+<Template name="embedBlock">
+  {{#if inEditedWall}}
+    Paste/edit embed code.
+    {{>codemirror }}
+  {{else}}
+    <div class="embed-responsive embed-responsive-4by3">
+      {{{embedCodeIframe}}} <!-- just the iframe -->
+    </div>
+    <div>
+      {{{embedCodeAfterIframe}}}
+    </div>
+  {{/if}}
+  {{#if inEditedWall}}
+    Add/edit a description.
+  {{/if}}
+  <p>
+    {{>summernote collection='Blocks' field='text' _id=_id enabled=inEditedWall options=summernoteOptions}}
+  </p>
+</Template>
+
+<Template name="codemirror">
+  <i class="codeexample fa fa-question-circle" title="insert simple example"></i>
+  <p>
+    <textarea class="codemirror">{{embedCode}}</textarea>
+  </p>
+</Template>
+
+<Template name="fileBlock">
+  <p>
+    {{>summernote collection='Blocks' field='text' _id=_id enabled=inEditedWall options=summernoteOptions}}
+  </p>
+  {{#sortable1c items=files  options=sortableOpts}} 
+    {{>fileLink}}
+  {{/sortable1c}}
+  {{#if inEditedWall}}
+    <p>
+      {{>upload_bootstrap formData=formData callbacks=processUpload}}
+    </p> 
+  {{/if}}
+</Template>
+
+<Template name="fileLink">
+  <p class="file">
+    {{#if inEditedWall}}
+      <a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>
+      {{>showHide collection='Files' itemName='file' item=this}}
+      <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
+    {{/if}}
+    <a href="/upload/{{path}}">{{name}}</a> 
+  </p> 
+</Template>
+
+<Template name="workSubmitBlock">
+  {{#if inEditedWall}}
+      <p>
+        Submit one or more distinct files here, as the assignment requires.  <i>Use a new work submission block to submit a new draft or revision of the same file or files.</i>
+      </p>
+    {{/if}}
+  <p class="bg-success">
+    Student Name (date)
+    <p>
+      {{#if inEditedWall}}
+        Add a note about these files.
+      {{/if}}
+      {{>summernote collection='Blocks' field='studentText' _id=_id enabled=inEditedWall options=summernoteOptions}}
+    </p>
+    <!--{{#sortable1c items=studentFiles  options=sortableOpts}} right now sortable cannot handle a more complicated selector involving two fields-->
+    <p>
+      {{#each studentFiles}}
+        {{>workSubmitLink}}
+      {{/each}}
+    </p>
+    <!--{{/sortable1c}}-->
+    {{#if inEditedWall}}
+      <p>
+        {{>upload_bootstrap formData=studentFormData callbacks=processStudentUpload}}
+      </p> 
+    {{/if}}
+  </p>
+  <p class="bg-warning">
+    Teacher Name (date)
+    <!--teacher sees checkout button above, clicks that instead of just downloading the file, then has return button ... return button checks if file has changed and issues confirmation if not (how?)-->
+    <p>
+      {{#if inEditedWall}}
+        Add a text response or a note to the student.
+      {{/if}}
+      {{>summernote collection='Blocks' field='teacherText' _id=_id enabled=inEditedWall options=summernoteOptions}}
+    </p>
+    <!--{{#sortable1c items=teacherFiles  options=sortableOpts}} -->
+    {{#each teacherFiles}}
+      {{>teacherResponseLink}}
+    {{/each}}
+    <!--{{/sortable1c}}-->
+    {{#if inEditedWall}}
+      Return a file to the student.
+      <p>
+        {{>upload_bootstrap formData=teacherFormData callbacks=processTeacherUpload}}
+      </p> 
+    {{/if}} 
+  </p>
+</Template>
+
+<Template name="workSubmitLink">
+  <p class="file">
+    {{#if inEditedWall}}
+      <!-- <a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>-->
+      {{>showHide collection='Files' itemName='file' item=this}}
+      <!--if is teacher-->
+      <a class="glyphicon glyphicon-remove deleteFile" title="delete file (only available for teacher)"></a>
+      <!--<i class="fa fa-download checkoutFile" title="download and checkout file for automatic return (only available for teacher)"></i>
+      checkout for review button, ghost appears in teacher files with button to return?-->
+      <!-- /if -->
+    {{/if}}
+    <a href="/upload/{{path}}" title="download file (for teacher - without checking out)">{{name}}</a> 
+  </p> 
+</Template>
+
+<Template name="teacherResponseLink">
+  <p class="file">
+    {{#if inEditedWall}} <!-- and if is teacher-->
+      <!--<a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>-->
+      {{>showHide collection='Files' itemName='file' item=this}}
+      <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
+    {{/if}}
+    <a href="/upload/{{path}}">{{name}}</a> 
+  </p> 
+</Template>
