@@ -20,5 +20,5 @@ rubaxa:sortable
 tomi:upload-server
 tomi:upload-jquery
 audit-argument-checks
-summernote:summernote
 perak:codemirror
+summernote:summernote@=0.6.5
