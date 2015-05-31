@@ -117,6 +117,14 @@ Template.column.events({
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
+  'click .addSubactivitiesBlock': function(event,tmpl) {
+    var block = {
+      columnID: tmpl.data._id,
+      type: 'subactivities',
+      title: ''
+    }
+    Meteor.call('insertBlock',block,alertOnError);
+  },
   'click .shrinkColumn': function(event,tmpl) {
     Meteor.call('shrinkColumn',tmpl.data._id,alertOnError);
   },

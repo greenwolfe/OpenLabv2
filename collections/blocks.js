@@ -6,7 +6,7 @@ Meteor.methods({
       columnID: Match.idString,
       wallID: Match.Optional(Match.idString),  //could be included from pasted block, will be overwritten with denormalized values anyway
       activityID: Match.Optional(Match.idString), //same as above
-      type: Match.OneOf('workSubmit','text','file','embed'), 
+      type: Match.OneOf('workSubmit','text','file','embed','subactivities'), 
       idFromCopiedBlock: Match.Optional(Match.idString),
       visible: Match.Optional(Boolean),
       title: Match.Optional(String),
@@ -26,6 +26,8 @@ Meteor.methods({
     block.activityID = column.activityID;
 
     if ('idFromCopiedBlock' in block) {
+      if (block.type == 'subactivities') 
+        throw new Meteor.Error('cannotCopyActivityBlock',"Error, cannot copy and paste an activity block.  Only one allowed per activity page.")
       var idFCB = block.idFromCopiedBlock;
       delete block.idFromCopiedBlock;
     }

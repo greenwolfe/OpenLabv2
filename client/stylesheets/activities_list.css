@@ -55,13 +55,13 @@ li.unittitle.active2 > a {
   border: thin none;
   border-radius: 4px;
 }
-#activityList div.activityColumn.bgprimary {
+#activityList div.activityColumn.bgprimary{
   background-color: #337AB7
 }
 #activityList div.activityColumn.bgsuccess {
   background-color: #DFF0D8;
 }
-#activityList p {
+#activityList p, #subactivityList p {
   background-color: #e6e6e6;
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#e6e6e6));
   background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
@@ -70,19 +70,21 @@ li.unittitle.active2 > a {
   background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
   background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
 }
-#activityList p a {
+#activityList p a, #subactivityList p a {
     color: #555555;
     font-size: small;
 }
-#activityList p a.glyphicon {
+#activityList p a.glyphicon, #subactivityList p a.glyphicon {
   font-size: medium;
 }
-#activityList p div[contenteditable="true"][class~='plaintexteditor'] {
+#activityList p div[contenteditable="true"][class~='plaintexteditor'],
+#subactivityList p div[contenteditable="true"][class~='plaintexteditor'] {
   width: 80%;
   float: right;
   cursor: text;
   background: inherit;
 }
-#activityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor']{
+#activityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor'], 
+#subactivityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor'] {
   width: 100%;
 }

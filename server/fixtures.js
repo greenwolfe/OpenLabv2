@@ -31,8 +31,8 @@ Meteor.startup(function () {
     for (i = 1; i <= 8; i++) {
       Units.insert({
         title: 'unit' + i,
+	app: 'openlab',
         longname: 'unit of instruction' + i,
-        description:  '',
         order: i,
         visible: true
       });
