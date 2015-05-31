@@ -172,3 +172,35 @@
     <a href="/upload/{{path}}">{{name}}</a> 
   </p> 
 </Template>
+
+<Template name='subactivitiesBlock'>
+ <p>Sub Activity Block</p>
+<!--  <div id='subactivityList'>
+    <div class = 'activityColumn column col-md-12'>
+      {{#if inEditedWall}}
+        {{>newSubactivity}}
+      {{/if}}
+      {{#sortable1c items=subactivities options=sortableOpts}}
+        {{> subactivityItem}}
+      {{/sortable1c}}
+    </div>
+  </div>-->
+</Template>
+
+<!--<template name = 'subactivityItem'>
+    <p class="aItem">
+      {{#unless inEditedWall}}
+        <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
+        {{>showHide collection='Activities' itemName='activity' item=this}}
+        {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}} 
+      {{else}}
+        <a  href="#"> {{{title}}} </a>
+      {{/unless}}
+    </p>
+</template>
+
+<template name='newSubactivity'>
+  <p class='aItem newItem'>
+    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new activity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
+  </p>
+</template>-->

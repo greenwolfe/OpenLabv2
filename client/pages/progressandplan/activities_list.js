@@ -184,7 +184,7 @@ Template.activityList.helpers({
       collection: 'Activities',
       selectField: 'unitID',
       selectValue: this._id,
-      disabled: !editingMainPage() //currently not working
+      //disabled: !editingMainPage() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
@@ -203,6 +203,16 @@ Template.activityList.helpers({
       {sort: {rank: 1}});
   }
 });
+
+  /*************************/
+ /** ACTIVITY ITEM  *******/
+/*************************/
+
+Template.activityItem.helpers({
+  pointsToOrID: function() {
+    return this.pointsTo || this._id;
+  }
+})
 
   /*************************/
  /*** NEW ACTIVITY  *******/

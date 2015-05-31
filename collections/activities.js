@@ -8,6 +8,7 @@ Meteor.methods({
   /***** INSERT ACTIVITY ****/
   insertActivity: function(activity) { 
     check(activity,{
+      pointsTo: Match.Optional(Match.idString),
       title: Match.nonEmptyString,
       unitID: Match.idString,
       //description:  Match.Optional(String), //deprecated ... now will just be text in a text block on the teacher wall
@@ -31,6 +32,16 @@ Meteor.methods({
         limit:1
       });
     activity.order = (LastAct) ? LastAct.order + 1 : 0; 
+    if (activity.pointsTo) {
+      var pointedTo = Activities.findOne(activity.pointsTo);
+      if (!pointedTo) 
+        throw new Meteor.Error('pointsToInvalid', "Cannot post activity.  Pointed to invalid host activity.");
+      //pointing to valid activity ... go ahead and add at end
+      //of acitivty list for this unit, then if insert is successful
+      //move to place after pointedTo.
+      if (activity.unitID != pointedTo.unitID)
+        throw new Meteor.Error('notSameUnit',"An activity and its subactivity must belong to the same unit.");
+    }
 
     var cU = Meteor.user(); //currentUser
     if (!cU)  
@@ -45,34 +56,40 @@ Meteor.methods({
     return Activities.insert(activity, function( error, _id) { 
       if ( error ) console.log ( error ); //info about what went wrong
       if ( _id ) {
-        Meteor.call('insertWall',{
-          activityID: _id,
-          type: 'teacher',
-          //owner: 'teacher', //probably no need for wall's owner?
-          visible: true,
-          order: 0
-        });
-        Meteor.call('insertWall',{
-          activityID: _id,
-          type: 'student',
-          //owner: 'st1',
-          visible: true,
-          order: 1
-        });
-        Meteor.call('insertWall',{
-          activityID: _id,
-          type: 'group',
-          //owner: ['st1','st2','st3'],
-          visible: true,
-          order: 2
-        });
-        Meteor.call('insertWall',{
-          activityID: _id,
-          type: 'section',
-          //owner: 'Bblock',
-          visible: true,
-          order: 3
-        });
+        if (activity.pointsTo) {
+          //is subactivity.  Move it to a spot just after its parent
+          if (activity.order != pointedTo.order + 1)
+            Meteor.call('sortItem','Activities',_id,'order','unitID',null,pointedTo.order+1);
+        } else {
+          Meteor.call('insertWall',{
+            activityID: _id,
+            type: 'teacher',
+            //owner: 'teacher', //probably no need for wall's owner?
+            visible: true,
+            order: 0
+          });
+          Meteor.call('insertWall',{
+            activityID: _id,
+            type: 'student',
+            //owner: 'st1',
+            visible: true,
+            order: 1
+          });
+          Meteor.call('insertWall',{
+            activityID: _id,
+            type: 'group',
+            //owner: ['st1','st2','st3'],
+            visible: true,
+            order: 2
+          });
+          Meteor.call('insertWall',{
+            activityID: _id,
+            type: 'section',
+            //owner: 'Bblock',
+            visible: true,
+            order: 3
+          });
+        }
       }
     });
   },  

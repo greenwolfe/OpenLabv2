@@ -115,12 +115,6 @@ Template.summernote.onRendered(function() {
   //check for clicks outside open popover
   //and make sure popover is closed and save is called
   // ... second-order correction to false blur handler in save function
-  /*$(element).blur(function(event) {
-    var elementID = element.attr('id') || '';
-    if ($(event.target).closest('#'+elementID).length)
-      console.log(elementID + ' blurred.');
-
-  });*/
   $(document).click(function(event) { 
     var elementID = element.attr('id') || '';
     if (!elementID) return; //summernote editor disabled?

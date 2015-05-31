@@ -1,4 +1,4 @@
-editingMainPageFactory = function(textIfTrue,textIfFalse) {
+var editingMainPageFactory = function(textIfTrue,textIfFalse) {
   //returns truthy value "editing" if a teacher is editing the main/progress page
   if (!_.isBoolean(textIfTrue))
     textIfTrue = textIfTrue || true;

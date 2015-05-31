@@ -273,3 +273,46 @@ Template.workSubmitLink.events({
 Template.teacherResponseLink.events({
   'click .deleteFile': deleteFile 
 })
+
+  /******************************/
+ /**** SUBACTIVITIES BLOCK *****/
+/******************************/
+/*
+Template.subactivitiesBlock.helpers({
+  subactivities: function() {
+    var activity = Activities.findOne(this.activityID);
+    return Activities.find({
+      unitID:activity.unitID,
+      pointsTo:activity._id
+    },{sort: {order: 1}});
+  },
+  sortableOpts: function() {
+    var activity = Activities.findOne(this.activityID);
+    return {
+      draggable:'.aItem',
+      handle: '.sortActivity',
+      collection: 'Activities',
+      selectField: 'unitID',
+      selectValue: activity.unitID,
+      //disabled: (!inEditedWall(this.wallID)) //!= this.wallID to apply to a single wall 
+      //onAdd: function(evt) {
+      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
+      //}
+    }
+  }
+})
+*/
+  /*************************/
+ /*** NEW SUBACTIVITY  ****/
+/*************************/
+/*
+Template.newSubactivity.helpers({
+  fixedFields: function() {
+    var activity = Activities.findOne(this.activityID);
+    return {
+      unitID:activity.unitID,
+      pointsTo:activity._id
+    }
+  }
+})
+*/
