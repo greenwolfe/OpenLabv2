@@ -1,0 +1,7 @@
+.helpBannerNavPills.alert.alert-info {
+  margin-bottom: 5px;
+  padding: 5px;
+}
+.helpBannerNavPills.alert.alert-info a[data-toggle="tab"] {
+  padding: 1px 3px;
+}

@@ -32,6 +32,7 @@ Template.sortable1c.onRendered(function() {
     //evt.newIndex && evt.oldIndex not accurate in nested cases, re-creating from template data
     var item = evt.item; //item being sorted
     var itemData = Blaze.getData(item); 
+    var currentOrder = (itemData && (options.selectField in itemData) && (itemData[options.selectField] == options.selectValue)) ? itemData[options.sortField] : null;
     var prevItem = item.previousElementSibling;
     var prevItemData = (prevItem) ? Blaze.getData(prevItem) : null;
     //validation:  previous item is part of same set
@@ -40,9 +41,9 @@ Template.sortable1c.onRendered(function() {
     var nextItemData = (nextItem) ? Blaze.getData(nextItem) : null;
     //validation:  next item is part of same set
     var nextOrder = (nextItemData && (options.selectField in nextItemData) && (nextItemData[options.selectField] == options.selectValue)) ? nextItemData[options.sortField] : null;
-    if (_.isFinite(nextOrder) && (itemData.order > nextOrder)) { //moved up
+    if (_.isFinite(nextOrder) && (currentOrder > nextOrder)) { //moved up
       Meteor.call('sortItem',options.collection,itemData._id,options.sortField,options.selectField,null,nextOrder,alertOnError);  
-    } else if (_.isFinite(prevOrder) && (itemData.order < prevOrder)) { //moved down
+    } else if (_.isFinite(prevOrder) && (currentOrder < prevOrder)) { //moved down
       Meteor.call('sortItem',options.collection,itemData._id,options.sortField,options.selectField,prevOrder,null,alertOnError);
     } else {
       //do nothing - drag and drop in same location

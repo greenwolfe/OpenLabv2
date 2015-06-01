@@ -62,8 +62,10 @@
       {{#sortable1c items=activities0 options=sortableOpts}}
         {{> activityItem}}
       {{/sortable1c}}
-      {{#if activities2}}
-        {{>newActivity}}
+      {{#if editingMainPage}}
+        {{#if activities2}}
+          {{>newActivity}}
+        {{/if}}
       {{/if}}
     </div>
     <div class = 'activityColumn column col-md-6 {{bgsuccess}}'>
@@ -71,9 +73,11 @@
         {{#sortable1c items=activities2 options=sortableOpts2}}
           {{> activityItem}}
         {{/sortable1c}}
-        {{#if editingMainPage}}{{#with activeUnit2}}
-          {{>newActivity}}
-        {{/with}}{{/if}}
+        {{#if editingMainPage}}
+          {{#with activeUnit2}}
+            {{>newActivity}}
+          {{/with}}
+        {{/if}}
       {{else}}
         {{#sortable1c items=activities1 options=sortableOpts}}
           {{> activityItem}}
@@ -99,7 +103,7 @@
 </template>
 
 <template name='newActivity'>
-  <p class='aItem newItem'>
+  <p class='newItem'>
     {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new activity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
   </p>
 </template>

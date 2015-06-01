@@ -1,0 +1,19 @@
+<Template name='helpBannerNavPills'>
+  <div class="helpBannerNavPills alert alert-info" role="alert">
+    <ul class="nav nav-pills pull-left">
+      <div class="text-center">Help: </div>
+    </ul>
+    <ul class="nav nav-pills">
+      {{#each helpmessages}}
+        <li><a href="{{href}}" data-toggle="tab">{{number}}</a></li>
+      {{/each}}
+    </ul>
+    <div class="tab-content">
+      {{#each helpmessages}}
+         <div class="tab-pane" id="{{id}}">
+           {{{message}}}
+         </div>
+      {{/each}}
+    </div>
+  </div>
+</Template>

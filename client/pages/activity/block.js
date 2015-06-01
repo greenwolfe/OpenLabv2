@@ -184,6 +184,16 @@ Template.fileLink.events({
 /*** disable ability for student to copy/paste or move to another wall ***/
 
 Template.workSubmitBlock.helpers({
+  helpMessages: function () {
+    return [
+      'Submit one or more distinct files here, as the assignment requires.',
+      "Just click inside the dotted blue outline and start typing to add additional information or a note about your assignment.",
+      "Click anywhere outside the blee outline to save changes.",
+      "The formatting menu appears when you select text.",
+      "Your teacher will look over your work and return a file with comments and/or leave you a message in return.",
+      "It is suggested that you use a new work submission block to submit a new draft or revision of the same file or files.  That way each resubmission and the teacher response are kept together."
+    ]
+  },
   studentFiles: function() {
     var selector = {blockID:this._id};
     selector.studentOrGroupID = theUserID;
@@ -277,14 +287,22 @@ Template.teacherResponseLink.events({
   /******************************/
  /**** SUBACTIVITIES BLOCK *****/
 /******************************/
-/*
+
 Template.subactivitiesBlock.helpers({
+  helpMessages: function () {
+    return [
+      'Activities created here will also appear in the main units and activities list, for example on the main page.',
+      "They will all link back to the same activity page - this one.",
+      "Reordering of the list in this block is independent of the main list.  In the main list, these activities can be sorted among the other activities or even moved to other units.",
+      "The title of this block, if it exists, will be used as the title of the page as well.  Otherwise, the title of the initial activity is used.",
+      "Create just one subactivities block per activity page.  It can be deleted and re-created without causing problems, but it is probably better just to hide it if you don't want it visible to students."
+    ]
+  },
   subactivities: function() {
     var activity = Activities.findOne(this.activityID);
     return Activities.find({
-      unitID:activity.unitID,
       pointsTo:activity._id
-    },{sort: {order: 1}});
+    },{sort: {suborder: 1}});
   },
   sortableOpts: function() {
     var activity = Activities.findOne(this.activityID);
@@ -292,20 +310,21 @@ Template.subactivitiesBlock.helpers({
       draggable:'.aItem',
       handle: '.sortActivity',
       collection: 'Activities',
-      selectField: 'unitID',
-      selectValue: activity.unitID,
-      //disabled: (!inEditedWall(this.wallID)) //!= this.wallID to apply to a single wall 
+      selectField: 'pointsTo',
+      selectValue: activity._id,
+      sortField: 'suborder',
+      disabled: (!inEditedWall(this.wallID)) //!= this.wallID to apply to a single wall 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
       //}
     }
   }
 })
-*/
+
   /*************************/
  /*** NEW SUBACTIVITY  ****/
 /*************************/
-/*
+
 Template.newSubactivity.helpers({
   fixedFields: function() {
     var activity = Activities.findOne(this.activityID);
@@ -315,4 +334,3 @@ Template.newSubactivity.helpers({
     }
   }
 })
-*/
