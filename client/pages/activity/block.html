@@ -99,16 +99,11 @@
 
 <Template name="workSubmitBlock">
   {{#if inEditedWall}}
-      <p>
-        Submit one or more distinct files here, as the assignment requires.  <i>Use a new work submission block to submit a new draft or revision of the same file or files.</i>
-      </p>
-    {{/if}}
+    {{>helpBannerNavPills messages=helpMessages}}
+  {{/if}}
   <p class="bg-success">
     Student Name (date)
     <p>
-      {{#if inEditedWall}}
-        Add a note about these files.
-      {{/if}}
       {{>summernote collection='Blocks' field='studentText' _id=_id enabled=inEditedWall options=summernoteOptions}}
     </p>
     <!--{{#sortable1c items=studentFiles  options=sortableOpts}} right now sortable cannot handle a more complicated selector involving two fields-->
@@ -124,13 +119,10 @@
       </p> 
     {{/if}}
   </p>
-  <p class="bg-warning">
+  <p class="teacherResponse bg-warning">
     Teacher Name (date)
     <!--teacher sees checkout button above, clicks that instead of just downloading the file, then has return button ... return button checks if file has changed and issues confirmation if not (how?)-->
     <p>
-      {{#if inEditedWall}}
-        Add a text response or a note to the student.
-      {{/if}}
       {{>summernote collection='Blocks' field='teacherText' _id=_id enabled=inEditedWall options=summernoteOptions}}
     </p>
     <!--{{#sortable1c items=teacherFiles  options=sortableOpts}} -->
@@ -139,7 +131,6 @@
     {{/each}}
     <!--{{/sortable1c}}-->
     {{#if inEditedWall}}
-      Return a file to the student.
       <p>
         {{>upload_bootstrap formData=teacherFormData callbacks=processTeacherUpload}}
       </p> 
@@ -174,33 +165,35 @@
 </Template>
 
 <Template name='subactivitiesBlock'>
- <p>Sub Activity Block</p>
-<!--  <div id='subactivityList'>
+  {{#if inEditedWall}}
+    {{>helpBannerNavPills messages=helpMessages}}
+  {{/if}}
+  <div id='subactivityList' class='row'>
     <div class = 'activityColumn column col-md-12'>
-      {{#if inEditedWall}}
-        {{>newSubactivity}}
-      {{/if}}
       {{#sortable1c items=subactivities options=sortableOpts}}
         {{> subactivityItem}}
       {{/sortable1c}}
+      {{#if inEditedWall}}
+        {{>newSubactivity}}
+      {{/if}}
     </div>
-  </div>-->
+  </div>
 </Template>
 
-<!--<template name = 'subactivityItem'>
+<template name = 'subactivityItem'>
     <p class="aItem">
-      {{#unless inEditedWall}}
+      {{#if inEditedWall ../wallID}}
         <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
         {{>showHide collection='Activities' itemName='activity' item=this}}
-        {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}} 
+        {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
       {{else}}
-        <a  href="#"> {{{title}}} </a>
-      {{/unless}}
+        <a  href="#">{{{title}}}</a>
+      {{/if}}
     </p>
 </template>
 
 <template name='newSubactivity'>
-  <p class='aItem newItem'>
-    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new activity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
+  <p class='newItem'>
+    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new subactivity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
   </p>
-</template>-->
+</template>

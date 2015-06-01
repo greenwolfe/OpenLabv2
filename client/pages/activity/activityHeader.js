@@ -1,6 +1,16 @@
 Template.activityHeader.helpers({
   siteTitle: function() {
       return Site.findOne().title;
+  },
+  pageTitle: function() {
+    var subactivitiesBlock = Blocks.findOne({
+      activityID: this._id,
+      type: 'subactivities'
+    });
+    if (!subactivitiesBlock )
+      return this.title;
+    var title = _.stripTags(subactivitiesBlock.title) || this.title;
+    return title;
   }
 });
 

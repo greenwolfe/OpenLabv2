@@ -50,6 +50,9 @@
 #activityList {
   outline: 1px solid #AAA;
 }
+#subactivityList {
+  padding-top: 10px;
+}
 li.unittitle.active2 > a {
   background-color: #DFF0D8;
   border: thin none;
@@ -61,14 +64,27 @@ li.unittitle.active2 > a {
 #activityList div.activityColumn.bgsuccess {
   background-color: #DFF0D8;
 }
-#activityList p, #subactivityList p {
-  background-color: #e6e6e6;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#e6e6e6));
-  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
-  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #e6e6e6);
-  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
-  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
-  background-image: linear-gradient(#ffffff, #ffffff 25%, #e6e6e6);
+#activityList p {
+  background-color: #afafaf;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#afafaf));
+  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #afafaf);
+  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+#subactivityList p {
+  background-color: #9f9f9f;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#efefef), color-stop(25%, #efefef), to(#9f9f9f));
+  background-image: -webkit-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -moz-linear-gradient(top, #efefef, #efefef 25%, #9f9f9f);
+  background-image: -ms-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -o-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 #activityList p a, #subactivityList p a {
     color: #555555;
@@ -84,7 +100,8 @@ li.unittitle.active2 > a {
   cursor: text;
   background: inherit;
 }
-#activityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor'], 
-#subactivityList p.aItem.newItem div[contenteditable="true"][class~='plaintexteditor'] {
+#activityList p.newItem div[contenteditable="true"][class~='plaintexteditor'], 
+#subactivityList p.newItem div[contenteditable="true"][class~='plaintexteditor'] {
   width: 100%;
+  margin-bottom: 10px;
 }

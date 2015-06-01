@@ -7,6 +7,16 @@ Template.wall.helpers({
     if (this.type == 'section') return 'B block Wall';
     return '';
   },
+  helpMessages: function () {
+    return [
+      'Use the add block menu to add a block to a column in this wall.',
+      'Edit any <span class="blue-outlined">blue-outlined text.</span>  Just click inside the blue outline and start typing.',
+      'Select text to reveal the formatting toolbar.',
+      'Click anywhere outside the blue outline to save changes. ',
+      'Drag and drop to rearrange blocks.  You can drag a block to another column or even another wall.',
+      'Use the modify menu to expand, shrink, add and delete columns.'
+    ]
+  },
   columns: function() {
     return Columns.find({wallID:this._id},{sort: {order:1}});
   },
@@ -15,9 +25,6 @@ Template.wall.helpers({
   },
   visibleOrEditing: function() {
     return (this.visible || inEditedWall(this._id));
-  },
-  showWallHelp: function() {
-    return (inEditedWall(this._id) && Session.get('showWallHelp'));
   }
 })
 
@@ -29,9 +36,5 @@ Template.wall.events({
     } else {
       Session.set('editedWall',null);
     }
-  },
-  'click .editHelp': function(event,tmpl) {
-    var help = Session.get('showWallHelp');
-    Session.set('showWallHelp',!help);
   }
 })
