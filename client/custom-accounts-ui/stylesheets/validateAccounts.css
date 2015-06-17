@@ -1,0 +1,7 @@
+.equal-height { /* makes bootstrap panels equal height so they wrap in distinct rows */
+  display: flex;
+  flex-wrap: wrap;
+}
+.validate-accounts .btn {
+  margin-top: 5px;
+}

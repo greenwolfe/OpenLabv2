@@ -13,12 +13,6 @@ Template.activitiesList.helpers({
       selector.visible = true; //show only visible units
     return Units.find(selector,{sort: {order: 1}});
   },
-  activeUnit: function() {
-    return Units.findOne(Session.get('activeUnit'));
-  },
-  activeUnit2: function() {
-    return Units.findOne(Session.get('activeUnit2'));
-  },
   sortableOpts: function() {
     return {
       draggable:'.unittitle',
@@ -37,7 +31,7 @@ Template.activitiesList.helpers({
 
 Template.unitTitle.helpers({
   active: function() {
-    var activeUnit = Session.get('activeUnit');
+    var activeUnit = openlabSession.get('activeUnit');
     if (!activeUnit) {
       var units = Units.find({visible:true},{sort: {order: 1}}).fetch();
       var cU = Meteor.user();
@@ -46,15 +40,15 @@ Template.unitTitle.helpers({
         ('studentActivityList' in cU.profile.lastOpened) && 
         Units.findOne(cU.profile.lastOpened.studentActivityList)) 
           activeUnit = cU.profile.lastOpened.studentActivityList;
-      Session.set('activeUnit', activeUnit);
+      openlabSession.set('activeUnit', activeUnit);
     }
     return (this._id == activeUnit) ? 'active' : '';
   },
   active2: function() {
-    return (this._id == Session.get('activeUnit2')) ? 'active2':'';
+    return (this._id == openlabSession.get('activeUnit2')) ? 'active2':'';
   },
   hidden: function() {
-    var activeUnit = Session.get('activeUnit');
+    var activeUnit = openlabSession.get('activeUnit');
     return (this._id == activeUnit) ? '' : 'hidden';
   },
   editable: function() {
@@ -67,26 +61,26 @@ Template.unitTitle.events({
   'click li > a': function(event,tmpl) {
     event.preventDefault();
     if (event.ctrlKey) {
-      var activeUnit2 = Session.get('activeUnit2');
-      var activeUnit = Session.get('activeUnit');
+      var activeUnit2 = openlabSession.get('activeUnit2');
+      var activeUnit = openlabSession.get('activeUnit');
       if (tmpl.data._id == activeUnit2) {
-        Session.set('activeUnit2',null);
+        openlabSession.set('activeUnit2',null);
       } else if (tmpl.data._id == activeUnit){
         return;
       } else if ((activeUnit2) && (tmpl.data._id == activeUnit)) {
-        Session.set('activeUnit',activeUnit2);
-        Session.set('activeUnit2',null);
+        openlabSession.set('activeUnit',activeUnit2);
+        openlabSession.set('activeUnit2',null);
         var cU = Meteor.user();
         if (cU && ('profile' in cU)) {
           Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":activeUnit2} });
         }
       } else {
-        Session.set('activeUnit2',tmpl.data._id);
+        openlabSession.set('activeUnit2',tmpl.data._id);
       }
     } else {
-      Session.set('activeUnit',tmpl.data._id);
-      if (tmpl.data._id == Session.get('activeUnit2'))
-        Session.set('activeUnit2',null);
+      openlabSession.set('activeUnit',tmpl.data._id);
+      if (tmpl.data._id == openlabSession.get('activeUnit2'))
+        openlabSession.set('activeUnit2',null);
       var cU = Meteor.user();
       if (cU && ('profile' in cU)) {
         Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":tmpl.data._id} });
@@ -107,7 +101,7 @@ Template.unitTitle.events({
 
 Template.activityList.helpers({
   activities0: function() {
-    var activeUnit2 = Session.get('activeUnit2');
+    var activeUnit2 = openlabSession.get('activeUnit2');
     var columns = [];
     var selector = {
       unitID: this._id,
@@ -123,7 +117,7 @@ Template.activityList.helpers({
     return columns[0];
   },
   activities1: function() {
-    var activeUnit2 = Session.get('activeUnit2');
+    var activeUnit2 = openlabSession.get('activeUnit2');
     var columns = [];
     var selector = {
       unitID: this._id,
@@ -139,13 +133,13 @@ Template.activityList.helpers({
     return columns[1];
   },
   bgsuccess: function() {
-    return Session.get('activeUnit2') ? 'bgsuccess' : '';
+    return openlabSession.get('activeUnit2') ? 'bgsuccess' : '';
   },
   bgprimary: function() {
-    return Session.get('activeUnit2') ? 'bgprimary' : '';
+    return openlabSession.get('activeUnit2') ? 'bgprimary' : '';
   },
   activities2: function() {
-    var activeUnit2 = Session.get('activeUnit2');
+    var activeUnit2 = openlabSession.get('activeUnit2');
     if (!activeUnit2) return null;
     var selector = {
       unitID: activeUnit2,
@@ -155,13 +149,8 @@ Template.activityList.helpers({
       selector.visible = true; //show only visible activities
     return Activities.find(selector,{sort: {order: 1}})
   },
-  activeUnit2: function() {
-    var id = Session.get('activeUnit2');
-    if (!id) return null;
-    return Units.findOne(id);
-  },
   sortableOpts2: function() {
-    var activeUnit2 = Session.get('activeUnit2');
+    var activeUnit2 = openlabSession.get('activeUnit2');
     return {
       draggable:'.aItem',
       handle: '.sortActivity',
@@ -194,7 +183,7 @@ Template.activityList.helpers({
   reassessments: function() {
     var userToShow = Meteor.userId();
     if (Roles.userIsInRole(userToShow,'teacher')) {
-      userToShow = Session.get('TeacherViewAs');
+      userToShow = openlabSession.get('TeacherViewAs');
     };
     return Activities.find({unitID: this._id, 
       ownerID: {$in: [userToShow]},

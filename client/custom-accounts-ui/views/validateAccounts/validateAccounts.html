@@ -1,0 +1,21 @@
+<template name="validateAccounts">
+  <div class="row-fluid">
+    {{>helpBannerNavPills messages=helpMessages}}
+  </div>
+  <div class="row-fluid equal-height">
+    {{#each users}}
+      <div class='column col-md-4'>
+        <div class="block panel panel-primary validate-accounts">
+          <div class="panel-heading ">
+            <h3 class="panel-title text-center">
+              {{{profile.firstName}}} {{{profile.lastName}}}
+            </h3>
+          </div>
+          <div class="panel-body fullwidth">
+            {{> editProfileForm}}
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</template>

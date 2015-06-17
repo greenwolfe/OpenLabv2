@@ -31,10 +31,10 @@ Template.wall.helpers({
 Template.wall.events({
   'click .editColumns': function(event,tmpl) {
     var wall = tmpl.data._id;
-    if (Session.get('editedWall') != wall) {
-      Session.set('editedWall',wall)
+    if (activityPageSession.get('editedWall') != wall) {
+      activityPageSession.set('editedWall',wall)
     } else {
-      Session.set('editedWall',null);
+      activityPageSession.set('editedWall',null);
     }
   }
 })

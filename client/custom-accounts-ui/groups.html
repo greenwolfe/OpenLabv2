@@ -1,0 +1,69 @@
+<template name="groups">
+  {{#if isInRole 'teacher,student'}}
+    {{#unless userIsInRole impersonatedId 'parentOrAdvisor'}}
+      <li id="groups-dropdown-list" class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown">
+          Current group: {{{groupies}}}
+          <b class="caret"></b>
+        </a>
+        <div id="groups-dropdown-menu" class="dropdown-menu">
+          {{#if openInvitesCount}}
+            <div class="alert alert-info">
+              {{#each openInvites}}
+                {{>openInvite}}
+              {{/each}}
+            </div>
+          {{/if}}
+          <div>
+            Select names below to create an invitation list.  <br>
+            {{#if currentGroup}}
+              Invite {{{inviteesMinusCurrent}}} to 
+              <button class="btn btn-warning btn-nopad" id="join-group">join this group</button>
+              , or<br> invite
+            {{else}}
+              Invite
+            {{/if}}
+            {{{invitees}}} to
+            <button class="btn btn-warning btn-nopad" id="form-new-group">form a new group</button>.
+          </div>
+          <ul class="nav nav-pills">
+            {{#each sections}}
+              {{> sectionChooseGroupMembers}}
+            {{/each}} 
+          </ul>
+          <ul class="nav nav-pills">
+            {{#each sectionMembers selectedSection}}
+              {{>userChooseGroupMembers}}
+            {{/each}}
+          </ul>
+        </div>
+      </li>
+    {{/unless}}
+  {{else}} 
+    {{#if isInRole 'parentOrAdvisor'}}
+      <p class="navbar-text">Current group: {{{groupies}}}</p>
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name = 'userChooseGroupMembers'>
+  <li class='userToView {{active}} {{disabled}}'>
+    <a href="#" title="{{profile.firstName}} {{profile.lastName}}">{{username}}</a>
+  </li>
+</template>
+
+<template name = 'sectionChooseGroupMembers'>
+  <li  class='{{active}}'>
+    <a href="#">{{name}}</a>
+  </li>
+</template>
+
+<template name = 'openInvite'>
+  {{{invitingMembers}}} {{haveHas}} invited you to form a group
+  {{#if someoneElseInvited}}
+    with {{{alsoInvited}}}
+  {{/if}}
+  .
+  <button class="btn btn-warning btn-nopad" id="accept-invite">Accept</button>
+  <button class="btn btn-warning btn-nopad" id="decline-invite">Decline</button>
+</template>

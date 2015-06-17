@@ -17,12 +17,16 @@ Meteor.startup(function () {
   })
 
   /*  define the teacher account and assign role*/
-
-  if (Meteor.users.find().count() == 0) {
+  if (Roles.getUsersInRole('teacher').count() == 0) {
+    var profile = {
+      firstName: 'Teacher',
+      lastName: 'One'
+    }
     var id = Accounts.createUser({
-      password: "password",
-      email: "matt_greenwolfe@caryacademy.org",
-      username: 'Gwolfe'
+      password: "Pa33word",
+      email: "teacher1@mailinator.com",
+      username: 'teacher1',
+      profile: profile
     });
     Roles.addUsersToRoles(id, ['teacher']);
   };
