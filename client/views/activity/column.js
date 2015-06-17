@@ -21,7 +21,7 @@ Template.column.helpers({
       collection: 'Blocks',
       selectField: 'columnID',
       selectValue: this._id,
-      disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
+      disabled: (!activityPageSession.get('editedWall')), //!= this.wallID to apply to a single wall 
       onAdd: function(evt) {
         Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
       }

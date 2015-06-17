@@ -9,10 +9,8 @@ underscore
 wizonesolutions:underscore-string
 iron:router
 sacha:spin
-ian:accounts-ui-bootstrap-3
 accounts-password
 alanning:roles
-mrt:moment
 linto:fontawesome
 
 twbs:bootstrap
@@ -22,3 +20,8 @@ tomi:upload-jquery
 audit-argument-checks
 perak:codemirror
 summernote:summernote@=0.6.5
+stylus
+email
+momentjs:moment
+zuuk:stale-session
+reactive-dict

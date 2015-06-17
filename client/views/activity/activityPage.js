@@ -31,7 +31,7 @@ Template.activityPage.helpers({
       collection: 'Walls',
       selectField: 'activityID',
       selectValue: this._id,
-      disabled: !Session.get('editedWall')
+      disabled: !activityPageSession.get('editedWall')
     }
   }
 });

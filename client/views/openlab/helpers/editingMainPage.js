@@ -7,7 +7,7 @@ var editingMainPageFactory = function(textIfTrue,textIfFalse) {
   return function() {
     var userID = Meteor.userId();
     if (!Roles.userIsInRole(userID,'teacher')) return textIfFalse;
-    return Session.get('editingMainPage') ?  textIfTrue : textIfFalse;
+    return openlabSession.get('editingMainPage') ?  textIfTrue : textIfFalse;
   }
 }
 editingMainPage = editingMainPageFactory();

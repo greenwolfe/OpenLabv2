@@ -1,0 +1,227 @@
+<template name="loginButtons">
+  <li id="login-dropdown-list" class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown">
+      {{{greeting}}}
+      <b class="caret"></b>
+    </a>
+    <div class="dropdown-menu">
+      {{#if isInRole 'teacher'}}
+        {{> selectedForm impersonatedOrUser}} 
+      {{else}} 
+        {{> selectedForm currentUser}}
+      {{/if}}
+    </div>
+  </li>
+</template>
+
+<!-- logged in form -->
+<template name="loggedInForm">
+  <button class="btn btn-primary btn-block" id="login-buttons-edit-profile">Edit Profile</button>
+  <!-- change password and signout only available for real users, block if impersonating -->
+  <button class="btn btn-primary btn-block" id="login-buttons-open-change-password">Change Password</button>
+  <button class="btn btn-block btn-primary" id="login-buttons-logout">Sign out</button>
+  {{#if isInRole 'teacher'}}
+      <a href="{{pathFor 'validateAccounts'}}">
+        Validate accounts
+      </a>
+  {{/if}}
+</template>
+
+<!-- loginForm -->
+<template name="loginForm">
+  {{#with session 'message'}}
+    {{#if text}}
+      <div class="alert alert-{{type}}">{{text}}</div>
+    {{/if}}
+  {{/with}}
+
+  <input id="login-username-or-email" type="usernameOrEmail" placeholder="Username or Email" class="form-control" />
+  <input id="login-password" type="password" placeholder="Password" class="form-control" />
+
+  <button class="btn btn-primary col-xs-12 col-sm-12" id="login-buttons-signin" type="button">Sign in</button>
+
+  <div id="login-other-options">
+    <a id="forgot-password-link" class="pull-left" >Forgot password?</a>
+    <a id="signup-link" class="pull-right" >Create account</a>
+  </div>
+</template>
+
+<!-- createAccountForm -->
+<template name="createAccountForm">
+  {{#with session 'message'}}
+    {{#if text}}
+      <div class="alert alert-{{type}}">{{text}}</div>
+    {{/if}}
+  {{/with}}
+
+  <input id="login-create-firstname" type="text" placeholder="First name" class="form-control" />
+  <input id="login-create-lastname" type="text" placeholder="Last name" class="form-control" />
+  <input id="login-create-username" type="text" placeholder="Username" class="form-control" />
+  <input id="login-create-email" type="email" placeholder="Email" class="form-control" />
+
+  <select id="login-create-role" type="role" class="form-control" required>
+    <option value="" selected disabled>Choose role</option>
+    <option value="student">Student</option>
+    <option value="teacher">Teacher</option>
+    <option value="parentOrAdvisor">Parent or Advisor</option>
+  </select>
+  <select id="login-create-section" type="section" class="form-control hidden" required>
+    <option value="" selected disabled>Choose section</option>
+    {{#each sections}}
+      <option value="{{_id}}">{{{name}}}</option>
+    {{/each}}
+  </select>
+  <div id="login-create-choose-students" class="hidden">
+    <p>Please enter the names of students you would like to observe.</p>
+    {{#each session 'childrenOrAdvisees'}}
+      <input class="form-control login-create-choose-student" type="student" value="{{name}}" placeholder="Firstname Lastname <Enter>"/>
+    {{/each}}
+    <input class="form-control login-create-choose-student" type="student" placeholder="Firstname Lastname <Enter>"  />
+  </div>
+
+  <button class="btn btn-primary col-xs-12 col-sm-12" id="login-buttons-create" type="button">Create</button>
+  <button class="btn btn-primary col-xs-12 col-sm-12" id="login-buttons-cancel-create" type="button">Return</button>
+</template>
+
+<!-- forgotPasswordForm -->
+<template name="forgotPasswordForm">
+  {{#with session 'message'}}
+    {{#if text}}
+      <div class="alert alert-{{type}}">{{text}}</div>
+    {{/if}}
+  {{/with}}
+
+  <div class="login-form">
+    <input id="forgot-password-email" type="email" placeholder="Email" class="form-control" />
+
+    <button class="btn btn-primary login-button-form-submit col-xs-12 col-sm-12" id="login-buttons-forgot-password">Reset password</button>
+    <button class="btn btn-primary col-xs-12 col-sm-12" id="login-buttons-cancel-forgot-password" type="button">Return</button>
+  </div>
+</template>
+
+<!-- changePasswordForm -->
+<template name="changePasswordForm">
+  {{#with session 'message'}}
+    {{#if text}}
+      <div class="alert alert-{{type}}">{{text}}</div>
+    {{/if}}
+  {{/with}}
+
+  <div class="login-form">
+    <input id="change-password-old" type="password" placeholder="Current password" class="form-control" />
+    <input id="change-password-new" type="password" placeholder="New password" class="form-control" />
+    <input id="change-password-new-again" type="password" placeholder="New password (again)" class="form-control" />
+
+    <button class="btn btn-block btn-primary" id="login-buttons-do-change-password">Change password</button>
+    <button class="btn btn-block btn-primary" id="login-buttons-cancel-change-password">Return</button>
+  </div>
+</template>
+
+<!-- editProfileForm -->
+<template name="editProfileForm">
+  {{#with session 'message'}}
+    {{#if text}}
+      <div class="alert alert-{{type}}">{{text}}</div>
+    {{/if}}
+  {{/with}}
+
+  <div class="form-group">
+    Name: <input id="edit-profile-firstname" type="text" value={{profile.firstName}} class="form-control" />
+    <input id="edit-profile-lastname" type="text" value={{profile.lastName}} class="form-control" />
+  </div> 
+  <div class="form-group">
+    Username: 
+    <input id="edit-profile-username" type="text" value={{username}} class="form-control" />
+  </div>
+  <div class="form-group">
+    Email: 
+    {{#each emails}}
+      <p>
+        {{address}}
+        {{#unless verified}}
+            <a href="#" class="glyphicon glyphicon-remove remove-email" title="Remove email."></a>
+            {{#if isInRole 'teacher'}}
+              {{#if emailCountIsOne}}
+                <a href="#" class="glyphicon glyphicon-send send-enrollment-email" title="Send validation e-mail."></a>
+              {{/if}}
+            {{/if}}
+        {{/unless}}
+      </p>
+    {{/each}}
+    {{#each session 'newEmails'}}
+      <input class="form-control edit-profile-add-email" type="email" value="{{address}}" placeholder="Add another email."/>
+    {{/each}}
+    <input class="form-control edit-profile-add-email" type="email" placeholder='Add another email.'>
+  </div>
+  {{#if isInRole 'teacher'}} 
+    {{#unless isSelf}}
+      Role:
+      <select id="edit-profile-role" type="role" class="form-control" required>
+        <option value="student" {{roleSelected 'student'}}>Student</option>
+        <option value="teacher" {{roleSelected 'teacher'}}>Teacher</option>
+        <option value="parentOrAdvisor" {{roleSelected 'parentOrAdvisor'}}>Parent or Advisor</option>
+      </select>
+    {{/unless}}
+  {{/if}}
+  {{#if userIsInRole _id 'student'}}
+    Section:
+    <select id="edit-profile-section" type="section" class="form-control" required>
+        <option value="" {{noSectionSelected}} disabled>Choose section</option>
+      {{#each sections}}
+        <option value="{{_id}}" {{sectionSelected}}>{{{name}}}</option>
+      {{/each}}
+    </select>
+  {{/if}}
+  {{#if userIsInRole _id 'parentOrAdvisor'}}
+    <div class="form-group">
+      Students you are observing:
+      {{#unless verifiedStudents}}
+        <br/>
+      {{/unless}}
+      {{#each verifiedStudents}}
+        <p> 
+          {{name}} 
+          <a href="#" class="glyphicon glyphicon-remove stop-observing" title="stop observing"></a>
+        </p>
+      {{/each}}
+
+      Requests pending approval:
+      {{#unless unverifiedStudents}} 
+        <br/>
+      {{/unless}}
+      {{#each unverifiedStudents}}
+        <p> 
+          {{name}} 
+          <a href="#" class="glyphicon glyphicon-remove stop-observing" title="stop observing"></a> 
+          {{#if isInRole 'teacher'}}
+            <a href="#" class="glyphicon glyphicon-ok verify-child-or-advisee" title="verify child or advisee"></a> 
+          {{/if}}
+        </p>  
+      {{/each}}
+
+      {{#if lostStudents}}
+        Name(s) not found:
+        {{#each lostStudents}}
+          <p> 
+            {{name}} 
+            <a href="#" class="glyphicon glyphicon-remove stop-observing" title="stop observing"></a>
+          </p>
+        {{/each}}
+      {{/if}}      
+      {{#if session 'childrenOrAdvisees'}}
+        New requests:
+        {{#each session 'childrenOrAdvisees'}}
+          <input class="form-control edit-profile-choose-student" type="student" value="{{name}}" placeholder="Firstname Lastname <Enter>"/>
+        {{/each}}
+      {{/if}}
+      <input class="form-control edit-profile-choose-student" type="student" placeholder="Firstname Lastname <Enter>"  />
+    </div>
+  {{/if}}
+
+
+  <button class="btn btn-primary col-xs-12 col-sm-12" id="edit-profile-save" type="button">Save Changes</button>
+  {{#if session 'isInDropdown'}}
+    <button class="btn btn-primary col-xs-12 col-sm-12" id="edit-profile-cancel" type="button">Return</button>
+  {{/if}}
+</template>
+

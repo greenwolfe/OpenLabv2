@@ -1,0 +1,59 @@
+<template name="viewAs">
+  {{#if isInRole 'teacher,parentOrAdvisor'}}
+    <li id="view-as-dropdown-list" class="dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown">
+        <span title = '{{currentUser.profile.firstName}} {{currentUser.profile.lastName}}'>{{currentUser.profile.firstName}}</span>  viewing as: {{{selectedText}}}
+        <b class="caret"></b>
+      </a>
+      <div id="view-as-dropdown-menu" class="dropdown-menu">
+        <ul class="nav nav-pills">
+          {{#with currentUser}}
+            {{>userToView}}
+          {{/with}}
+          {{#if isInRole 'teacher'}}
+            {{#each sections}}
+              {{> sectionToView}}
+            {{/each}} 
+            {{>parentsToView}}
+          {{else}}
+            {{#if isInRole 'parentOrAdvisor'}}
+              {{#each childrenOrAdvisees}}
+                {{>userToView}}
+              {{/each}}
+            {{/if}}
+          {{/if}}
+        </ul>
+        <ul class="nav nav-pills">
+          {{#if isInRole 'teacher'}}
+            {{#each sectionMembers selectedSection._id}}
+              {{>userToView}}
+            {{/each}}
+            {{#if viewParents}}
+              {{#each parents}}
+                {{>userToView}}
+              {{/each}}
+            {{/if}}
+          {{/if}}
+        </ul>
+      </div>
+    </li>
+  {{/if}}
+</template>
+
+<template name = 'userToView'>
+  <li class='userToView {{active}}'>
+    <a href="#" title="{{profile.firstName}} {{profile.lastName}}">{{username}}</a>
+  </li>
+</template>
+
+<template name = 'sectionToView'>
+  <li  class='{{active}}'>
+    <a href="#">{{name}}</a>
+  </li>
+</template>
+
+<template name = 'parentsToView'>
+  <li  class='{{active}}'>
+    <a href="#">parents/advisors</a>
+  </li>
+</template>

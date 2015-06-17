@@ -1,0 +1,37 @@
+<body>
+	{{> setPasswordDialog}}
+</body>
+
+<template name="setPasswordDialog">
+		<div class="modal" id="login-set-password-modal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					{{#unless session 'messageOnly'}}
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h4 class="modal-title">Choose a Password</h4>
+						</div>
+					{{/unless}}
+					<div class="modal-body">
+					  {{#with session 'message'}}
+					    {{#if text}}
+					      <div class="alert alert-{{type}}">{{text}}</div>
+					    {{/if}}
+					  {{/with}}
+					  {{#unless session 'messageOnly'}}
+							<input id="login-create-password" type="password" placeholder="Password" class="form-control" />
+	  					<input id="login-create-password-again" type="password" placeholder="Confirm Password" class="form-control" /><br>
+	  				{{/unless}}
+					</div>
+					<div class="modal-footer">
+						<a class="btn btn-default" id="login-cancel-set-password-dialog">{{OkCancel}}</a>
+						{{#unless session 'messageOnly'}}
+							<button class="btn btn-primary" id="login-set-password">
+								Set Password
+							</button>
+						{{/unless}}
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dalog -->
+		</div><!-- /.modal -->
+</template>
