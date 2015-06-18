@@ -12,50 +12,26 @@
 	"buffers":
 	[
 		{
-			"file": "client/views/openlab/openlab.html",
-			"settings":
-			{
-				"buffer_size": 356,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/openlab/openlabHeader.html",
-			"settings":
-			{
-				"buffer_size": 940,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "client/views/openlab/activities_list.html",
 			"settings":
 			{
-				"buffer_size": 3642,
+				"buffer_size": 3777,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/helpers/alertOnError.js",
+			"file": "client/views/activity/block.html",
 			"settings":
 			{
-				"buffer_size": 82,
+				"buffer_size": 7297,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/openlab.js",
+			"file": "client/stylesheets/activity_page.css",
 			"settings":
 			{
-				"buffer_size": 0,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/openlab/openlabHeader.js",
-			"settings":
-			{
-				"buffer_size": 437,
+				"buffer_size": 4362,
 				"line_ending": "Unix"
 			}
 		},
@@ -63,23 +39,47 @@
 			"file": "client/views/openlab/activities_list.js",
 			"settings":
 			{
-				"buffer_size": 7104,
+				"buffer_size": 8269,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/helpers/openlabSession.js",
+			"file": "collections/activityStatuses.js",
 			"settings":
 			{
-				"buffer_size": 4161,
+				"buffer_size": 4797,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/stylesheets/activities_list.css",
+			"file": "client/stylesheets/activity_statuses.css",
 			"settings":
 			{
-				"buffer_size": 2989,
+				"buffer_size": 981,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "server/publications.js",
+			"settings":
+			{
+				"buffer_size": 1620,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/custom-accounts-ui/viewAs.js",
+			"settings":
+			{
+				"buffer_size": 3033,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/router.js",
+			"settings":
+			{
+				"buffer_size": 4065,
 				"line_ending": "Unix"
 			}
 		}
@@ -123,8 +123,9 @@
 	[
 		"/home/solargreen/meteor/OpenLabv2",
 		"/home/solargreen/meteor/OpenLabv2/client",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers",
-		"/home/solargreen/meteor/OpenLabv2/client/views",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers",
 		"/home/solargreen/meteor/OpenLabv2/lib",
@@ -132,8 +133,19 @@
 	],
 	"file_history":
 	[
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/memberships.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js",
+		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
@@ -141,13 +153,11 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/progressPlan.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/helpers/openlabSession.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/activities_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/application/layout.html",
 		"/home/solargreen/meteor/OpenLabv2/client/main.html",
-		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers/activityPageSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/progressandplan/helpers/openlabSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/progressandplan/helpers/editingMainPage.js",
@@ -164,7 +174,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/helpers/activityPageSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/activityHeader.html",
-		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/OpenLabv2.sublime-project",
 		"/home/solargreen/.config/sublime-text-3/Packages/User/Package Control.sublime-settings",
@@ -229,7 +238,6 @@
 		"/home/solargreen/meteor/OpenLab/collections/users.js",
 		"/home/solargreen/meteor/OpenLab/client/views/includes/student_header.html",
 		"/home/solargreen/meteor/MeteorCheatSheet",
-		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
 		"/home/solargreen/meteor/uploadsTest/client/helpers/showHide.html",
 		"/home/solargreen/meteor/uploadsTest/client/helpers/showHide.js",
 		"/home/solargreen/meteor/uploadsTest/client/helpers/inEditedWall.js",
@@ -252,14 +260,7 @@
 		"/home/solargreen/meteor/uploadsTest/server/fixtures.js",
 		"/home/solargreen/meteor/uploadsTest/server/publications.js",
 		"/home/solargreen/meteor/uploadsTest/server/init.js",
-		"/home/solargreen/meteor/uploadsTest-deployment/mup.json",
-		"/home/solargreen/Desktop/dropped text.txt",
-		"/home/solargreen/meteor/uploadsTest/client/stylesheets/monokai.css",
-		"/home/solargreen/meteor/uploadsTest/client/pages/activity/wall.html",
-		"/home/solargreen/meteor/uploadsTest/client/pages/activity/activityPage.html",
-		"/home/solargreen/meteor/uploadsTest/client/pages/activity/imageBlockarchive.html",
-		"/home/solargreen/meteor/uploadsTest/client/summernote/summernote.html",
-		"/home/solargreen/meteor/uploadsTest/client/summernote/toolbars.js"
+		"/home/solargreen/meteor/uploadsTest-deployment/mup.json"
 	],
 	"find":
 	{
@@ -277,6 +278,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"today",
 			".unittitle",
 			"Session",
 			"aitem",
@@ -403,8 +405,7 @@
 			"activity",
 			"nA",
 			"activity",
-			"activitySS",
-			".find"
+			"activitySS"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -423,24 +424,54 @@
 	"groups":
 	[
 		{
-			"selected": 3,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "client/views/openlab/openlab.html",
+					"file": "client/views/openlab/activities_list.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 356,
+						"buffer_size": 3777,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								25,
-								25
+								3047,
+								3047
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 357.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "client/views/activity/block.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7297,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
 							]
 						],
 						"settings":
@@ -457,106 +488,12 @@
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "client/views/openlab/openlabHeader.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 940,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								180,
-								180
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
 					"buffer": 2,
-					"file": "client/views/openlab/activities_list.html",
+					"file": "client/stylesheets/activity_page.css",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3642,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								397,
-								360
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "client/helpers/alertOnError.js",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 82,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								82,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 3,
-			"sheets":
-			[
-				{
-					"buffer": 4,
-					"file": "client/views/openlab/openlab.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 0,
+						"buffer_size": 4362,
 						"regions":
 						{
 						},
@@ -569,30 +506,38 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2703.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 7,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 4,
+			"sheets":
+			[
 				{
-					"buffer": 5,
-					"file": "client/views/openlab/openlabHeader.js",
+					"buffer": 3,
+					"file": "client/views/openlab/activities_list.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 437,
+						"buffer_size": 8269,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								321,
-								321
+								8036,
+								8036
 							]
 						],
 						"settings":
@@ -602,27 +547,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 3179.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "client/views/openlab/activities_list.js",
+					"buffer": 4,
+					"file": "collections/activityStatuses.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7104,
+						"buffer_size": 4797,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1264,
+								1264
 							]
 						],
 						"settings":
@@ -635,54 +580,24 @@
 						"translation.y": 255.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
-					"file": "client/views/openlab/helpers/openlabSession.js",
+					"buffer": 5,
+					"file": "client/stylesheets/activity_statuses.css",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4161,
+						"buffer_size": 981,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "client/stylesheets/activities_list.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2989,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								268,
-								268
+								870,
+								870
 							]
 						],
 						"settings":
@@ -692,10 +607,100 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 306.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "server/publications.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1620,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1563,
+								1563
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 408.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "client/custom-accounts-ui/viewAs.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3033,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1676,
+								1676
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 459.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "lib/router.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4065,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1279,
+								1279
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 102.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -767,7 +772,7 @@
 		[
 			[
 				"",
-				"~/meteor/custom-accounts-ui/customAccountsUI.sublime-project"
+				"~/meteor/OpenLab/OpenLab.sublime-project"
 			]
 		],
 		"width": 380.0
@@ -781,7 +786,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},

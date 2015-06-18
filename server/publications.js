@@ -38,3 +38,8 @@ Meteor.publish('blocks',function() {  //change to user or section ID in order to
   return Blocks.find();
 });
 
+Meteor.publish('activityStatuses',function(userID) { 
+  check(userID,String) //not checking for Match.idString because null string passed if not logged in
+  return ActivityStatuses.find({studentID:userID});
+});
+

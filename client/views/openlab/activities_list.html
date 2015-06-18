@@ -97,6 +97,8 @@
         {{>showHide collection='Activities' itemName='activity' item=this}}
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
+        <i class="activityStatus {{status}}" title="{{hoverText}}"></i>
+        <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> {{{title}}} </a>
       {{/if}}
     </p>
