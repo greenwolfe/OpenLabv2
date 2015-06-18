@@ -200,6 +200,39 @@ Template.activityList.helpers({
 Template.activityItem.helpers({
   pointsToOrID: function() {
     return this.pointsTo || this._id;
+  },
+  status: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return 'icon-notStarted';
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:this._id});
+    if (!status)
+      return 'icon-notStarted';
+    return 'icon-' + status.level;
+  },
+  late: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return '';
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:this._id});
+    if (!status)
+      return '';
+    return (status.late) ? 'icon-late' : '';  
+  }
+})
+
+Template.activityItem.events({
+  'click .activityStatus': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  
+  },
+  'click .activityPunctual': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
   }
 })
 
