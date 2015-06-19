@@ -45,3 +45,16 @@ i.icon-done {
 i.icon-late {
   background-image: url('late.png');
 }
+
+#activityList a {
+  padding-right: 1px;
+}
+#activityList i.progressstripe {
+  float: right;
+}
+#activityList i.progressstripe.expected {
+  background-color: #FAA732;
+}
+#activityList i.progressstripe.completed {
+  background-color: #08C; 
+}

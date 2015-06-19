@@ -54,6 +54,27 @@ Template.unitTitle.helpers({
   editable: function() {
     var activeUnit = Session.get('activeUnit');
     return (this._id == activeUnit) ? 'true' : '';
+  },
+  percentCompleted: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    //add part to selector to find only those whose deadline is past.
+    var activityIDs = _.pluck(Activities.find(
+      {
+        unitID:this._id,
+        visible:true
+      },
+      {fields:{_id:1}}).fetch(),'_id')
+    var expected = activityIDs.length;
+    if (expected == 0) return 0;
+    var statuses = ActivityStatuses.find(
+      {
+        activityID:{$in:activityIDs},
+        studentID:studentID
+      }).fetch();
+    var completed = statuses.filter(function(status) {
+      return _.str.include(status.level,'done')
+    }).length
+    return 100*completed/expected;
   }  
 });
 
@@ -197,27 +218,45 @@ Template.activityList.helpers({
  /** ACTIVITY ITEM  *******/
 /*************************/
 
+/* currentStatus */
+var currentStatus = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+}
+
 Template.activityItem.helpers({
   pointsToOrID: function() {
     return this.pointsTo || this._id;
   },
   status: function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    if (!Roles.userIsInRole(studentID,'student'))
-      return 'icon-notStarted';
-    var status = ActivityStatuses.findOne({studentID:studentID,activityID:this._id});
+    var status = currentStatus(this._id);
     if (!status)
-      return 'icon-notStarted';
+      return 'icon-notStarted'
     return 'icon-' + status.level;
   },
+  statusTitle: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return 'not started';
+    var titleDict = {'notStarted':'not started','oneBar':'barely started','twoBars':'almost half-way done','threeBars':'more than half-way done','fourBars':'80% there','fiveBars':'just about done','submitted':'work submitted','returned':'revisions are needed, see comments by your teacher','donewithcomments':'done, but review comments by your teacher before taking an assessment','done':'done'};
+    return titleDict[status.level];
+  },
   late: function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    if (!Roles.userIsInRole(studentID,'student'))
-      return '';
-    var status = ActivityStatuses.findOne({studentID:studentID,activityID:this._id});
+    var status = currentStatus(this._id);
     if (!status)
       return '';
     return (status.late) ? 'icon-late' : '';  
+  },
+  expected: function() {
+    return 'expected';
+  },
+  completed: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return '';
+    return _.str.include(status.level,'done') ? 'completed' : '';
   }
 })
 
