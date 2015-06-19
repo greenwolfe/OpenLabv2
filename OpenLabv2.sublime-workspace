@@ -15,7 +15,7 @@
 			"file": "client/views/openlab/activities_list.html",
 			"settings":
 			{
-				"buffer_size": 3777,
+				"buffer_size": 3927,
 				"line_ending": "Unix"
 			}
 		},
@@ -36,10 +36,13 @@
 			}
 		},
 		{
+			"contents": "  /*************************/\n /*** ACTIVITIES LIST  ****/\n/*************************/\n\n//Template.activitiesList.rendered = function() {\n//  $('#activities').accordion({heightStyle: \"content\"});\n//}\n\nTemplate.activitiesList.helpers({\n  units: function() {\n    var selector = {};\n    if (!editingMainPage())\n      selector.visible = true; //show only visible units\n    return Units.find(selector,{sort: {order: 1}});\n  },\n  sortableOpts: function() {\n    return {\n      draggable:'.unittitle',\n      handle: '.sortUnit',\n      collection: 'Units',\n      selectField: 'app', //selects all units\n      selectValue: 'openlab', //as openlab is only allowed value of app field\n      disabled: !editingMainPage() \n    }\n  }\n});\n\n  /*********************/\n /** UNIT TITLE      **/\n/*********************/\n\nTemplate.unitTitle.helpers({\n  active: function() {\n    var activeUnit = openlabSession.get('activeUnit');\n    if (!activeUnit) {\n      var units = Units.find({visible:true},{sort: {order: 1}}).fetch();\n      var cU = Meteor.user();\n      activeUnit = units[0]._id;\n      if (cU && ('profile' in cU) && ('lastOpened' in cU.profile) && \n        ('studentActivityList' in cU.profile.lastOpened) && \n        Units.findOne(cU.profile.lastOpened.studentActivityList)) \n          activeUnit = cU.profile.lastOpened.studentActivityList;\n      openlabSession.set('activeUnit', activeUnit);\n    }\n    return (this._id == activeUnit) ? 'active' : '';\n  },\n  active2: function() {\n    return (this._id == openlabSession.get('activeUnit2')) ? 'active2':'';\n  },\n  hidden: function() {\n    var activeUnit = openlabSession.get('activeUnit');\n    return (this._id == activeUnit) ? '' : 'hidden';\n  },\n  editable: function() {\n    var activeUnit = Session.get('activeUnit');\n    return (this._id == activeUnit) ? 'true' : '';\n  },\n    \n});\n\nTemplate.unitTitle.events({\n  'click li > a': function(event,tmpl) {\n    event.preventDefault();\n    if (event.ctrlKey) {\n      var activeUnit2 = openlabSession.get('activeUnit2');\n      var activeUnit = openlabSession.get('activeUnit');\n      if (tmpl.data._id == activeUnit2) {\n        openlabSession.set('activeUnit2',null);\n      } else if (tmpl.data._id == activeUnit){\n        return;\n      } else if ((activeUnit2) && (tmpl.data._id == activeUnit)) {\n        openlabSession.set('activeUnit',activeUnit2);\n        openlabSession.set('activeUnit2',null);\n        var cU = Meteor.user();\n        if (cU && ('profile' in cU)) {\n          Meteor.users.update({_id:cU._id}, { $set:{\"profile.lastOpened.studentActivityList\":activeUnit2} });\n        }\n      } else {\n        openlabSession.set('activeUnit2',tmpl.data._id);\n      }\n    } else {\n      openlabSession.set('activeUnit',tmpl.data._id);\n      if (tmpl.data._id == openlabSession.get('activeUnit2'))\n        openlabSession.set('activeUnit2',null);\n      var cU = Meteor.user();\n      if (cU && ('profile' in cU)) {\n        Meteor.users.update({_id:cU._id}, { $set:{\"profile.lastOpened.studentActivityList\":tmpl.data._id} });\n      }\n    }\n  },\n  'dragstart li > a': function(event,tmpl) {\n    //bootstrap navs are draggable by default\n    //disabling this behavior so you have to grab\n    //the draggable handle to sort the units\n    event.preventDefault();\n  }\n})\n\n  /*************************/\n /** ACTIVITY LIST  *******/\n/*************************/\n\nTemplate.activityList.helpers({\n  activities0: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    var columns = [];\n    var selector = {\n      unitID: this._id,\n      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string\n    };\n    if (!editingMainPage())\n      selector.visible = true; //show only visible activities\n    columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); \n    if (activeUnit2)\n      return columns[1];\n    var half = Math.ceil(columns[1].length/2)\n    columns[0] = columns[1].splice(0,half); \n    return columns[0];\n  },\n  activities1: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    var columns = [];\n    var selector = {\n      unitID: this._id,\n      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string\n    };\n    if (!editingMainPage())\n      selector.visible = true; //show only visible activities\n    columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); \n    if (activeUnit2)\n      return null;\n    var half = Math.ceil(columns[1].length/2)\n    columns[0] = columns[1].splice(0,half); \n    return columns[1];\n  },\n  bgsuccess: function() {\n    return openlabSession.get('activeUnit2') ? 'bgsuccess' : '';\n  },\n  bgprimary: function() {\n    return openlabSession.get('activeUnit2') ? 'bgprimary' : '';\n  },\n  activities2: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    if (!activeUnit2) return null;\n    var selector = {\n      unitID: activeUnit2,\n      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string\n    };\n    if (!editingMainPage())\n      selector.visible = true; //show only visible activities\n    return Activities.find(selector,{sort: {order: 1}})\n  },\n  sortableOpts2: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    return {\n      draggable:'.aItem',\n      handle: '.sortActivity',\n      group: 'activityColumn',\n      collection: 'Activities',\n      selectField: 'unitID',\n      selectValue: activeUnit2,\n      disabled: !editingMainPage() //currently not working\n      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall \n      //onAdd: function(evt) {\n      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);\n      //}\n    }    \n  },\n  sortableOpts: function() {\n    return {\n      draggable:'.aItem',\n      handle: '.sortActivity',\n      group: 'activityColumn',\n      collection: 'Activities',\n      selectField: 'unitID',\n      selectValue: this._id,\n      //disabled: !editingMainPage() //currently not working\n      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall \n      //onAdd: function(evt) {\n      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);\n      //}\n    }\n  },\n  reassessments: function() {\n    var userToShow = Meteor.userId();\n    if (Roles.userIsInRole(userToShow,'teacher')) {\n      userToShow = openlabSession.get('TeacherViewAs');\n    };\n    return Activities.find({unitID: this._id, \n      ownerID: {$in: [userToShow]},\n      type: 'assessment',\n      visible: true},\n      {sort: {rank: 1}});\n  }\n});\n\n  /*************************/\n /** ACTIVITY ITEM  *******/\n/*************************/\n\n/* currentStatus */\nvar currentStatus = function(activityID) {\n  var studentID = Meteor.impersonatedOrUserId();\n  if (!Roles.userIsInRole(studentID,'student'))\n    return undefined;\n  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});\n}\n\nTemplate.activityItem.helpers({\n  pointsToOrID: function() {\n    return this.pointsTo || this._id;\n  },\n  status: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return 'icon-notStarted'\n    return 'icon-' + status.level;\n  },\n  statusTitle: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return 'not started';\n    var titleDict = {'notStarted':'not started','oneBar':'barely started','twoBars':'almost half-way done','threeBars':'more than half-way done','fourBars':'80% there','fiveBars':'just about done','submitted':'work submitted','returned':'revisions are needed, see comments by your teacher','donewithcomments':'done, but review comments by your teacher before taking an assessment','done':'done'};\n    return titleDict[status.level];\n  },\n  late: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return '';\n    return (status.late) ? 'icon-late' : '';  \n  },\n  expected: function() {\n    return 'expected';\n  },\n  completed: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return '';\n    return _.str.include(status.level,'done') ? 'completed' : '';\n  }\n})\n\nTemplate.activityItem.events({\n  'click .activityStatus': function(event,tmpl) {\n    var studentID = Meteor.impersonatedOrUserId();\n    if (!Roles.userIsInRole(studentID,'student'))\n      return; \n    Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  \n  },\n  'click .activityPunctual': function(event,tmpl) {\n    var studentID = Meteor.impersonatedOrUserId();\n    if (!Roles.userIsInRole(studentID,'student'))\n      return; \n    Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  \n  }\n})\n\n  /*************************/\n /*** NEW ACTIVITY  *******/\n/*************************/\n\nTemplate.newActivity.helpers({\n  fixedFields: function() {\n    return {unitID:this._id}\n  }\n})",
 			"file": "client/views/openlab/activities_list.js",
+			"file_size": 8973,
+			"file_write_time": 130791482898034933,
 			"settings":
 			{
-				"buffer_size": 8269,
+				"buffer_size": 8977,
 				"line_ending": "Unix"
 			}
 		},
@@ -55,7 +58,7 @@
 			"file": "client/stylesheets/activity_statuses.css",
 			"settings":
 			{
-				"buffer_size": 981,
+				"buffer_size": 1221,
 				"line_ending": "Unix"
 			}
 		},
@@ -125,14 +128,14 @@
 		"/home/solargreen/meteor/OpenLabv2/client",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
+		"/home/solargreen/meteor/OpenLabv2/client/views",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers",
 		"/home/solargreen/meteor/OpenLabv2/lib",
 		"/home/solargreen/meteor/OpenLabv2/server"
 	],
 	"file_history":
 	[
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.html",
 		"/home/solargreen/meteor/OpenLabv2/collections/memberships.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js",
@@ -144,7 +147,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
@@ -278,6 +280,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"id=\"activities\"",
+			"id='activities'",
 			"today",
 			".unittitle",
 			"Session",
@@ -403,9 +407,7 @@
 			"defaultText",
 			"editDescription",
 			"activity",
-			"nA",
-			"activity",
-			"activitySS"
+			"nA"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -433,15 +435,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3777,
+						"buffer_size": 3927,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3047,
-								3047
+								3564,
+								3564
 							]
 						],
 						"settings":
@@ -454,7 +456,7 @@
 						"translation.y": 357.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -520,7 +522,7 @@
 			]
 		},
 		{
-			"selected": 4,
+			"selected": 0,
 			"sheets":
 			[
 				{
@@ -529,15 +531,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8269,
+						"buffer_size": 8977,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8036,
-								8036
+								1816,
+								1816
 							]
 						],
 						"settings":
@@ -547,10 +549,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3179.0,
+						"translation.y": 425.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
@@ -566,8 +568,8 @@
 						"selection":
 						[
 							[
-								1264,
-								1264
+								1400,
+								1400
 							]
 						],
 						"settings":
@@ -576,11 +578,11 @@
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 0.0,
-						"translation.y": 255.0,
+						"translation.x": 639.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -589,15 +591,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 981,
+						"buffer_size": 1221,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								870,
-								870
+								1131,
+								1131
 							]
 						],
 						"settings":
@@ -607,10 +609,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 306.0,
+						"translation.y": 612.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -640,7 +642,7 @@
 						"translation.y": 408.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -670,7 +672,7 @@
 						"translation.y": 459.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -700,7 +702,7 @@
 						"translation.y": 102.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 6,
 					"type": "text"
 				}
 			]

@@ -30,7 +30,7 @@
         <div class="progress-bar progress-bar-warning" style="width: 70%;" title="18/20"></div>
       </div>
       <div class="progress">
-        <div class="progress-bar progress-bar-info" style="width: 30%;" title="15/18"></div>
+        <div class="progress-bar progress-bar-info" style="width: {{percentCompleted}}%;"></div>
       </div>
     {{/if}}
     <a href="#" title="{{longname}}">      
@@ -93,13 +93,18 @@
 <template name = 'activityItem'>
     <p class="aItem">
       {{#if editingMainPage}}
-        <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder or move to another model (in side-by-side view)."></a>
+        <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder or move to another model (in side-by-side view).">
+        </a>
         {{>showHide collection='Activities' itemName='activity' item=this}}
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
-        <i class="activityStatus {{status}}" title="{{hoverText}}"></i>
+        <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
-        <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> {{{title}}} </a>
+        <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> 
+        {{{title}}} 
+          <i class="progressstripe {{expected}}">&nbsp;</i>
+          <i class="progressstripe {{completed}}">&nbsp;</i>
+        </a>
       {{/if}}
     </p>
 </template>
