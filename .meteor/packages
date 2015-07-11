@@ -4,7 +4,6 @@
 # but you can also edit it by hand.
 
 meteor-platform
-insecure
 underscore
 wizonesolutions:underscore-string
 iron:router
@@ -25,3 +24,5 @@ email
 momentjs:moment
 zuuk:stale-session
 reactive-dict
+tsega:bootstrap3-datetimepicker
+clubfest:raphael

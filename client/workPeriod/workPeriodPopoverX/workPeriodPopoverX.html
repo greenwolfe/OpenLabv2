@@ -1,0 +1,44 @@
+<body>
+  {{>workPeriodPopoverX}}
+</body>
+
+<template name="workPeriodPopoverX">
+  <div id="workPeriodPopoverX" class="popover popover-default popover-xlg">
+    <div class="arrow"></div>
+    <div class="popover-title">
+      <span class="close" data-dismiss="modal">&times;</span>
+      Title
+    </div>
+    <div class="popover-content">
+      <div class="container-fluid">
+        <div class="row text-center">
+          {{> workPeriodGauge workPeriod=workPeriod radius=60}}
+        </div>
+        <div class="row">
+          <div class='col-sm-12'>
+            <span class="unit-date-range">This unit: From {{formatDate workPeriod.unitStartDate}} to {{formatDate workPeriod.unitEndDate}} </span>
+          </div>
+        </div>
+        <div class="row">
+          <div class='col-sm-12'>
+            <div class='date-range'>
+              <span>This activity: From</span>
+              <input type='text' class="form-control" id='startDatePicker' />
+              <span>to</span>
+              <input type='text' class="form-control" id='endDatePicker' />
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class='col-sm-12'>
+            Pointer shows today's date (when in range).
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="popover-footer">
+        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+        <button type="return" class="btn btn-sm btn-default">Return</button>
+    </div>
+  </div>
+</template>
