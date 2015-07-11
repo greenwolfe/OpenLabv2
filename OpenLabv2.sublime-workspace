@@ -15,74 +15,71 @@
 			"file": "client/views/openlab/activities_list.html",
 			"settings":
 			{
-				"buffer_size": 3927,
+				"buffer_size": 3973,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/activity/block.html",
+			"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
 			"settings":
 			{
-				"buffer_size": 7297,
+				"buffer_size": 262,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/stylesheets/activity_page.css",
+			"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.html",
 			"settings":
 			{
-				"buffer_size": 4362,
+				"buffer_size": 87,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "  /*************************/\n /*** ACTIVITIES LIST  ****/\n/*************************/\n\n//Template.activitiesList.rendered = function() {\n//  $('#activities').accordion({heightStyle: \"content\"});\n//}\n\nTemplate.activitiesList.helpers({\n  units: function() {\n    var selector = {};\n    if (!editingMainPage())\n      selector.visible = true; //show only visible units\n    return Units.find(selector,{sort: {order: 1}});\n  },\n  sortableOpts: function() {\n    return {\n      draggable:'.unittitle',\n      handle: '.sortUnit',\n      collection: 'Units',\n      selectField: 'app', //selects all units\n      selectValue: 'openlab', //as openlab is only allowed value of app field\n      disabled: !editingMainPage() \n    }\n  }\n});\n\n  /*********************/\n /** UNIT TITLE      **/\n/*********************/\n\nTemplate.unitTitle.helpers({\n  active: function() {\n    var activeUnit = openlabSession.get('activeUnit');\n    if (!activeUnit) {\n      var units = Units.find({visible:true},{sort: {order: 1}}).fetch();\n      var cU = Meteor.user();\n      activeUnit = units[0]._id;\n      if (cU && ('profile' in cU) && ('lastOpened' in cU.profile) && \n        ('studentActivityList' in cU.profile.lastOpened) && \n        Units.findOne(cU.profile.lastOpened.studentActivityList)) \n          activeUnit = cU.profile.lastOpened.studentActivityList;\n      openlabSession.set('activeUnit', activeUnit);\n    }\n    return (this._id == activeUnit) ? 'active' : '';\n  },\n  active2: function() {\n    return (this._id == openlabSession.get('activeUnit2')) ? 'active2':'';\n  },\n  hidden: function() {\n    var activeUnit = openlabSession.get('activeUnit');\n    return (this._id == activeUnit) ? '' : 'hidden';\n  },\n  editable: function() {\n    var activeUnit = Session.get('activeUnit');\n    return (this._id == activeUnit) ? 'true' : '';\n  },\n    \n});\n\nTemplate.unitTitle.events({\n  'click li > a': function(event,tmpl) {\n    event.preventDefault();\n    if (event.ctrlKey) {\n      var activeUnit2 = openlabSession.get('activeUnit2');\n      var activeUnit = openlabSession.get('activeUnit');\n      if (tmpl.data._id == activeUnit2) {\n        openlabSession.set('activeUnit2',null);\n      } else if (tmpl.data._id == activeUnit){\n        return;\n      } else if ((activeUnit2) && (tmpl.data._id == activeUnit)) {\n        openlabSession.set('activeUnit',activeUnit2);\n        openlabSession.set('activeUnit2',null);\n        var cU = Meteor.user();\n        if (cU && ('profile' in cU)) {\n          Meteor.users.update({_id:cU._id}, { $set:{\"profile.lastOpened.studentActivityList\":activeUnit2} });\n        }\n      } else {\n        openlabSession.set('activeUnit2',tmpl.data._id);\n      }\n    } else {\n      openlabSession.set('activeUnit',tmpl.data._id);\n      if (tmpl.data._id == openlabSession.get('activeUnit2'))\n        openlabSession.set('activeUnit2',null);\n      var cU = Meteor.user();\n      if (cU && ('profile' in cU)) {\n        Meteor.users.update({_id:cU._id}, { $set:{\"profile.lastOpened.studentActivityList\":tmpl.data._id} });\n      }\n    }\n  },\n  'dragstart li > a': function(event,tmpl) {\n    //bootstrap navs are draggable by default\n    //disabling this behavior so you have to grab\n    //the draggable handle to sort the units\n    event.preventDefault();\n  }\n})\n\n  /*************************/\n /** ACTIVITY LIST  *******/\n/*************************/\n\nTemplate.activityList.helpers({\n  activities0: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    var columns = [];\n    var selector = {\n      unitID: this._id,\n      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string\n    };\n    if (!editingMainPage())\n      selector.visible = true; //show only visible activities\n    columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); \n    if (activeUnit2)\n      return columns[1];\n    var half = Math.ceil(columns[1].length/2)\n    columns[0] = columns[1].splice(0,half); \n    return columns[0];\n  },\n  activities1: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    var columns = [];\n    var selector = {\n      unitID: this._id,\n      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string\n    };\n    if (!editingMainPage())\n      selector.visible = true; //show only visible activities\n    columns[1] = Activities.find(selector,{sort: {order: 1}}).fetch(); \n    if (activeUnit2)\n      return null;\n    var half = Math.ceil(columns[1].length/2)\n    columns[0] = columns[1].splice(0,half); \n    return columns[1];\n  },\n  bgsuccess: function() {\n    return openlabSession.get('activeUnit2') ? 'bgsuccess' : '';\n  },\n  bgprimary: function() {\n    return openlabSession.get('activeUnit2') ? 'bgprimary' : '';\n  },\n  activities2: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    if (!activeUnit2) return null;\n    var selector = {\n      unitID: activeUnit2,\n      ownerID: {$in: [null,'']} //matches if Activities does not have onwerID field, or if it has the field, but it contains the value null or an empty string\n    };\n    if (!editingMainPage())\n      selector.visible = true; //show only visible activities\n    return Activities.find(selector,{sort: {order: 1}})\n  },\n  sortableOpts2: function() {\n    var activeUnit2 = openlabSession.get('activeUnit2');\n    return {\n      draggable:'.aItem',\n      handle: '.sortActivity',\n      group: 'activityColumn',\n      collection: 'Activities',\n      selectField: 'unitID',\n      selectValue: activeUnit2,\n      disabled: !editingMainPage() //currently not working\n      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall \n      //onAdd: function(evt) {\n      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);\n      //}\n    }    \n  },\n  sortableOpts: function() {\n    return {\n      draggable:'.aItem',\n      handle: '.sortActivity',\n      group: 'activityColumn',\n      collection: 'Activities',\n      selectField: 'unitID',\n      selectValue: this._id,\n      //disabled: !editingMainPage() //currently not working\n      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall \n      //onAdd: function(evt) {\n      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);\n      //}\n    }\n  },\n  reassessments: function() {\n    var userToShow = Meteor.userId();\n    if (Roles.userIsInRole(userToShow,'teacher')) {\n      userToShow = openlabSession.get('TeacherViewAs');\n    };\n    return Activities.find({unitID: this._id, \n      ownerID: {$in: [userToShow]},\n      type: 'assessment',\n      visible: true},\n      {sort: {rank: 1}});\n  }\n});\n\n  /*************************/\n /** ACTIVITY ITEM  *******/\n/*************************/\n\n/* currentStatus */\nvar currentStatus = function(activityID) {\n  var studentID = Meteor.impersonatedOrUserId();\n  if (!Roles.userIsInRole(studentID,'student'))\n    return undefined;\n  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});\n}\n\nTemplate.activityItem.helpers({\n  pointsToOrID: function() {\n    return this.pointsTo || this._id;\n  },\n  status: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return 'icon-notStarted'\n    return 'icon-' + status.level;\n  },\n  statusTitle: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return 'not started';\n    var titleDict = {'notStarted':'not started','oneBar':'barely started','twoBars':'almost half-way done','threeBars':'more than half-way done','fourBars':'80% there','fiveBars':'just about done','submitted':'work submitted','returned':'revisions are needed, see comments by your teacher','donewithcomments':'done, but review comments by your teacher before taking an assessment','done':'done'};\n    return titleDict[status.level];\n  },\n  late: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return '';\n    return (status.late) ? 'icon-late' : '';  \n  },\n  expected: function() {\n    return 'expected';\n  },\n  completed: function() {\n    var status = currentStatus(this._id);\n    if (!status)\n      return '';\n    return _.str.include(status.level,'done') ? 'completed' : '';\n  }\n})\n\nTemplate.activityItem.events({\n  'click .activityStatus': function(event,tmpl) {\n    var studentID = Meteor.impersonatedOrUserId();\n    if (!Roles.userIsInRole(studentID,'student'))\n      return; \n    Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  \n  },\n  'click .activityPunctual': function(event,tmpl) {\n    var studentID = Meteor.impersonatedOrUserId();\n    if (!Roles.userIsInRole(studentID,'student'))\n      return; \n    Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  \n  }\n})\n\n  /*************************/\n /*** NEW ACTIVITY  *******/\n/*************************/\n\nTemplate.newActivity.helpers({\n  fixedFields: function() {\n    return {unitID:this._id}\n  }\n})",
+			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
+			"settings":
+			{
+				"buffer_size": 1502,
+				"line_ending": "Unix"
+			}
+		},
+		{
 			"file": "client/views/openlab/activities_list.js",
-			"file_size": 8973,
-			"file_write_time": 130791482898034933,
 			"settings":
 			{
-				"buffer_size": 8977,
+				"buffer_size": 10042,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "collections/activityStatuses.js",
+			"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
 			"settings":
 			{
-				"buffer_size": 4797,
+				"buffer_size": 409,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/stylesheets/activity_statuses.css",
+			"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
 			"settings":
 			{
-				"buffer_size": 1221,
+				"buffer_size": 4064,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "server/publications.js",
+			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
 			"settings":
 			{
-				"buffer_size": 1620,
+				"buffer_size": 2564,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/custom-accounts-ui/viewAs.js",
+			"file": "client/stylesheets/workPeriod.css",
 			"settings":
 			{
-				"buffer_size": 3033,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/router.js",
-			"settings":
-			{
-				"buffer_size": 4065,
+				"buffer_size": 401,
 				"line_ending": "Unix"
 			}
 		}
@@ -126,30 +123,38 @@
 	[
 		"/home/solargreen/meteor/OpenLabv2",
 		"/home/solargreen/meteor/OpenLabv2/client",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
 		"/home/solargreen/meteor/OpenLabv2/client/views",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
-		"/home/solargreen/meteor/OpenLabv2/lib",
-		"/home/solargreen/meteor/OpenLabv2/server"
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX",
+		"/home/solargreen/meteor/OpenLabv2/lib"
 	],
 	"file_history":
 	[
+		"/home/solargreen/meteor/OpenLabv2/lib/router.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriodGauge.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.js",
+		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/application.css",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
+		"/home/solargreen/meteor/OpenLabv2/server/init.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/group_modals.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.html",
 		"/home/solargreen/meteor/OpenLabv2/collections/memberships.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
-		"/home/solargreen/meteor/OpenLabv2/lib/router.js",
-		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
 		"/home/solargreen/meteor/OpenLabv2/server/users.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/progressPlan.html",
@@ -176,7 +181,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/helpers/activityPageSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/activityHeader.html",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/OpenLabv2.sublime-project",
 		"/home/solargreen/.config/sublime-text-3/Packages/User/Package Control.sublime-settings",
 		"/home/solargreen/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
@@ -190,7 +194,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/help.html",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/help.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/application.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/progressPlan.css",
 		"/home/solargreen/meteor/OpenLabv2/collections/columns.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
@@ -256,13 +259,7 @@
 		"/home/solargreen/meteor/uploadsTest/collections/blocks.js",
 		"/home/solargreen/meteor/uploadsTest/methods/sortable1cMethods.js",
 		"/home/solargreen/meteor/uploadsTest/methods/showHideMethods.js",
-		"/home/solargreen/meteor/uploadsTest/methods/MatchHelpers.js",
-		"/home/solargreen/meteor/uploadsTest/collections/walls.js",
-		"/home/solargreen/meteor/uploadsTest/collections/columns.js",
-		"/home/solargreen/meteor/uploadsTest/server/fixtures.js",
-		"/home/solargreen/meteor/uploadsTest/server/publications.js",
-		"/home/solargreen/meteor/uploadsTest/server/init.js",
-		"/home/solargreen/meteor/uploadsTest-deployment/mup.json"
+		"/home/solargreen/meteor/uploadsTest/methods/MatchHelpers.js"
 	],
 	"find":
 	{
@@ -426,7 +423,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 1,
 			"sheets":
 			[
 				{
@@ -435,15 +432,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3927,
+						"buffer_size": 3973,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3564,
-								3564
+								3661,
+								3661
 							]
 						],
 						"settings":
@@ -453,19 +450,75 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 357.0,
+						"translation.y": 1768.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 262,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								249,
+								249
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 87,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "client/views/activity/block.html",
+					"buffer": 3,
+					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7297,
+						"buffer_size": 1502,
 						"regions":
 						{
 						},
@@ -479,6 +532,162 @@
 						"settings":
 						{
 							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 4,
+					"file": "client/views/openlab/activities_list.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10042,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9332,
+								9332
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4131.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 409,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								366,
+								366
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4064,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2564,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "client/stylesheets/workPeriod.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 401,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								397,
+								397
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
@@ -487,222 +696,6 @@
 						"zoom_level": 1.0
 					},
 					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "client/stylesheets/activity_page.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4362,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2703.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 0,
-			"sheets":
-			[
-				{
-					"buffer": 3,
-					"file": "client/views/openlab/activities_list.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8977,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1816,
-								1816
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 425.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "collections/activityStatuses.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4797,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1400,
-								1400
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 639.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "client/stylesheets/activity_statuses.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1221,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1131,
-								1131
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 612.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "server/publications.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1620,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1563,
-								1563
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 408.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "client/custom-accounts-ui/viewAs.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3033,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1676,
-								1676
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 459.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "lib/router.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4065,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1279,
-								1279
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 102.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
 					"type": "text"
 				}
 			]
@@ -736,7 +729,7 @@
 		"cols":
 		[
 			0.0,
-			0.5,
+			0.519867549669,
 			1.0
 		],
 		"rows":
@@ -774,7 +767,7 @@
 		[
 			[
 				"",
-				"~/meteor/OpenLab/OpenLab.sublime-project"
+				"~/meteor/dateTimePickerTest/dateTimePicker.sublime-workspace"
 			]
 		],
 		"width": 380.0
@@ -788,7 +781,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 1,
+	"selected_group": 0,
 	"settings":
 	{
 	},

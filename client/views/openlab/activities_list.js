@@ -240,7 +240,17 @@ Template.activityItem.helpers({
     var status = currentStatus(this._id);
     if (!status)
       return 'not started';
-    var titleDict = {'notStarted':'not started','oneBar':'barely started','twoBars':'almost half-way done','threeBars':'more than half-way done','fourBars':'80% there','fiveBars':'just about done','submitted':'work submitted','returned':'revisions are needed, see comments by your teacher','donewithcomments':'done, but review comments by your teacher before taking an assessment','done':'done'};
+    var titleDict = {
+      'notStarted':'not started',
+      'oneBar':'barely started',
+      'twoBars':'almost half-way done',
+      'threeBars':'more than half-way done',
+      'fourBars':'80% there',
+      'fiveBars':'just about done',
+      'submitted':'work submitted, waiting for teacher response',
+      'returned':'Please revise and resubmit according to comments by your teacher',
+      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
+      'done':'Done.'};
     return titleDict[status.level];
   },
   late: function() {
@@ -257,6 +267,14 @@ Template.activityItem.helpers({
     if (!status)
       return '';
     return _.str.include(status.level,'done') ? 'completed' : '';
+  },
+  workPeriod: function () {
+    return {
+      unitStartDate: moment().subtract(2, 'weeks').toDate(),
+      unitEndDate: moment().add(2,'weeks').toDate(),
+      startDate: moment().add(2,'days').toDate(),
+      endDate: moment().add(6,'days').toDate()
+    };
   }
 })
 

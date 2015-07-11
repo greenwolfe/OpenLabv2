@@ -11,4 +11,6 @@ Meteor.startup(function () {
       return '/' + formData.activityID + '/' + formData.user + '/' + formData.purpose;
     },
   });
+  //nice file structure from wordPress ... within activityName
+  //have last/first/month/day/file
 });  
