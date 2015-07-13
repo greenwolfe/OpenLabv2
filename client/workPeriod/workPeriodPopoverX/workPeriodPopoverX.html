@@ -3,11 +3,13 @@
 </body>
 
 <template name="workPeriodPopoverX">
-  <div id="workPeriodPopoverX" class="popover popover-default popover-xlg">
+  <div id="workPeriodPopoverX" class="popover popover-default">
     <div class="arrow"></div>
     <div class="popover-title">
       <span class="close" data-dismiss="modal">&times;</span>
-      Title
+      <div class="text-center">
+        <span>{{{sectionName}}}</span>
+      </div>
     </div>
     <div class="popover-content">
       <div class="container-fluid">
@@ -16,17 +18,17 @@
         </div>
         <div class="row">
           <div class='col-sm-12'>
-            <span class="unit-date-range">This unit: From {{formatDate workPeriod.unitStartDate}} to {{formatDate workPeriod.unitEndDate}} </span>
+            <p class="unit-date-range text-center">This unit from <br/> {{formatDate workPeriod.unitStartDate}} <br/> to <br/>{{formatDate workPeriod.unitEndDate}} </p>
           </div>
         </div>
         <div class="row">
           <div class='col-sm-12'>
-            <div class='date-range'>
-              <span>This activity: From</span>
-              <input type='text' class="form-control" id='startDatePicker' />
-              <span>to</span>
-              <input type='text' class="form-control" id='endDatePicker' />
-            </div>
+            <p class='date-range text-center'>
+              This activity from 
+              <input type='text' class="form-control" id='startDatePicker' {{disabled}}/>
+              to 
+              <input type='text' class="form-control" id='endDatePicker'  {{disabled}}/>
+            </p>
           </div>
         </div>
         <div class="row">
@@ -35,10 +37,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="popover-footer">
-        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
-        <button type="return" class="btn btn-sm btn-default">Return</button>
     </div>
   </div>
 </template>

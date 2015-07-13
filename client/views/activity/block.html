@@ -30,7 +30,7 @@
       </div>
     </div>
     <div class="panel-body fullwidth"> <!-- fullwidth corrects mysterious bug that only seems to affect workSubmitBlock and not other -->
-      {{> blockType}}
+      {{>Template.dynamic template=blockType }}
     </div>
     <div class="panel-footer">
       {{#if inEditedWall}}

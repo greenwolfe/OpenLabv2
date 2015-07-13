@@ -1,17 +1,22 @@
 #startDatePicker, #endDatePicker {
   display: inline-block;
-  width: 220px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+#startDatePicker[disabled], #endDatePicker[disabled] {
+  cursor: default;
+  border-style: none;
+  box-shadow: none;
 }
 #workPeriodPopoverX .popover-content .date-range {
   background-color: #EFEFEF;
   border-radius: 6px;
+  width: 220px;
+  padding: 0px 6px 12px;
 }
 #workPeriodPopoverX .popover-content .unit-date-range {
   background-color: #AFAFAF;
   border-radius: 6px;
-}
-.popover-xlg {
-    min-width: 700px;
 }
 .btn.workPeriod-gauge {
   padding: 0;
