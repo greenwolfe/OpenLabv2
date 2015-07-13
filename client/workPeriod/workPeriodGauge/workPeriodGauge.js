@@ -2,6 +2,8 @@
  /**** WORK PERIOD GAUGE *******/
 /******************************/
 
+//change messages:  orange = overdue, blue = completed
+//late has separate indicator
 Template.workPeriodGauge.onRendered(function() {
   var workPeriodGauge = this.find('.workPeriodGauge');
   //need a valid workperiod so that the gauge is initiall rendered

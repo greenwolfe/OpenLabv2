@@ -15,7 +15,7 @@ each day in the calendar ... show status as of that particular*/
 /** positioning code from popover-x 
         https://github.com/kartik-v/bootstrap-popover-x/blob/master/js/bootstrap-popover-x.js 
         starting at line 54 **/
- $.fn.positionOn = function(element, placement) {
+$.fn.positionOn = function(element, placement) {
   return this.each(function() {
     var target   = $(this);
     var targetWidth = target[0].offsetWidth
@@ -36,6 +36,7 @@ each day in the calendar ... show status as of that particular*/
           placement = 'right right-bottom'
         } else {
           return {
+            position: 'absolute',
             top: y, 
             left: elementPos.left + elementWidth
           }; 
@@ -44,12 +45,14 @@ each day in the calendar ... show status as of that particular*/
       },
       'right right-top': function() {
         return {
+          position: 'absolute',
           top: elementPos.top - 0.1*targetHeight + 0.5*elementHeight, 
           left: elementPos.left + elementWidth
         };       
       },
       'right right-bottom': function() {
         return {
+          position: 'absolute',
           top: elementPos.top - 0.9*targetHeight + 0.5*elementHeight, 
           left: elementPos.left + elementWidth
         };
@@ -63,6 +66,7 @@ each day in the calendar ... show status as of that particular*/
           placement = 'left left-bottom'
         } else {
           return {
+            position: 'absolute',
             top: y, 
             left: elementPos.left  - targetWidth
           }; 
@@ -71,12 +75,14 @@ each day in the calendar ... show status as of that particular*/
       },
       'left left-top': function() {
         return {
+          position: 'absolute',
           top: elementPos.top - 0.1*targetHeight + 0.5*elementHeight, 
           left: elementPos.left  - targetWidth
         };       
       },
       'left left-bottom': function() {
         return {
+          position: 'absolute',
           top: elementPos.top - 0.9*targetHeight + 0.5*elementHeight, 
           left: elementPos.left  - targetWidth
         };
@@ -90,6 +96,7 @@ each day in the calendar ... show status as of that particular*/
           placement = 'top top-right'
         } else {
           return {
+            position: 'absolute',
             top: elementPos.top - targetHeight, 
             left: x
           }; 
@@ -98,12 +105,14 @@ each day in the calendar ... show status as of that particular*/
       },
       'top top-right': function() {
         return {
+          position: 'absolute',
           top: elementPos.top - targetHeight, 
           left: elementPos.left - 0.9*targetWidth + 0.5*elementWidth,
         };       
       },
       'top top-left': function() {
         return {
+          position: 'absolute',
           top: elementPos.top - targetHeight, 
           left: elementPos.left - 0.1*targetWidth + 0.5*elementWidth,
         };
@@ -117,6 +126,7 @@ each day in the calendar ... show status as of that particular*/
           placement = 'bottom bottom-right'
         } else {
           return {
+            position: 'absolute',
             top: elementPos.top + elementHeight, 
             left: x
           }; 
@@ -125,24 +135,24 @@ each day in the calendar ... show status as of that particular*/
       },
       'bottom bottom-right': function() {
         return {
+          position: 'absolute',
           top: elementPos.top + elementHeight, 
           left: elementPos.left - 0.9*targetWidth + 0.5*elementWidth,
         };       
       },
       'bottom bottom-left': function() {
         return {
+          position: 'absolute',
           top: elementPos.top + elementHeight, 
           left: elementPos.left - 0.1*targetWidth + 0.5*elementWidth,
         };
       }       
     }
 
-    var css = moveTarget[placement]();
-    css.position = 'absolute';
-    target.css(css);
+    target.css(moveTarget[placement]());
     target.alterClass('right* left* top* bottom*',placement);
   });
-}; 
+};
 
 /**
  * https://gist.github.com/peteboere/1517285
@@ -168,7 +178,7 @@ $.fn.alterClass = function ( removals, additions ) {
  
   var patt = new RegExp( '\\s' + 
       removals.
-        replace( /\*/g, '[A-Za-z0-9-_]+' ). //remove extra space after *
+        replace( /\*/g, '[A-Za-z0-9-_]+' ).
         split( ' ' ).
         join( '\\s|\\s' ) + 
       '\\s', 'g' );
@@ -205,7 +215,7 @@ Template.workPeriodPopoverX.events({
     workPeriodPopover.positionOn(workPeriodGauge,'right');
     $('body').css({overflow:'auto'}); //default modal behavior restricts scrolling
   }
-}); 
+});
 
 var dateTimeFormat = "ddd, MMM D YYYY [at] h:mm a";
 var dateFormat = "ddd, MMM D YYYY"
@@ -215,15 +225,13 @@ Template.workPeriodPopoverX.onRendered(function() {
     showClose:  true,
     showClear: true,
     keepOpen: false,
-    format: dateTimeFormat,
-    widgetPositioning: {vertical:'bottom',horizontal:'auto'}
+    format: dateTimeFormat
   });
   this.$('#endDatePicker').datetimepicker({
     showClose: true,
     showClear: true,
     keepOpen: false,
-    format: dateTimeFormat,  //bug in widgetPositioning: {vertial:'top'} so overriding default 'auto' and setting to 'bottom', which also means the picker does not cover the graphic
-    widgetPositioning: {vertical:'bottom',horizontal:'auto'}
+    format: dateTimeFormat
   });
 
   tmpl = this;
@@ -259,13 +267,6 @@ Template.workPeriodPopoverX.helpers({
       unitStartDate: longLongAgo,
       unitEndDate: moment(longLongAgo).add(1,'days').toDate()
     }
-  },
-  sectionName: function() {
-    if (openlabSession.get('editingMainPage')) {
-      var selectedSection = Meteor.selectedSection();
-      return (selectedSection) ? selectedSection.name : 'all sections';
-    }
-    return '&nbsp;'
   },
   formatDate: function(date) {
     return (Match.test(date,Date)) ? moment(date).format(dateFormat) : '_____';

@@ -17,7 +17,7 @@ var deleteFile = function(event,template) {
 
 Template.block.helpers({
   blockType: function() {
-    return Template[this.type + 'Block'];
+    return this.type + 'Block';
   },
   fileCount: function() {
     var selector = {blockID:this._id};

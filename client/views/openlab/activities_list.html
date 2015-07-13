@@ -92,6 +92,7 @@
 
 <template name = 'activityItem'>
     <p class="aItem">
+      {{> workPeriodButton workPeriod}}
       {{#if editingMainPage}}
         <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder or move to another model (in side-by-side view).">
         </a>
@@ -102,10 +103,9 @@
         <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> 
         {{{title}}} 
-          <i class="progressstripe {{expected}}">&nbsp;</i>
-          <i class="progressstripe {{completed}}">&nbsp;</i>
-        </a>
-        {{> workPeriodButton workPeriod}}        
+          <!--<i class="progressstripe {{expected}}">&nbsp;</i>
+          <i class="progressstripe {{completed}}">&nbsp;</i>-->
+        </a>        
       {{/if}}
     </p>
 </template>
