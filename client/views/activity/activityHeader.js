@@ -1,15 +1,21 @@
 Template.activityHeader.helpers({
   siteTitle: function() {
-      return Site.findOne().title;
+    return Site.findOne().title;
   },
   pageTitle: function() {
+    var activity = Activities.findOne(FlowRouter.getParam('_id'));
+    if (!activity) { //validate accounts needs its own header
+      if (FlowRouter.getRouteName() == 'validateAccounts')
+        return 'Validate Accounts';
+      return '';
+    }
     var subactivitiesBlock = Blocks.findOne({
-      activityID: this._id,
+      activityID: activity._id,
       type: 'subactivities'
     });
     if (!subactivitiesBlock )
-      return this.title;
-    var title = _.stripTags(subactivitiesBlock.title) || this.title;
+      return activity.title;
+    var title = _.stripTags(subactivitiesBlock.title) || activity.title;
     return title;
   }
 });

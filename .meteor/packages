@@ -6,8 +6,6 @@
 meteor-platform
 underscore
 wizonesolutions:underscore-string
-iron:router
-sacha:spin
 accounts-password
 alanning:roles
 linto:fontawesome
@@ -27,3 +25,7 @@ reactive-dict
 tsega:bootstrap3-datetimepicker
 clubfest:raphael
 reactive-var
+meteorhacks:flow-router
+meteorhacks:flow-layout
+meteorhacks:fast-render
+arillo:flow-router-helpers

@@ -1,8 +1,8 @@
 <template name = "layout">
   <div class = "container-fluid">
-    {{> yield region='header'}}
+    {{> Template.dynamic template=header}}
     <div id="main" class="row-fluid">
-        {{> yield}}
+        {{> Template.dynamic template=main}}
     </div>
   </div>
 </template>
