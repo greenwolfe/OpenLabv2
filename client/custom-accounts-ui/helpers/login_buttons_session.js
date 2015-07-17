@@ -138,6 +138,13 @@ Meteor.selectedSection = function() {
     return Meteor.currentSection(); //could be undefined if no one is logged in or logged or impersonated user has no curren section
   return section;
 }
+Meteor.selectedSectionId = function() {
+  var viewAs = loginButtonsSession.get('viewAs');
+  var section = Sections.findOne(viewAs);
+  if (!section) //viewAs is null or is a userId
+    return Meteor.currentSectionId(); //could be undefined if no one is logged in or logged or impersonated user has no curren section
+  return section._id;  
+}
 Template.registerHelper('selectedSection',function() {
   return Meteor.selectedSection();
 });

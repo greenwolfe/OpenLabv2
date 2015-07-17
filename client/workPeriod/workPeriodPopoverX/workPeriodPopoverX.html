@@ -18,7 +18,7 @@
         </div>
         <div class="row">
           <div class='col-sm-12'>
-            <p class="unit-date-range text-center">This unit from <br/> {{formatDate workPeriod.unitStartDate}} <br/> to <br/>{{formatDate workPeriod.unitEndDate}} </p>
+            <p class="unit-date-range text-center">This unit from <br/> {{formatDate unitStartDate}} <br/> to <br/>{{formatDate unitEndDate}} </p>
           </div>
         </div>
         <div class="row">
@@ -37,6 +37,13 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="popover-footer">
+        Save for: 
+        {{#if selectedSection}}
+          <button type="submit" id="saveForSection" class="btn btn-sm btn-primary">{{{sectionName}}}</button>
+        {{/if}}
+        <button type="submit" id="saveForAllSections" class="btn btn-sm btn-primary">all sections</button>
     </div>
   </div>
 </template>

@@ -54,6 +54,8 @@ Meteor.methods({
       status = {
         studentID:studentID,
         activityID:activityID,
+        unitID: activity.unitID,
+        pointsTo: activity.pointsTo,
         level: statuses[1], //First increment sets it to level 1 
         incrementedBy: cU._id,
         incrementedAt: rightNow,

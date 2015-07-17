@@ -92,13 +92,13 @@
 
 <template name = 'activityItem'>
     <p class="aItem">
-      {{> workPeriodButton workPeriod}}
       {{#if editingMainPage}}
         <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder or move to another model (in side-by-side view).">
         </a>
         {{>showHide collection='Activities' itemName='activity' item=this}}
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
+        {{> workPeriodButton workPeriod}}
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> 
@@ -112,7 +112,7 @@
 
 <template name='newActivity'>
   <p class='newItem'>
-    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new activity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
+    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new activity.  Type title here. Click outside blue box to save.' clearOnSave=true fixedFields=fixedFields}}
   </p>
 </template>
 
