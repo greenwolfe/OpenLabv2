@@ -293,8 +293,6 @@ Template.activityItem.helpers({
       activityID: this._id,
       sectionID: Meteor.selectedSectionId()
     });
-    console.log('activityItem helper');
-    console.log(workPeriod);
     if (workPeriod) 
       return workPeriod;
     return {
