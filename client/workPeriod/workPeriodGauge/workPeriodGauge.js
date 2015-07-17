@@ -10,8 +10,7 @@ Template.workPeriodGauge.onRendered(function() {
   //set unitEndDate to notSoLongAgo() (new Date(0) + 1 week) and the others to longLongAgo() (new Date(0)) which will be treated as null dates
   var wP = this.data.workPeriod;
   var r = this.data.radius || 20;
-  console.log('workPeriodGauge radius = ' + r);
-  console.log(wP);
+
   var gauge = Raphael(workPeriodGauge, 2*r, r); // width of gauge assumed to be r/3
   var path = "M " + r/6 + " " + r; // width/2 from left edge
   path += "A " + 5*r/6 + " " + 5*r/6 + " 0 1 1 " + 11*r/6 + " " +  r; //180 degree arc

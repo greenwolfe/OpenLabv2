@@ -10,6 +10,8 @@
 *      better detection of whether changes to this activity's workPeriod would change unit start and end dates
 *better handling of closing and signalling success from user viewpoint
 *      perhaps implement that notification area?
+*merge save for all and save for section handlers, getting
+*    designation from event.target.id
 */
 
 /** extended jquery to position the modal dialog box (target) 
@@ -215,34 +217,6 @@ Template.workPeriodPopoverX.onRendered(function() {
     format: dateTimeFormat,  //bug in widgetPositioning: {vertial:'top'} so overriding default 'auto' and setting to 'bottom', which also means the picker does not cover the graphic
     widgetPositioning: {vertical:'bottom',horizontal:'auto'}
   });
-
-  /*tmpl = this;
-  this.autorun(function(c) {
-    var wP = Session.get('workPeriod');
-    if ((wP) && Match.test(wP,Match.ObjectIncluding({
-        startDate: Date,
-        endDate: Date,
-        unitStartDate: Date,
-        unitEndDate: Date
-      }))) 
-    {
-
-      if (dateIsNull(wP.startDate)) {
-        tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
-      } else {
-        tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
-      }
-
-      if (dateIsNull(wP.endDate)) {
-        tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
-      } else {
-        tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
-      }
-    } else {
-      tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
-      tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
-    }
-  })*/
 })
 
   /****************/
@@ -253,8 +227,6 @@ Template.workPeriodPopoverX.onRendered(function() {
 Template.workPeriodPopoverX.events({
   'show.bs.modal #workPeriodPopoverX': function(event,tmpl) {
     //initialize date time pickers
-    console.log('show.bs.modal #workPeriodPopoverX');
-    console.log(Session.get('workPeriod'));
     var wP = Session.get('workPeriod') || 
       {
         startDate: longLongAgo(),
@@ -262,7 +234,6 @@ Template.workPeriodPopoverX.events({
         unitStartDate: longLongAgo(),
         unitEndDate: notSoLongAgo()
       };
-    console.log(wP);
     if (dateIsNull(wP.startDate)) {
       tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
     } else {
@@ -287,8 +258,6 @@ Template.workPeriodPopoverX.events({
     //reset session variable based on change
     var date = (event.date) ? event.date.toDate() : longLongAgo(); //the dateIsNull function treats longLongAgo as a null value
     var wP = Session.get('workPeriod');
-    console.log('dp.change #startDatePicker');
-    console.log(wP);
     if (dateIsNull(date)) {
       wP.startDate = longLongAgo();
       tmpl.$('#endDatePicker').data("DateTimePicker").minDate(false);
@@ -301,7 +270,6 @@ Template.workPeriodPopoverX.events({
         wP.unitStartDate = wP.startDate;
       }
     }
-    console.log(wP);
     Session.set('workPeriod',wP);
   },
   'dp.change #endDatePicker': function(event,tmpl) {
@@ -309,8 +277,6 @@ Template.workPeriodPopoverX.events({
     //reset session variable based on change
     var date = (event.date) ? event.date.toDate() : notSoLongAgo(); //dateIsNull treats notSoLongAgo as a null value
     var wP = Session.get('workPeriod');
-    console.log('dp.change #endDatePicker');
-    console.log(wP);
     if (dateIsNull(date)) {
       wP.endDate = notSoLongAgo(); 
       tmpl.$('#startDatePicker').data("DateTimePicker").maxDate(false);
@@ -323,20 +289,18 @@ Template.workPeriodPopoverX.events({
         wP.unitEndDate = wP.endDate;
       }
     }
-    console.log(wP);
     Session.set('workPeriod',wP);
   },
   'click #saveForSection': function(event,tmpl) {
-    console.log('click #saveForSection');
-    console.log(event);
     var wP = Session.get('workPeriod');
     //when both dates null, check if user intends to delete WorkPeriod
     if (dateIsNull(wP.startDate) && dateIsNull(wP.endDate)) {
       if (Match.test(wP,Match.ObjectIncluding({_id: Match.idString}))) {
-        var selectedSection = Meteor.selectedSection();
+        var selectedSection = Sections.findOne(wP.sectionID);
         var sectionName = (selectedSection) ? selectedSection.name : '____';
+        var sectionID = (selectedSection) ? selectedSection._id : '';
         if (confirm('Do you want to delete this work period for ' + sectionName + ' ?'))
-          return Meteor.call('deleteWorkPeriod',wP._id,alertOnError);
+          return Meteor.call('deleteWorkPeriod',wP,alertOnError);
       }
     } else {
       //send info message ... only one of the dates is null
@@ -348,16 +312,13 @@ Template.workPeriodPopoverX.events({
     Meteor.call('setWorkPeriod',wP,alertOnError);
   },
   'click #saveForAllSections': function(event,tmpl) {
-    console.log('click #saveForAllSections');
-    console.log(event);
     var wP = Session.get('workPeriod');
     //when both dates null, check if user intends to delete WorkPeriod
     if (dateIsNull(wP.startDate) && dateIsNull(wP.endDate)) {
       if (Match.test(wP,Match.ObjectIncluding({_id: Match.idString}))) {
-        var selectedSection = Meteor.selectedSection();
-        var sectionName = (selectedSection) ? selectedSection.name : '____';
-        if (confirm('Do you want to delete this work period for ' + sectionName + ' ?'))
-          return Meteor.call('deleteWorkPeriod',wP._id,alertOnError);
+        if (confirm('Do you want to delete this work period for all sections?'))
+          wP.sectionID = 'applyToAll';
+          return Meteor.call('deleteWorkPeriod',wP,alertOnError);
       }
     } else {
       //send info message ... only one of the dates is null
@@ -400,8 +361,6 @@ Template.workPeriodPopoverX.helpers({
   },
   unitEndDate: function() {
     var wP = Session.get('workPeriod') || {};
-    console.log('workPeriodPopoverX unitEndDate helper');
-    console.log(wP);
     return (('unitEndDate' in wP) && !dateIsNull(wP.unitEndDate)) ? wP.unitEndDate : '';
   },  
   sectionName: function() {

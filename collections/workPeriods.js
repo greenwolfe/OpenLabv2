@@ -44,7 +44,7 @@ Meteor.methods({
     workPeriod.unitStartDate = workPeriod.startDate; //valid initial values, to be checked and modified later in collection hook
     workPeriod.unitEndDate = workPeriod.endDate;
 
-    var selector =  (sectionID = 'applyToAll') ? {} : {sectionID:workPeriod.sectionID};
+    var selector =  (workPeriod.sectionID == 'applyToAll') ? {} : {_id:workPeriod.sectionID};
     Sections.find(selector).forEach(function(section) {
       var wP = WorkPeriods.findOne({sectionID:section._id,activityID:workPeriod.activityID});
       if (wP) {
@@ -58,8 +58,12 @@ Meteor.methods({
       }
     });
   },
-  'deleteWorkPeriod': function(workPeriodID) {
-    check(workPeriodID,Match.idString);
+  'deleteWorkPeriod': function(workPeriod) {
+    check(workPeriod,Match.ObjectIncluding({
+      sectionID: Match.OneOf(Match.idString,'applyToAll'), 
+      _id: Match.idString,
+      activityID: Match.idString
+    }));
 
     var cU = Meteor.user();
     if (!cU)
@@ -67,11 +71,17 @@ Meteor.methods({
     if (!Roles.userIsInRole(cU,'teacher'))
       throw new Meteor.Error('notTeacher','Only a teacher can set or change a work period.');
 
-    workPeriod = WorkPeriods.findOne(workPeriodID);
-    if (!workPeriod)
+    wP = WorkPeriods.findOne(workPeriod._id);
+    if (!wP)
       throw new Meteor.Error('workPeriod-not-found',"Cannot delete work period with id = , " + workPeriodID + " work period not found.")
 
-    return WorkPeriods.remove(workPeriodID);
+    var selector =  (workPeriod.sectionID == 'applyToAll') ? {} : {_id:workPeriod.sectionID};
+    Sections.find(selector).forEach(function(section) {
+      var wP = WorkPeriods.findOne({sectionID:section._id,activityID:workPeriod.activityID});
+      if (wP) {
+        WorkPeriods.remove(wP._id);
+      }
+    });
   }
 })
 
