@@ -48,16 +48,5 @@ Meteor.methods({
     //after deleting, move any files below this one up
     Files.update({_id: {$in: ids}}, {$inc: {order:-1}}, {multi: true});
     return _id;
-  },
-  denormalizeFile: function(fileID) {
-    check(fileID,Match.idString);
-    file = Files.findOne(fileID);
-    if (!file)
-      throw new Meteor.Error('file-not-found',"Cannot denormalize file, file not found.")
-    var block = Blocks.findOne(file.blockID);
-    Files.update(file._id,{$set:{columnID:block.columnID}});
-    Files.update(file._id,{$set:{wallID:block.wallID}});
-    Files.update(file._id,{$set:{activityID:block.activityID}});
-    return fileID;
   }
 })

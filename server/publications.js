@@ -38,8 +38,47 @@ Meteor.publish('blocks',function() {  //change to user or section ID in order to
   return Blocks.find();
 });
 
-Meteor.publish('activityStatuses',function(userID) { 
-  check(userID,String) //not checking for Match.idString because null string passed if not logged in
-  return ActivityStatuses.find({studentID:userID});
+Meteor.publish('activityStatuses',function(studentID,unitID) { 
+  check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  studentID = studentID || this.userId;  
+  var selector = {}
+  if (Roles.userIsInRole(studentID,'student'))
+    selector.studentID = studentID;
+
+  check(unitID,Match.Optional(Match.OneOf(Match.idString,null)));
+  if (unitID)
+    selector.unitID = unitID;
+
+  return ActivityStatuses.find(selector);
+});
+
+Meteor.publish('subActivityStatuses',function(studentID,pointsTo){
+  check(studentID,Match.Optional(Match.idString)); 
+  studentID = studentID || this.userId;  //setting default here because flow router cannot pass in user id
+  var selector = {}
+  if (Roles.userIsInRole(studentID,'student'))
+    selector.studentID = studentID;
+
+  check(pointsTo,Match.Optional(Match.idString));
+  if (pointsTo)
+    selector.pointsTo = pointsTo;
+
+  return ActivityStatuses.find(selector);  
+})
+
+//passing in sectionID and unitID allows initial loading of just enough data to render the visible unit
+//passing in just sectionID allows loading workperiods for other units in the background after the first data comes through
+//passing in neither allows loading all workperiods for teacher
+Meteor.publish('workPeriods',function(sectionID,unitID) { 
+  check(sectionID,Match.Optional(Match.OneOf(Match.idString,'',null)));
+  var selector = {};
+  if (sectionID)
+    selector.sectionID = sectionID;
+
+  check(unitID,Match.Optional(Match.idString));
+  if (unitID)
+    selector.unitID = unitID;
+
+  return WorkPeriods.find(selector);
 });
 

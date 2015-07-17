@@ -1,20 +1,29 @@
   //add separately to popover
-/*
-in header B block, etc (just notification) ... unit and activity names 
-similar view for student, but no editing capability? 
+/*to do:
+*  have this info show up in the calendar?
+*  have it editable in the calendar?
+*  provide for overrides at the individual or group level (make this a separate collection?)
 
-PROBABLY NOT DO BELOW ... TOO COMPLICATED
-add a calendar section which can be toggled on and off showing the suggested work periods
-make it a mini activity-list complete with status indicators?
-that way when I give them more freedom, they can see their progress
-each day in the calendar ... show status as of that particular*/
+*save teachers last viewed section, if not present, selecte a random section
+*mockup display not accurate/helpful ...
+*      if no workPeriod, grab unitStart and EndDates from another activity if present
+*      better detection of whether changes to this activity's workPeriod would change unit start and end dates
+*better handling of closing and signalling success from user viewpoint
+*      perhaps implement that notification area?
+*/
 
-/** extend jquery to position the modal dialog box (target) 
-    near the triggering element (element) **/
+/** extended jquery to position the modal dialog box (target) 
+    near the triggering element (element) using: **/
 /** http://snippets.aktagon.com/snippets/310-positioning-an-element-over-another-element-with-jquery **/
 /** positioning code from popover-x 
         https://github.com/kartik-v/bootstrap-popover-x/blob/master/js/bootstrap-popover-x.js 
         starting at line 54 **/
+
+  /*******************/
+ /**** utilities ****/
+/*******************/
+/* should be put in bootstrapPopoverX replacing old .js file? */
+
  $.fn.positionOn = function(element, placement) {
   return this.each(function() {
     var target   = $(this);
@@ -184,28 +193,9 @@ $.fn.alterClass = function ( removals, additions ) {
   return !additions ? self : self.addClass( additions );
 };
 
-Template.workPeriodPopoverX.events({
-  'dp.change #startDatePicker': function(event,tmpl) {
-    var date = event.date.toDate();
-    tmpl.$('#endDatePicker').data("DateTimePicker").minDate(date);
-    var wP = Session.get('workPeriod');
-    wP.startDate = date;
-    Session.set('workPeriod',wP);
-  },
-  'dp.change #endDatePicker': function(event,tmpl) {
-    var date = event.date.toDate();
-    tmpl.$('#startDatePicker').data("DateTimePicker").maxDate(date);
-    var wP = Session.get('workPeriod');
-    wP.endDate = date;
-    Session.set('workPeriod',wP);
-  },
-  'shown.bs.modal #workPeriodPopoverX': function(event,tmpl) {
-    var workPeriodGauge = $(event.relatedTarget);
-    var workPeriodPopover = tmpl.$('#workPeriodPopoverX');
-    workPeriodPopover.positionOn(workPeriodGauge,'right');
-    $('body').css({overflow:'auto'}); //default modal behavior restricts scrolling
-  }
-}); 
+  /********************/
+ /**** onRendered ****/
+/********************/
 
 var dateTimeFormat = "ddd, MMM D YYYY [at] h:mm a";
 var dateFormat = "ddd, MMM D YYYY"
@@ -226,54 +216,208 @@ Template.workPeriodPopoverX.onRendered(function() {
     widgetPositioning: {vertical:'bottom',horizontal:'auto'}
   });
 
-  tmpl = this;
+  /*tmpl = this;
   this.autorun(function(c) {
     var wP = Session.get('workPeriod');
-    if (Match.test(wP,Match.ObjectIncluding({
-        startDate: Date,
-        endDate: Date,
-        unitStartDate: Date,
-        unitEndDate: Date
-      }))) {
-      tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
-      tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
-    }  
-  })
-})
-//all working here, but no provision for sending initial values
-//to datetimepicker inputs
-Template.workPeriodPopoverX.helpers({
-  workPeriod: function() {
-    var wP = Session.get('workPeriod');
-    if (Match.test(wP,Match.ObjectIncluding({
+    if ((wP) && Match.test(wP,Match.ObjectIncluding({
         startDate: Date,
         endDate: Date,
         unitStartDate: Date,
         unitEndDate: Date
       }))) 
-        return wP;
-    longLongAgo = new Date(0);
-    return {
-      startDate: longLongAgo,
-      endDate: longLongAgo,
-      unitStartDate: longLongAgo,
-      unitEndDate: moment(longLongAgo).add(1,'days').toDate()
+    {
+
+      if (dateIsNull(wP.startDate)) {
+        tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
+      } else {
+        tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
+      }
+
+      if (dateIsNull(wP.endDate)) {
+        tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
+      } else {
+        tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
+      }
+    } else {
+      tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
+      tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
+    }
+  })*/
+})
+
+  /****************/
+ /**** events ****/
+/****************/
+
+//make save and apply to all buttons in the footer
+Template.workPeriodPopoverX.events({
+  'show.bs.modal #workPeriodPopoverX': function(event,tmpl) {
+    //initialize date time pickers
+    console.log('show.bs.modal #workPeriodPopoverX');
+    console.log(Session.get('workPeriod'));
+    var wP = Session.get('workPeriod') || 
+      {
+        startDate: longLongAgo(),
+        endDate: longLongAgo(),
+        unitStartDate: longLongAgo(),
+        unitEndDate: notSoLongAgo()
+      };
+    console.log(wP);
+    if (dateIsNull(wP.startDate)) {
+      tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
+    } else {
+      tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
+    }
+
+    if (dateIsNull(wP.endDate)) {
+      tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
+    } else {
+      tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
     }
   },
+  'shown.bs.modal #workPeriodPopoverX': function(event,tmpl) {
+    //position the modal as a popover and show the cartoon bubble arrow
+    var workPeriodGauge = $(event.relatedTarget);
+    var workPeriodPopover = tmpl.$('#workPeriodPopoverX');
+    workPeriodPopover.positionOn(workPeriodGauge,'right');
+    $('body').css({overflow:'auto'}); //default modal behavior restricts scrolling
+  },
+  'dp.change #startDatePicker': function(event,tmpl) {
+    //link the pickers to ensure startDate < endDate
+    //reset session variable based on change
+    var date = (event.date) ? event.date.toDate() : longLongAgo(); //the dateIsNull function treats longLongAgo as a null value
+    var wP = Session.get('workPeriod');
+    console.log('dp.change #startDatePicker');
+    console.log(wP);
+    if (dateIsNull(date)) {
+      wP.startDate = longLongAgo();
+      tmpl.$('#endDatePicker').data("DateTimePicker").minDate(false);
+    } else {
+      tmpl.$('#endDatePicker').data("DateTimePicker").minDate(date);
+      wP.startDate = date;
+      if ('unitStartDate' in wP) {
+        wP.unitStartDate = (wP.startDate < wP.unitStartDate) ? wP.startDate : wP.unitStartDate;
+      } else {
+        wP.unitStartDate = wP.startDate;
+      }
+    }
+    console.log(wP);
+    Session.set('workPeriod',wP);
+  },
+  'dp.change #endDatePicker': function(event,tmpl) {
+     //link the pickers to ensure startDate < endDate
+    //reset session variable based on change
+    var date = (event.date) ? event.date.toDate() : notSoLongAgo(); //dateIsNull treats notSoLongAgo as a null value
+    var wP = Session.get('workPeriod');
+    console.log('dp.change #endDatePicker');
+    console.log(wP);
+    if (dateIsNull(date)) {
+      wP.endDate = notSoLongAgo(); 
+      tmpl.$('#startDatePicker').data("DateTimePicker").maxDate(false);
+    } else {
+      tmpl.$('#startDatePicker').data("DateTimePicker").maxDate(date);
+      wP.endDate = date;
+      if ('unitEndDate' in wP) {
+        wP.unitEndDate = (wP.endDate > wP.unitEndDate) ? wP.endDate : wP.unitEndDate;
+      } else {
+        wP.unitEndDate = wP.endDate;
+      }
+    }
+    console.log(wP);
+    Session.set('workPeriod',wP);
+  },
+  'click #saveForSection': function(event,tmpl) {
+    console.log('click #saveForSection');
+    console.log(event);
+    var wP = Session.get('workPeriod');
+    //when both dates null, check if user intends to delete WorkPeriod
+    if (dateIsNull(wP.startDate) && dateIsNull(wP.endDate)) {
+      if (Match.test(wP,Match.ObjectIncluding({_id: Match.idString}))) {
+        var selectedSection = Meteor.selectedSection();
+        var sectionName = (selectedSection) ? selectedSection.name : '____';
+        if (confirm('Do you want to delete this work period for ' + sectionName + ' ?'))
+          return Meteor.call('deleteWorkPeriod',wP._id,alertOnError);
+      }
+    } else {
+      //send info message ... only one of the dates is null
+      if (dateIsNull(wP.startDate) || dateIsNull(wP.endDate)) {
+        return alert('You must select both start and end dates.');
+      }
+    }
+    wP.sectionID = Meteor.selectedSectionId();
+    Meteor.call('setWorkPeriod',wP,alertOnError);
+  },
+  'click #saveForAllSections': function(event,tmpl) {
+    console.log('click #saveForAllSections');
+    console.log(event);
+    var wP = Session.get('workPeriod');
+    //when both dates null, check if user intends to delete WorkPeriod
+    if (dateIsNull(wP.startDate) && dateIsNull(wP.endDate)) {
+      if (Match.test(wP,Match.ObjectIncluding({_id: Match.idString}))) {
+        var selectedSection = Meteor.selectedSection();
+        var sectionName = (selectedSection) ? selectedSection.name : '____';
+        if (confirm('Do you want to delete this work period for ' + sectionName + ' ?'))
+          return Meteor.call('deleteWorkPeriod',wP._id,alertOnError);
+      }
+    } else {
+      //send info message ... only one of the dates is null
+      if (dateIsNull(wP.startDate) || dateIsNull(wP.endDate)) {
+        return alert('You must select both start and end dates.');
+      }
+    }
+    wP.sectionID = 'applyToAll';
+    Meteor.call('setWorkPeriod',wP,alertOnError);
+  },
+  'hide.bs.modal #workPeriodPopoverX': function(event,tmpl) {
+    Session.set('workPeriod',{
+      startDate: longLongAgo(),
+      endDate: longLongAgo(),
+      unitStartDate: longLongAgo(),
+      unitEndDate: notSoLongAgo()
+    });
+    tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
+    tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
+  }
+}); 
+
+  /*****************/
+ /**** helpers ****/
+/*****************/
+
+Template.workPeriodPopoverX.helpers({
+  workPeriod: function() {
+    return Session.get('workPeriod') || 
+      {
+        startDate: longLongAgo(),
+        endDate: longLongAgo(),
+        unitStartDate: longLongAgo(),
+        unitEndDate: notSoLongAgo()
+      };
+  },
+  unitStartDate: function() {
+    var wP = Session.get('workPeriod') || {};
+    return (('unitStartDate' in wP) && !dateIsNull(wP.unitStartDate)) ? wP.unitStartDate : '';
+  },
+  unitEndDate: function() {
+    var wP = Session.get('workPeriod') || {};
+    console.log('workPeriodPopoverX unitEndDate helper');
+    console.log(wP);
+    return (('unitEndDate' in wP) && !dateIsNull(wP.unitEndDate)) ? wP.unitEndDate : '';
+  },  
   sectionName: function() {
-    if (openlabSession.get('editingMainPage')) {
+    if (Roles.userIsInRole(Meteor.userId(),'teacher')) {
       var selectedSection = Meteor.selectedSection();
-      return (selectedSection) ? selectedSection.name : 'all sections';
+      return (selectedSection) ? selectedSection.name : '&nbsp;';
     }
     return '&nbsp;'
   },
   formatDate: function(date) {
-    return (Match.test(date,Date)) ? moment(date).format(dateFormat) : '_____';
+    return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
   },
   formatDateTime: function(date) {
-    return (Match.test(date,Date)) ? moment(date).format(dateTimeFormat) : '_____';
+    return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateTimeFormat) : '_____';
   },
   disabled: function() {
-    return (openlabSession.get('editingMainPage')) ? '' : 'disabled';
+    return (Roles.userIsInRole(Meteor.userId(),'teacher')) ? '' : 'disabled';
   }
 })

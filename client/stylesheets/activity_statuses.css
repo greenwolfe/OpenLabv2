@@ -7,7 +7,7 @@
   vertical-align: text-top;
   background-position: 0 0;
   background-repeat: no-repeat;
-  background-size: contain;  
+  background-size: contain; 
 }
 i.icon-notStarted {
   background-image: url('notStarted.png');
@@ -48,6 +48,9 @@ i.icon-late {
 
 #activityList a {
   padding-right: 1px;
+}
+#activityList i.activityStatus {
+  margin-left: 4px;
 }
 #activityList i.progressstripe {
   float: right;

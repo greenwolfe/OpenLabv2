@@ -120,6 +120,32 @@ Template.unitTitle.events({
  /** ACTIVITY LIST  *******/
 /*************************/
 
+Template.activityList.onCreated(function() {
+  instance = this;
+
+  instance.autorun(function() {
+    var userID = Meteor.impersonatedOrUserId();
+    if (!userID)
+      return;
+    var sectionID = Meteor.selectedSectionId();
+    var unitID = instance.data._id;
+    //first get the info that will be immediately shown
+    var activitiesThisUnit = Meteor.subscribe('activityStatuses',userID,unitID);
+    var workPeriodsThisUnit = Meteor.subscribe('workPeriods',sectionID,unitID);
+
+    if (activitiesThisUnit.ready()) { //then load the rest in the background
+      var activityStatuses = Meteor.subscribe('activityStatuses',userID); 
+      if (activityStatuses.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
+        Meteor.subscribe('activityStatuses');
+    }
+    if (workPeriodsThisUnit.ready()) {
+      var workPeriods = Meteor.subscribe('workPeriods',sectionID);
+      if (workPeriods.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
+        Meteor.subscribe('workPeriods');
+    }
+  })
+})
+
 Template.activityList.helpers({
   activities0: function() {
     var activeUnit2 = openlabSession.get('activeUnit2');
@@ -181,9 +207,6 @@ Template.activityList.helpers({
       selectValue: activeUnit2,
       disabled: !editingMainPage() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
-      //onAdd: function(evt) {
-      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
-      //}
     }    
   },
   sortableOpts: function() {
@@ -196,9 +219,6 @@ Template.activityList.helpers({
       selectValue: this._id,
       //disabled: !editingMainPage() //currently not working
       //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
-      //onAdd: function(evt) {
-      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
-      //}
     }
   },
   reassessments: function() {
@@ -259,7 +279,7 @@ Template.activityItem.helpers({
       return '';
     return (status.late) ? 'icon-late' : '';  
   },
-  expected: function() {
+  expected: function() { //compute based on workPeriod
     return 'expected';
   },
   completed: function() {
@@ -269,12 +289,22 @@ Template.activityItem.helpers({
     return _.str.include(status.level,'done') ? 'completed' : '';
   },
   workPeriod: function () {
+    var workPeriod =  WorkPeriods.findOne({
+      activityID: this._id,
+      sectionID: Meteor.selectedSectionId()
+    });
+    console.log('activityItem helper');
+    console.log(workPeriod);
+    if (workPeriod) 
+      return workPeriod;
     return {
-      unitStartDate: moment().subtract(2, 'weeks').toDate(),
-      unitEndDate: moment().add(2,'weeks').toDate(),
-      startDate: moment().add(2,'days').toDate(),
-      endDate: moment().add(6,'days').toDate()
-    };
+      activityID: this._id, //passed in for later use
+      sectionID: 'applyToAll', //default value
+      startDate: longLongAgo(),
+      endDate: longLongAgo(),
+      unitStartDate: longLongAgo(),
+      unitEndDate: notSoLongAgo()
+    }
   }
 })
 

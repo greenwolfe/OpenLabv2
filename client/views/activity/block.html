@@ -187,6 +187,9 @@
         {{>showHide collection='Activities' itemName='activity' item=this}}
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
       {{else}}
+        {{> workPeriodButton workPeriod}}
+        <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
+        <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="#">{{{title}}}</a>
       {{/if}}
     </p>

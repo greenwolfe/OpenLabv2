@@ -141,7 +141,7 @@ Template.fileBlock.helpers({
   },
   processUpload: function() { //passed to insertFile method to create object referring to file
     var blockID = this._id
-    var studentOrGroupID = theUserID;
+    var studentOrGroupID = Meteor.impersonatedOrUserId();
     var purpose = 'fileBlock';
     return {
       finished: function(index, file, tmpl) {
@@ -288,6 +288,18 @@ Template.teacherResponseLink.events({
  /**** SUBACTIVITIES BLOCK *****/
 /******************************/
 
+Template.subactivitiesBlock.onCreated(function() {
+  instance = this;
+
+  instance.autorun(function() {
+    var userID = Meteor.impersonatedOrUserId();
+    var activity = Activities.findOne(instance.data.activityID);
+
+    if (activity)
+      var thisUnitSubscription = Meteor.subscribe('subActivityStatuses',userID,activity.pointsTo);
+  })
+})
+
 Template.subactivitiesBlock.helpers({
   helpMessages: function () {
     return [
@@ -318,6 +330,56 @@ Template.subactivitiesBlock.helpers({
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
       //}
     }
+  }
+})
+
+  /**************************/
+ /*** SUBACTIVITY ITEM  ****/
+/**************************/
+
+/* currentStatus */
+var currentStatus = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+}
+
+Template.subactivityItem.helpers({
+  workPeriod: function () {
+    return {
+      unitStartDate: moment().subtract(2, 'weeks').toDate(),
+      unitEndDate: moment().add(2,'weeks').toDate(),
+      startDate: moment().add(2,'days').toDate(),
+      endDate: moment().add(6,'days').toDate()
+    };
+  },
+  status: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return 'icon-notStarted'
+    return 'icon-' + status.level;
+  },
+  late: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return '';
+    return (status.late) ? 'icon-late' : '';  
+  }
+});
+
+Template.subactivityItem.events({
+  'click .activityStatus': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  
+  },
+  'click .activityPunctual': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
   }
 })
 

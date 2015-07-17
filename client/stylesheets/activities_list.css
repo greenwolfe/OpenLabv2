@@ -58,6 +58,9 @@ li.unittitle.active2 > a {
   border: thin none;
   border-radius: 4px;
 }
+#activityList div.activityColumn {
+  min-height: 20px;
+}
 #activityList div.activityColumn.bgprimary{
   background-color: #337AB7
 }

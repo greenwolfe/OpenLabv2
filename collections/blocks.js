@@ -90,18 +90,21 @@ Meteor.methods({
     if (_.contains(keys,'type'))
       throw new Meteor.Error('blockTypeFixed',"Cannot change the type of a block.");
     return block._id; 
-  },
-  denormalizeBlock: function(blockID) {
-    check(blockID,Match.idString);
-    block = Blocks.findOne(blockID);
-    if (!block)
-      throw new Meteor.Error('block-not-found',"Cannot denormalize block, block not found.")
-    var column = Columns.findOne(block.columnID);
-    Blocks.update(block._id,{$set:{wallID:column.wallID}});
-    Blocks.update(block._id,{$set:{activityID:column.activityID}});
-    Files.find({blockID:block._id}).forEach(function(file) { 
-      Meteor.call('denormalizeFile',file._id);
+  }
+});
+
+/**** HOOKS *****/
+Blocks.after.update(function (userID, doc, fieldNames, modifier) {
+  if (doc.columnID !== this.previous.columnID) {
+    //denormalizing
+    ActivityStatuses.update({activityID:this.previous._id},{$set: {unitID:doc.unitID}}, {multi: true});
+    var column = Columns.findOne(doc.columnID);
+    Blocks.update(doc._id,{$set:{wallID:column.wallID}});
+    Blocks.update(doc._id,{$set:{activityID:column.activityID}});
+    Files.find({blockID:doc._id}).forEach(function(file) { 
+      Files.update(file._id,{$set:{columnID:column._id}});
+      Files.update(file._id,{$set:{wallID:column.wallID}});
+      Files.update(file._id,{$set:{activityID:column.activityID}});
     });  
-    return blockID;
   }
 });

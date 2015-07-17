@@ -22,6 +22,9 @@ Template.plaintexteditor.events({
     var text = _.trim(_.stripTags($element.text()));
 
     var id = tmpl.data._id || 'new';
+    if ((id == 'new') && (text == '')) 
+      return; //avioding text not changed error below, since there wasn't any text to begin with
+
     var method = _.rtrim(tmpl.data.collection,'s'); //if collection = Posts, method=Post
     method = method.replace(/ie$/,'y'); //if collection = Activities, method  = Activity
     var item = tmpl.data.fixedFields || {};
