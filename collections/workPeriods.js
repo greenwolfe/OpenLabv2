@@ -21,7 +21,9 @@ Meteor.methods({
       unitID: Match.Optional(Match.idString), //set from activity below, reset by update hook whenver activity itself changes
       activityVisible: Match.Optional(Boolean), //same here
       unitStartDate: Match.Optional(Date), // will be set or reset in collection hook
-      unitEndDate: Match.Optional(Date) //same here
+      unitEndDate: Match.Optional(Date), //same here
+      unitStartDateWithoutSelf: Match.Optional(Date), //same here
+      unitEndDateWithoutSelf: Match.Optional(Date) //same here
     });
 
     var cU = Meteor.user();
@@ -90,37 +92,70 @@ Meteor.methods({
  /****************/
 
 WorkPeriods.after.update(function (userID, doc, fieldNames, modifier) {
-  calcUnitPeriod(doc);
+  setUnitPeriod(doc);
 });
 
 WorkPeriods.after.insert(function(userID,doc) {
-  calcUnitPeriod(doc);
+  setUnitPeriod(doc);
 });
 
 WorkPeriods.after.remove(function(userID,doc) {
-  calcUnitPeriod(doc);
+  setUnitPeriod(doc);
 });
 
-var calcUnitPeriod = function(workPeriod) {
+var setUnitPeriod = function(workPeriod) {
   var selector = {
     sectionID:workPeriod.sectionID,
     unitID:workPeriod.unitID,
     activityVisible:true
   };
   var modifier = {};
-  var workPeriods = WorkPeriods.find(selector).fetch();
-
-  if (workPeriods.length == 0) //last activity in unit was hidden or deleted
+  var workPeriodsCursor = WorkPeriods.find(selector);
+  if (workPeriodsCursor.count() == 0) //last activity in unit was hidden or deleted
     return;
+  var workPeriods = workPeriodsCursor.fetch();
 
   var startDates = _.pluck(workPeriods,'startDate');
-  var endDates = _.pluck(workPeriods,'endDate');
   var unitStartDate = _.min(startDates);
+
+  var endDates = _.pluck(workPeriods,'endDate');
   var unitEndDate = _.max(endDates);
 
   var modifier = {
     unitStartDate:unitStartDate,
-    unitEndDate:unitEndDate
+    unitEndDate:unitEndDate,
   };
-  WorkPeriods.direct.update(selector,{$set:modifier},{multi: true});   
+
+  //for each work period, also find min of dates without self,
+  //to facilitate simulation of what happens when the date is edited before saving that change
+  workPeriodsCursor.forEach(function(wP) {
+    modifier.unitStartDateWithoutSelf = wayWayInTheFuture(); //default
+    //remove one occurance of wP.startDate (incidentally, the one removed is the first one, but that is inconsequential)
+    var selfStartDate = wP.startDate.getTime();
+    var startDatesWithoutSelf = _.filter(startDates,function(value) { 
+      if (!selfStartDate) //skip the rest and just keep the value if we've already found one occurance
+        return true;
+      if (value.getTime() == selfStartDate) {
+        selfStartDate = null; //stops further searching, can't find method to break filter loop
+        return false;
+      }
+      return true;
+    });
+    modifier.unitStartDateWithoutSelf = _.min(startDatesWithoutSelf);
+
+    modifier.unitEndDateWithoutSelf = notSoLongAgo(); //default
+    var selfEndDate = wP.endDate.getTime();
+    var endDatesWithoutSelf = _.filter(endDates,function(value) { 
+      if (!selfEndDate) //skip the rest and just keep the value if we've already found one occurance
+        return true;
+      if (value.getTime() == selfEndDate) {
+        selfEndDate = null;
+        return false;
+      }
+      return true;
+    });
+    modifier.unitEndDateWithoutSelf = _.max(endDatesWithoutSelf);
+
+    WorkPeriods.direct.update(wP._id,{$set:modifier});   
+  });
 }

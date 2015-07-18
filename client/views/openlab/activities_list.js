@@ -293,16 +293,18 @@ Template.activityItem.helpers({
       activityID: this._id,
       sectionID: Meteor.selectedSectionId()
     });
-    if (workPeriod) 
-      return workPeriod;
-    return {
+    return workPeriod || {
       activityID: this._id, //passed in for later use
+      unitID: this.unitID, //passed in for completeness, probably not used to display data
+      activityVisible: this.visible, //passed in for completeness, probably not used to display data
       sectionID: 'applyToAll', //default value
       startDate: longLongAgo(),
       endDate: longLongAgo(),
       unitStartDate: longLongAgo(),
-      unitEndDate: notSoLongAgo()
-    }
+      unitEndDate: notSoLongAgo(),
+      unitStartDateWithoutSelf: wayWayInTheFuture(),
+      unitEndDateWithoutSelf: notSoLongAgo()
+    };
   }
 })
 

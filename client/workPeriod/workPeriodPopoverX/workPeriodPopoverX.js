@@ -1,4 +1,19 @@
-  //add separately to popover
+/* to use, pass in an object with the following fields via Session.set('workPeriod')
+   a valid workPeriod set using the setWorkPeriod method will have these fields
+   values give are well-behaved defaults if there is no workPeriod for this activity and section yet
+      activityID: this._id,           //required:  valid activity _id
+      unitID: this.unitID,            //passed in for completeness, probably not used to display data
+      activityVisible: this.visible,  //passed in for completeness, probably not used to display data
+      sectionID: 'applyToAll',        //rest are well-behaved default values
+      startDate: longLongAgo(),       //new Date(0)
+      endDate: longLongAgo(),
+      unitStartDate: longLongAgo(),
+      unitEndDate: notSoLongAgo(),    //newDate(0) plus one week
+      unitStartDateWithoutSelf: wayWayInTheFuture(), //new Date(8630000000000000); //new Date(8640000000000000) =  Sat Sep 13 275760 01:00:00 GMT+0100 (BST) and is the maximum possible javascript Date
+      unitEndDateWithoutSelf: notSoLongAgo()
+*/
+
+
 /*to do:
 *  have this info show up in the calendar?
 *  have it editable in the calendar?
@@ -195,12 +210,31 @@ $.fn.alterClass = function ( removals, additions ) {
   return !additions ? self : self.addClass( additions );
 };
 
+  /*******************/
+ /**** onCreated ****/
+/*******************/
+
+Template.workPeriodPopoverX.onCreated(function() {
+  this.nullWorkPeriod = {
+    activityID: Random.id(17),
+    unitID: Random.id(17),
+    activityVisible: false,
+    startDate: longLongAgo(),
+    endDate: longLongAgo(),
+    unitStartDate: longLongAgo(),
+    unitEndDate: notSoLongAgo(),
+    unitStartDateWithoutSelf: wayWayInTheFuture(),
+    unitEndDateWithoutSelf: notSoLongAgo()
+  };
+});
+
+
   /********************/
  /**** onRendered ****/
 /********************/
 
 var dateTimeFormat = "ddd, MMM D YYYY [at] h:mm a";
-var dateFormat = "ddd, MMM D YYYY"
+var dateFormat = "ddd, MMM D YYYY";
 
 Template.workPeriodPopoverX.onRendered(function() {
   this.$('#startDatePicker').datetimepicker({
@@ -227,23 +261,22 @@ Template.workPeriodPopoverX.onRendered(function() {
 Template.workPeriodPopoverX.events({
   'show.bs.modal #workPeriodPopoverX': function(event,tmpl) {
     //initialize date time pickers
-    var wP = Session.get('workPeriod') || 
-      {
-        startDate: longLongAgo(),
-        endDate: longLongAgo(),
-        unitStartDate: longLongAgo(),
-        unitEndDate: notSoLongAgo()
-      };
+    var wP = Session.get('workPeriod') || tmpl.nullWorkPeriod;
+
     if (dateIsNull(wP.startDate)) {
-      tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
+      //tmpl.$('#startDatePicker').data('DateTimePicker').defaultDate(null);
+      tmpl.$('#startDatePicker').val('');
     } else {
-      tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
+      //tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
+      tmpl.$('#startDatePicker').val(moment(wP.startDate).format(dateTimeFormat));
     }
 
     if (dateIsNull(wP.endDate)) {
-      tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
+      //tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
+      tmpl.$('#endDatePicker').val('');
     } else {
-      tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
+      //tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
+      tmpl.$('#endDatePicker').val(moment(wP.endDate).format(dateTimeFormat));
     }
   },
   'shown.bs.modal #workPeriodPopoverX': function(event,tmpl) {
@@ -258,18 +291,16 @@ Template.workPeriodPopoverX.events({
     //reset session variable based on change
     var date = (event.date) ? event.date.toDate() : longLongAgo(); //the dateIsNull function treats longLongAgo as a null value
     var wP = Session.get('workPeriod');
+
     if (dateIsNull(date)) {
-      wP.startDate = longLongAgo();
       tmpl.$('#endDatePicker').data("DateTimePicker").minDate(false);
+      wP.startDate = longLongAgo();
     } else {
       tmpl.$('#endDatePicker').data("DateTimePicker").minDate(date);
       wP.startDate = date;
-      if ('unitStartDate' in wP) {
-        wP.unitStartDate = (wP.startDate < wP.unitStartDate) ? wP.startDate : wP.unitStartDate;
-      } else {
-        wP.unitStartDate = wP.startDate;
-      }
     }
+    wP.unitStartDate = _.min([wP.startDate,wP.unitStartDateWithoutSelf]);
+
     Session.set('workPeriod',wP);
   },
   'dp.change #endDatePicker': function(event,tmpl) {
@@ -277,18 +308,16 @@ Template.workPeriodPopoverX.events({
     //reset session variable based on change
     var date = (event.date) ? event.date.toDate() : notSoLongAgo(); //dateIsNull treats notSoLongAgo as a null value
     var wP = Session.get('workPeriod');
+
     if (dateIsNull(date)) {
-      wP.endDate = notSoLongAgo(); 
       tmpl.$('#startDatePicker').data("DateTimePicker").maxDate(false);
+      wP.endDate = notSoLongAgo(); 
     } else {
       tmpl.$('#startDatePicker').data("DateTimePicker").maxDate(date);
       wP.endDate = date;
-      if ('unitEndDate' in wP) {
-        wP.unitEndDate = (wP.endDate > wP.unitEndDate) ? wP.endDate : wP.unitEndDate;
-      } else {
-        wP.unitEndDate = wP.endDate;
-      }
     }
+    wP.unitEndDate = _.max([wP.endDate,wP.unitEndDateWithoutSelf]);
+
     Session.set('workPeriod',wP);
   },
   'click #saveForSection': function(event,tmpl) {
@@ -298,12 +327,14 @@ Template.workPeriodPopoverX.events({
       if (Match.test(wP,Match.ObjectIncluding({_id: Match.idString}))) {
         var selectedSection = Sections.findOne(wP.sectionID);
         var sectionName = (selectedSection) ? selectedSection.name : '____';
-        var sectionID = (selectedSection) ? selectedSection._id : '';
-        if (confirm('Do you want to delete this work period for ' + sectionName + ' ?'))
-          return Meteor.call('deleteWorkPeriod',wP,alertOnError);
+        if (confirm('Do you want to delete this work period for ' + sectionName + ' ?')) {
+          wP.sectionID = (selectedSection) ? selectedSection._id : '';
+          Meteor.call('deleteWorkPeriod',wP,alertOnError);
+        }
       }
+      return;
     } else {
-      //send info message ... only one of the dates is null
+      //send info message if only one of the dates is null
       if (dateIsNull(wP.startDate) || dateIsNull(wP.endDate)) {
         return alert('You must select both start and end dates.');
       }
@@ -318,8 +349,9 @@ Template.workPeriodPopoverX.events({
       if (Match.test(wP,Match.ObjectIncluding({_id: Match.idString}))) {
         if (confirm('Do you want to delete this work period for all sections?'))
           wP.sectionID = 'applyToAll';
-          return Meteor.call('deleteWorkPeriod',wP,alertOnError);
+          Meteor.call('deleteWorkPeriod',wP,alertOnError);
       }
+      return;
     } else {
       //send info message ... only one of the dates is null
       if (dateIsNull(wP.startDate) || dateIsNull(wP.endDate)) {
@@ -330,12 +362,7 @@ Template.workPeriodPopoverX.events({
     Meteor.call('setWorkPeriod',wP,alertOnError);
   },
   'hide.bs.modal #workPeriodPopoverX': function(event,tmpl) {
-    Session.set('workPeriod',{
-      startDate: longLongAgo(),
-      endDate: longLongAgo(),
-      unitStartDate: longLongAgo(),
-      unitEndDate: notSoLongAgo()
-    });
+    Session.set('workPeriod',tmpl.nullWorkPeriod);
     tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
     tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
   }
@@ -347,13 +374,8 @@ Template.workPeriodPopoverX.events({
 
 Template.workPeriodPopoverX.helpers({
   workPeriod: function() {
-    return Session.get('workPeriod') || 
-      {
-        startDate: longLongAgo(),
-        endDate: longLongAgo(),
-        unitStartDate: longLongAgo(),
-        unitEndDate: notSoLongAgo()
-      };
+    var tmpl = Template.instance();
+    return Session.get('workPeriod') || tmpl.nullWorkPeriod;
   },
   unitStartDate: function() {
     var wP = Session.get('workPeriod') || {};
