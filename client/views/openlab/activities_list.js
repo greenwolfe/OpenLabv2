@@ -55,17 +55,41 @@ Template.unitTitle.helpers({
     var activeUnit = Session.get('activeUnit');
     return (this._id == activeUnit) ? 'true' : '';
   },
-  percentCompleted: function() {
+  percentExpected: function() {
     var studentID = Meteor.impersonatedOrUserId();
-    //add part to selector to find only those whose deadline is past.
     var activityIDs = _.pluck(Activities.find(
       {
         unitID:this._id,
         visible:true
       },
       {fields:{_id:1}}).fetch(),'_id')
-    var expected = activityIDs.length;
-    if (expected == 0) return 0;
+    var total = activityIDs.length; 
+    if (total == 0) return 0;
+
+    var endDates = _.pluck(WorkPeriods.find(
+      {
+        unitID:this._id,
+        activityVisible:true,
+        sectionID: Meteor.selectedSectionId()
+      },
+      {fields:{endDate:1}}).fetch(),'endDate')
+    var today = new Date();
+    var expected = endDates.filter(function(date) {
+        return (today > date);
+      }).length
+    return 100*expected/total;
+  },
+  percentCompleted: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityIDs = _.pluck(Activities.find(
+      {
+        unitID:this._id,
+        visible:true
+      },
+      {fields:{_id:1}}).fetch(),'_id')
+    var total = activityIDs.length; 
+    if (total == 0) return 0;
+
     var statuses = ActivityStatuses.find(
       {
         activityID:{$in:activityIDs},
@@ -74,7 +98,7 @@ Template.unitTitle.helpers({
     var completed = statuses.filter(function(status) {
       return _.str.include(status.level,'done')
     }).length
-    return 100*completed/expected;
+    return 100*completed/total;
   }  
 });
 
@@ -279,7 +303,7 @@ Template.activityItem.helpers({
       return '';
     return (status.late) ? 'icon-late' : '';  
   },
-  expected: function() { //compute based on workPeriod
+/*  expected: function() { //compute based on workPeriod
     return 'expected';
   },
   completed: function() {
@@ -287,13 +311,35 @@ Template.activityItem.helpers({
     if (!status)
       return '';
     return _.str.include(status.level,'done') ? 'completed' : '';
-  },
+  },*/
   workPeriod: function () {
+    //find existing workPeriod
     var workPeriod =  WorkPeriods.findOne({
       activityID: this._id,
       sectionID: Meteor.selectedSectionId()
     });
-    return workPeriod || {
+    if (workPeriod) 
+      return workPeriod;
+
+    //else get unit dates off a workPeriod for another activity from the same unit and section
+    //unitDatesWithoutSelf are by definition the unitDates for the other workPeriod
+    workPeriod = WorkPeriods.findOne({
+      unitID: this.unitID,
+      sectionID: Meteor.selectedSectionId()
+    });
+    if (workPeriod) {
+      //keep existing unitID, sectionID, unitDates 
+      workPeriod.activityID = this._id;
+      workPeriod.activityVisible = this.visible;
+      workPeriod.startDate = longLongAgo();
+      workPeriod.endDate = longLongAgo();
+      workPeriod.unitStartDateWithoutSelf = workPeriod.unitStartDate;
+      workPeriod.unitEndDateWithoutSelf = workPeriod.unitEndDate;
+      return workPeriod;
+    }
+
+    //else make up a stub with all null values
+    workPeriod = {
       activityID: this._id, //passed in for later use
       unitID: this.unitID, //passed in for completeness, probably not used to display data
       activityVisible: this.visible, //passed in for completeness, probably not used to display data
@@ -305,6 +351,7 @@ Template.activityItem.helpers({
       unitStartDateWithoutSelf: wayWayInTheFuture(),
       unitEndDateWithoutSelf: notSoLongAgo()
     };
+    return workPeriod;
   }
 })
 
