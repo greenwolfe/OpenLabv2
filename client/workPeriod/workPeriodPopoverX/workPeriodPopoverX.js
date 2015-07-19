@@ -19,16 +19,26 @@
 *  have it editable in the calendar?
 *  provide for overrides at the individual or group level (make this a separate collection?)
 
+*  popover work flow maybe better with calendar icon and text input?
+*  switch values and keep popover open when click on new button
+*  not handled well when both dates are null and then you select one value ... 
+*        first, the other input is automatically filled in with the min or max allowed value, 
+*        but second it isn't registered and so when you press save, it says you haven't selected anything
+
 *save teachers last viewed section, if not present, selecte a random section
-*mockup display not accurate/helpful ...
-*      if no workPeriod, grab unitStart and EndDates from another activity if present
-*      better detection of whether changes to this activity's workPeriod would change unit start and end dates
-*better handling of closing and signalling success from user viewpoint
-*      perhaps implement that notification area?
+*improve stub simulation 
+*     have all icons register the provisional change?
+*     have it extend to more than a half-circle to show extended deadline?
+******better handling of closing and signalling success from user viewpoint
+********      perhaps implement that notification area?
 *merge save for all and save for section handlers, getting
 *    designation from event.target.id
 */
 
+
+  /*******************/
+ /**** utilities ****/
+/*******************/
 /** extended jquery to position the modal dialog box (target) 
     near the triggering element (element) using: **/
 /** http://snippets.aktagon.com/snippets/310-positioning-an-element-over-another-element-with-jquery **/
@@ -36,9 +46,6 @@
         https://github.com/kartik-v/bootstrap-popover-x/blob/master/js/bootstrap-popover-x.js 
         starting at line 54 **/
 
-  /*******************/
- /**** utilities ****/
-/*******************/
 /* should be put in bootstrapPopoverX replacing old .js file? */
 
  $.fn.positionOn = function(element, placement) {
@@ -263,6 +270,7 @@ Template.workPeriodPopoverX.events({
     //initialize date time pickers
     var wP = Session.get('workPeriod') || tmpl.nullWorkPeriod;
 
+    //which method is best?  set value or initialize datetimepicker?
     if (dateIsNull(wP.startDate)) {
       //tmpl.$('#startDatePicker').data('DateTimePicker').defaultDate(null);
       tmpl.$('#startDatePicker').val('');

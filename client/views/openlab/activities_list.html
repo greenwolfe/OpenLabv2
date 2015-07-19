@@ -1,8 +1,8 @@
 <template name = 'activitiesList'> 
   <div id="activitiesListTitle">
     <h4 >activities</h4>
-    <span class="progress-bar-warning"> expected progress </span>
-    <span class="progress-bar-info"> your progress </span>
+    <span class="progress-bar-warning"> should be completed </span>
+    <span class="progress-bar-info"> you have completed </span>
     <i class="fa fa-question-circle" title="Click title to select unit.  Ctrl-click another to view two units side-by-side."></i>
   </div>
   <ul id='units' class="nav nav-pills">
@@ -27,7 +27,7 @@
       </div>
     {{else}}
       <div class="progress">
-        <div class="progress-bar progress-bar-warning" style="width: 70%;" title="18/20"></div>
+        <div class="progress-bar progress-bar-warning" style="width: {{percentExpected}}%;" title="18/20"></div>
       </div>
       <div class="progress">
         <div class="progress-bar progress-bar-info" style="width: {{percentCompleted}}%;"></div>
