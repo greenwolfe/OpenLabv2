@@ -149,10 +149,10 @@ Template.summernote.onRendered(function() {
   var codeviewButton = element.next('.note-editor').find('button[data-name="codeview"]')
   if (codeview)
     codeview.blur(function(event) {
-      console.log('codeview blurred');
-      console.log(event);
-      console.log(element.code())
-      console.log(_.str.include(element.code(),'<script'))
+      //console.log('codeview blurred');
+      //console.log(event);
+      //console.log(element.code())
+      //console.log(_.str.include(element.code(),'<script'))
       if (_.str.include(element.code(),'<script')) {
         //console.log('resetting codeview html');
         //codeview.html('This embed code contains javascript and has been blocked because some embedded javascript makes the site hang up.  If you are trying to aggregate and poste rss, atom or twitter feeds, use the feed block.');
@@ -160,7 +160,7 @@ Template.summernote.onRendered(function() {
         element.code('This embed code contains javascript and has been blocked because some embedded javascript makes the site hang up.  If you are trying to aggregate and post rss, atom or twitter feeds, use the feed block.');
         //console.log(element.code())
         //saveText([{target:{id:'notAnElement'}}]);
-        console.log('dismissing code view');
+        //console.log('dismissing code view');
         if ($(codeview).is(':visible'))
           codeviewButton.click();       
       } 

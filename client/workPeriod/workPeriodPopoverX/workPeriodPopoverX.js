@@ -19,18 +19,20 @@
 *  have it editable in the calendar?
 *  provide for overrides at the individual or group level (make this a separate collection?)
 
-*  popover work flow maybe better with calendar icon and text input?
 *  switch values and keep popover open when click on new button
-*  not handled well when both dates are null and then you select one value ... 
-*        first, the other input is automatically filled in with the min or max allowed value, 
-*        but second it isn't registered and so when you press save, it says you haven't selected anything
+*      difficult to do, and double-click works
+*  popover does not dismiss on blur, which causes problems when switching to a new unit without first dismissing it
+*      the popover doesn't change content, but now points to a different activity
+*      currently handled by hiding the modal on the unit title click event
+*      would be better to handle it here
 
 *save teachers last viewed section, if not present, selecte a random section
+*    proved difficult to do unless a section is actually selected through viewAs on login
+*    but that may not be what is wanted in general ... difficult to do just for workPeriods
+*unrelated note: do same for parents selection of student
 *improve stub simulation 
 *     have all icons register the provisional change?
 *     have it extend to more than a half-circle to show extended deadline?
-******better handling of closing and signalling success from user viewpoint
-********      perhaps implement that notification area?
 *merge save for all and save for section handlers, getting
 *    designation from event.target.id
 */
@@ -233,6 +235,10 @@ Template.workPeriodPopoverX.onCreated(function() {
     unitStartDateWithoutSelf: wayWayInTheFuture(),
     unitEndDateWithoutSelf: notSoLongAgo()
   };
+
+  this.footerTemplate = new ReactiveVar('workPeriodSaveButtons');
+  this.alertMessage = new ReactiveVar(null);
+  this.alertType = new ReactiveVar('info');
 });
 
 
@@ -249,14 +255,28 @@ Template.workPeriodPopoverX.onRendered(function() {
     showClear: true,
     keepOpen: false,
     format: dateTimeFormat,
-    widgetPositioning: {vertical:'bottom',horizontal:'auto'}
+    widgetPositioning: {vertical:'bottom',horizontal:'auto'},
+    keyBinds: {enter: function(widget) {
+      if (widget.find('.datepicker').is(':visible')) {
+        this.hide();
+      } else {
+        this.date(widget.find('.datepicker').val());
+      }
+    }}
   });
   this.$('#endDatePicker').datetimepicker({
     showClose: true,
     showClear: true,
     keepOpen: false,
     format: dateTimeFormat,  //bug in widgetPositioning: {vertial:'top'} so overriding default 'auto' and setting to 'bottom', which also means the picker does not cover the graphic
-    widgetPositioning: {vertical:'bottom',horizontal:'auto'}
+    widgetPositioning: {vertical:'bottom',horizontal:'auto'},
+    keyBinds: {enter: function(widget) {
+      if (widget.find('.datepicker').is(':visible')) {
+        this.hide();
+      } else {
+        this.date(widget.find('.datepicker').val());
+      }
+    }}
   });
 })
 
@@ -270,21 +290,16 @@ Template.workPeriodPopoverX.events({
     //initialize date time pickers
     var wP = Session.get('workPeriod') || tmpl.nullWorkPeriod;
 
-    //which method is best?  set value or initialize datetimepicker?
     if (dateIsNull(wP.startDate)) {
-      //tmpl.$('#startDatePicker').data('DateTimePicker').defaultDate(null);
-      tmpl.$('#startDatePicker').val('');
+      tmpl.$('#startDatePicker').data('DateTimePicker').defaultDate(null);
     } else {
-      //tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
-      tmpl.$('#startDatePicker').val(moment(wP.startDate).format(dateTimeFormat));
+      tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);
     }
 
     if (dateIsNull(wP.endDate)) {
-      //tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
-      tmpl.$('#endDatePicker').val('');
+      tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
     } else {
-      //tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
-      tmpl.$('#endDatePicker').val(moment(wP.endDate).format(dateTimeFormat));
+      tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);
     }
   },
   'shown.bs.modal #workPeriodPopoverX': function(event,tmpl) {
@@ -293,7 +308,7 @@ Template.workPeriodPopoverX.events({
     var workPeriodPopover = tmpl.$('#workPeriodPopoverX');
     workPeriodPopover.positionOn(workPeriodGauge,'right');
     $('body').css({overflow:'auto'}); //default modal behavior restricts scrolling
-  },
+   },
   'dp.change #startDatePicker': function(event,tmpl) {
     //link the pickers to ensure startDate < endDate
     //reset session variable based on change
@@ -342,13 +357,20 @@ Template.workPeriodPopoverX.events({
       }
       return;
     } else {
-      //send info message if only one of the dates is null
+      //send warning message if only one of the dates is null
       if (dateIsNull(wP.startDate) || dateIsNull(wP.endDate)) {
-        return alert('You must select both start and end dates.');
+        tmpl.alertMessage.set("Enter valid dates with end date greater than start date, or clear <i>both dates</i> to delete this work period.");
+        tmpl.alertType.set('info');
+        return tmpl.footerTemplate.set('workPeriodAlert');
       }
     }
     wP.sectionID = Meteor.selectedSectionId();
-    Meteor.call('setWorkPeriod',wP,alertOnError);
+    Meteor.call('setWorkPeriod',wP,function(error,result) {
+      if (error) return alert(error.reason);
+      tmpl.alertMessage.set("Work Period Saved");
+      tmpl.alertType.set('success');
+      tmpl.footerTemplate.set('workPeriodAlertDismiss');
+    });
   },
   'click #saveForAllSections': function(event,tmpl) {
     var wP = Session.get('workPeriod');
@@ -361,16 +383,25 @@ Template.workPeriodPopoverX.events({
       }
       return;
     } else {
-      //send info message ... only one of the dates is null
+      //send warning message ... only one of the dates is null
       if (dateIsNull(wP.startDate) || dateIsNull(wP.endDate)) {
-        return alert('You must select both start and end dates.');
+        tmpl.alertMessage.set("Enter valid dates with end date greater than start date, or clear <i>both dates</i> to delete this work period.");        tmpl.alertType.set('info');
+        return tmpl.footerTemplate.set('workPeriodAlert');
       }
     }
     wP.sectionID = 'applyToAll';
-    Meteor.call('setWorkPeriod',wP,alertOnError);
+    Meteor.call('setWorkPeriod',wP,function(error,result) {
+      if (error) return alert(error.reason);
+      tmpl.alertMessage.set("Work Period Saved");
+      tmpl.alertType.set('success');
+      tmpl.footerTemplate.set('workPeriodAlertDismiss');
+    });
   },
   'hide.bs.modal #workPeriodPopoverX': function(event,tmpl) {
     Session.set('workPeriod',tmpl.nullWorkPeriod);
+    tmpl.footerTemplate.set('workPeriodSaveButtons');
+    tmpl.alertMessage.set(null);
+    tmpl.alertType.set('info');
     tmpl.$('#startDatePicker').data('DateTimePicker').date(null);
     tmpl.$('#endDatePicker').data('DateTimePicker').date(null);
   }
@@ -381,6 +412,14 @@ Template.workPeriodPopoverX.events({
 /*****************/
 
 Template.workPeriodPopoverX.helpers({
+  session: function(key,item) {
+    var tmpl = Template.instance();
+    var value = tmpl.Session.get(key);
+    if ((value) && (item) && _.isObject(value) && (item in value)) {
+      return value[item];
+    }
+    return value;
+  },
   workPeriod: function() {
     var tmpl = Template.instance();
     return Session.get('workPeriod') || tmpl.nullWorkPeriod;
@@ -408,5 +447,83 @@ Template.workPeriodPopoverX.helpers({
   },
   disabled: function() {
     return (Roles.userIsInRole(Meteor.userId(),'teacher')) ? '' : 'disabled';
+  },
+  footerTemplate: function() {
+    var tmpl = Template.instance();
+    return tmpl.footerTemplate.get();
   }
 })
+
+
+  /******************************************/
+ /**** TEMPLATE WORKPERIOD SAVE BUTTONS ****/
+/******************************************/
+
+Template.workPeriodSaveButtons.helpers({
+  sectionName: function() {
+    if (Roles.userIsInRole(Meteor.userId(),'teacher')) {
+      var selectedSection = Meteor.selectedSection();
+      return (selectedSection) ? selectedSection.name : '&nbsp;';
+    }
+    return '&nbsp;'
+  }
+})
+
+  /************************** ********/
+ /**** TEMPLATE WORKPERIOD ALERT ****/
+/***********************************/
+
+Template.workPeriodAlert.events({
+  'click #dismissWorkPeriodAlert': function(event,tmpl) {
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    parent.footerTemplate.set('workPeriodSaveButtons');
+    parent.alertMessage.set(null);
+    parent.alertType.set('info');
+  }
+})
+Template.workPeriodAlert.helpers({
+  'alertMessage': function() {
+    var tmpl = Template.instance();
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    return parent.alertMessage.get();
+  },
+  'alertType': function() {
+    var tmpl = Template.instance();
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    return parent.alertType.get();
+  }
+})
+
+  /*******************************************/
+ /**** TEMPLATE WORKPERIOD ALERT DISMISS ****/
+/*******************************************/
+
+Template.workPeriodAlertDismiss.events({
+  'click #returnWorkPeriodAlert': function(event,tmpl) {
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    parent.footerTemplate.set('workPeriodSaveButtons');
+    parent.alertMessage.set(null);
+    parent.alertType.set('info');
+  },
+  'click #closeWorkPeriodAlert': function(event,tmpl) {
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    parent.$('#workPeriodPopoverX').modal('hide'); 
+    parent.alertMessage.set(null);
+    parent.alertType.set('info');   
+  }
+})
+
+Template.workPeriodAlertDismiss.helpers({
+  'alertMessage': function() {
+    var tmpl = Template.instance();
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    return parent.alertMessage.get();
+  },
+  'alertType': function() {
+    var tmpl = Template.instance();
+    var parent = tmpl.closestInstance("workPeriodPopoverX");
+    return parent.alertType.get();
+  }
+})
+
+
