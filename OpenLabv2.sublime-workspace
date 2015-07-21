@@ -15,7 +15,7 @@
 			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
 			"settings":
 			{
-				"buffer_size": 1368,
+				"buffer_size": 3103,
 				"line_ending": "Unix"
 			}
 		},
@@ -28,14 +28,6 @@
 			}
 		},
 		{
-			"file": "client/views/openlab/activities_list.html",
-			"settings":
-			{
-				"buffer_size": 3988,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
 			"settings":
 			{
@@ -44,13 +36,34 @@
 			}
 		},
 		{
-			"contents": "  //add separately to popover\n/*\nin header B block, etc (just notification) ... unit and activity names \nsimilar view for student, but no editing capability? \n\nPROBABLY NOT DO BELOW ... TOO COMPLICATED\nadd a calendar section which can be toggled on and off showing the suggested work periods\nmake it a mini activity-list complete with status indicators?\nthat way when I give them more freedom, they can see their progress\neach day in the calendar ... show status as of that particular*/\n\n/** extend jquery to position the modal dialog box (target) \n    near the triggering element (element) **/\n/** http://snippets.aktagon.com/snippets/310-positioning-an-element-over-another-element-with-jquery **/\n/** positioning code from popover-x \n        https://github.com/kartik-v/bootstrap-popover-x/blob/master/js/bootstrap-popover-x.js \n        starting at line 54 **/\n $.fn.positionOn = function(element, placement) {\n  return this.each(function() {\n    var target   = $(this);\n    var targetWidth = target[0].offsetWidth\n    var targetHeight = target[0].offsetHeight\n    var targetPos; //new position of target, to be calculated\n\n    var elementPos = element.offset();\n    var elementWidth = element[0].offsetWidth;\n    var elementHeight = element[0].offsetHeight;\n\n    placement = placement || 'right';\n    var moveTarget = {\n      right: function() {\n        var y = elementPos.top + elementHeight / 2 - targetHeight / 2;\n        if (y < $(window).scrollTop()) { //top of modal is off screen\n          placement = 'right right-top';\n        } else if ((y + targetHeight > window.innerHeight) && (y + 0.4*targetHeight < $(window).scrollTop())) { //bottom of modal is off screen and adjusting up won't make the top go offscreen\n          placement = 'right right-bottom'\n        } else {\n          return {\n            top: y, \n            left: elementPos.left + elementWidth\n          }; \n        }\n        return moveTarget[placement]();\n      },\n      'right right-top': function() {\n        return {\n          top: elementPos.top - 0.1*targetHeight + 0.5*elementHeight, \n          left: elementPos.left + elementWidth\n        };       \n      },\n      'right right-bottom': function() {\n        return {\n          top: elementPos.top - 0.9*targetHeight + 0.5*elementHeight, \n          left: elementPos.left + elementWidth\n        };\n      },\n\n      left: function() {\n        var y = elementPos.top + elementHeight / 2 - targetHeight / 2;\n        if (y < $(window).scrollTop()) { //top of modal is off screen\n          placement = 'left left-top';\n        } else if ((y + targetHeight > window.innerHeight) && (y + 0.4*targetHeight < $(window).scrollTop())) { //bottom of modal is off screen and adjusting up won't make the top go offscreen\n          placement = 'left left-bottom'\n        } else {\n          return {\n            top: y, \n            left: elementPos.left  - targetWidth\n          }; \n        }\n        return moveTarget[placement]();\n      },\n      'left left-top': function() {\n        return {\n          top: elementPos.top - 0.1*targetHeight + 0.5*elementHeight, \n          left: elementPos.left  - targetWidth\n        };       \n      },\n      'left left-bottom': function() {\n        return {\n          top: elementPos.top - 0.9*targetHeight + 0.5*elementHeight, \n          left: elementPos.left  - targetWidth\n        };\n      },\n\n      top: function() {\n        var x = elementPos.left + elementWidth / 2 - targetWidth / 2;\n        if (x < $(window).scrollLeft()) { //left edge of modal is off screen\n          placement = 'top top-left';\n        } else if (x + targetWidth > window.innerWidth) { //right edge of modal is off screen\n          placement = 'top top-right'\n        } else {\n          return {\n            top: elementPos.top - targetHeight, \n            left: x\n          }; \n        }\n        return moveTarget[placement]();\n      },\n      'top top-right': function() {\n        return {\n          top: elementPos.top - targetHeight, \n          left: elementPos.left - 0.9*targetWidth + 0.5*elementWidth,\n        };       \n      },\n      'top top-left': function() {\n        return {\n          top: elementPos.top - targetHeight, \n          left: elementPos.left - 0.1*targetWidth + 0.5*elementWidth,\n        };\n      },\n\n      bottom: function() {\n        var x = elementPos.left + elementWidth / 2 - targetWidth / 2;\n        if (x < $(window).scrollLeft()) { //left edge of modal is off screen\n          placement = 'bottom bottom-left';\n        } else if (x + 100*targetWidth > window.innerWidth) { //right edge of modal is off screen\n          placement = 'bottom bottom-right'\n        } else {\n          return {\n            top: elementPos.top + elementHeight, \n            left: x\n          }; \n        }\n        return moveTarget[placement]();\n      },\n      'bottom bottom-right': function() {\n        return {\n          top: elementPos.top + elementHeight, \n          left: elementPos.left - 0.9*targetWidth + 0.5*elementWidth,\n        };       \n      },\n      'bottom bottom-left': function() {\n        return {\n          top: elementPos.top + elementHeight, \n          left: elementPos.left - 0.1*targetWidth + 0.5*elementWidth,\n        };\n      }       \n    }\n\n    var css = moveTarget[placement]();\n    css.position = 'absolute';\n    target.css(css);\n    target.alterClass('right* left* top* bottom*',placement);\n  });\n}; \n\n/**\n * https://gist.github.com/peteboere/1517285\n * jQuery alterClass plugin\n *\n * Remove element classes with wildcard matching. Optionally add classes:\n *   $( '#foo' ).alterClass( 'foo-* bar-*', 'foobar' )\n *\n * Copyright (c) 2011 Pete Boere (the-echoplex.net)\n * Free under terms of the MIT license: http://www.opensource.org/licenses/mit-license.php\n *\n */\n\n$.fn.alterClass = function ( removals, additions ) {\n  \n  var self = this;\n  \n  if ( removals.indexOf( '*' ) === -1 ) {\n    // Use native jQuery methods if there is no wildcard matching\n    self.removeClass( removals );\n    return !additions ? self : self.addClass( additions );\n  }\n \n  var patt = new RegExp( '\\\\s' + \n      removals.\n        replace( /\\*/g, '[A-Za-z0-9-_]+' ). //remove extra space after *\n        split( ' ' ).\n        join( '\\\\s|\\\\s' ) + \n      '\\\\s', 'g' );\n \n  self.each( function ( i, it ) {\n    var cn = ' ' + it.className + ' ';\n    while ( patt.test( cn ) ) {\n      cn = cn.replace( patt, ' ' );\n    }\n    it.className = $.trim( cn );\n  });\n \n  return !additions ? self : self.addClass( additions );\n};\n\n//make save and apply to all buttons in the footer\nTemplate.workPeriodPopoverX.events({\n  'dp.change #startDatePicker': function(event,tmpl) {\n    if (!event.date)\n      return;\n    var date = event.date.toDate();\n    tmpl.$('#endDatePicker').data(\"DateTimePicker\").minDate(date);\n    var wP = Session.get('workPeriod');\n    wP.startDate = date;\n    Session.set('workPeriod',wP);\n  },\n  'dp.change #endDatePicker': function(event,tmpl) {\n    if (!event.date)\n      return;\n    var date = event.date.toDate();\n    tmpl.$('#startDatePicker').data(\"DateTimePicker\").maxDate(date);\n    var wP = Session.get('workPeriod');\n    wP.endDate = date;\n    Session.set('workPeriod',wP);\n  },\n  'shown.bs.modal #workPeriodPopoverX': function(event,tmpl) {\n    var workPeriodGauge = $(event.relatedTarget);\n    var workPeriodPopover = tmpl.$('#workPeriodPopoverX');\n    workPeriodPopover.positionOn(workPeriodGauge,'right');\n    $('body').css({overflow:'auto'}); //default modal behavior restricts scrolling\n  },\n  'hide.bs.modal #workPeriodPopoverX': function(event,tmpl) {\n    Session.set('workPeriod',{});\n    tmpl.$('#startDatePicker').data('DateTimePicker').date(null);\n    tmpl.$('#endDatePicker').data('DateTimePicker').date(null);\n  }\n}); \n\nvar dateTimeFormat = \"ddd, MMM D YYYY [at] h:mm a\";\nvar dateFormat = \"ddd, MMM D YYYY\"\n\nTemplate.workPeriodPopoverX.onRendered(function() {\n  this.$('#startDatePicker').datetimepicker({\n    showClose:  true,\n    showClear: true,\n    keepOpen: false,\n    format: dateTimeFormat,\n    widgetPositioning: {vertical:'bottom',horizontal:'auto'}\n  });\n  this.$('#endDatePicker').datetimepicker({\n    showClose: true,\n    showClear: true,\n    keepOpen: false,\n    format: dateTimeFormat,  //bug in widgetPositioning: {vertial:'top'} so overriding default 'auto' and setting to 'bottom', which also means the picker does not cover the graphic\n    widgetPositioning: {vertical:'bottom',horizontal:'auto'}\n  });\n\n  tmpl = this;\n  this.autorun(function(c) {\n    var wP = Session.get('workPeriod');\n    if (Match.test(wP,Match.ObjectIncluding({\n        startDate: Date,\n        endDate: Date,\n        unitStartDate: Date,\n        unitEndDate: Date\n      }))) {\n      var longLongAgo = new Date(0)\n      var notSoLongAgo = moment(longLongAgo).add(2,'weeks').toDate();\n\n      if (wP.startDate > notSoLongAgo)\n        tmpl.$('#startDatePicker').data('DateTimePicker').date(wP.startDate);\n      if (wP.endDate > notSoLongAgo)\n        tmpl.$('#endDatePicker').data('DateTimePicker').date(wP.endDate);\n    }  \n  })\n})\n//all working here, but no provision for sending initial values\n//to datetimepicker inputs\nTemplate.workPeriodPopoverX.helpers({\n  workPeriod: function() {\n    var wP = Session.get('workPeriod');\n    if (Match.test(wP,Match.ObjectIncluding({\n        startDate: Date,\n        endDate: Date,\n        unitStartDate: Date,\n        unitEndDate: Date\n      }))) \n        return wP;\n    return {};\n    longLongAgo = new Date(0);\n    return {\n      startDate: longLongAgo,\n      endDate: longLongAgo,\n      unitStartDate: longLongAgo,\n      unitEndDate: moment(longLongAgo).add(1,'weeks').toDate()\n    }\n  },\n  unitStartDate: function() {\n    var wP = Session.get('workPeriod') || {};\n    return wP.unitStartDate || '';\n  },\n  unitEndDate: function() {\n    var wP = Session.get('workPeriod') || {};\n    return wP.unitEndDate || '';\n  },  \n  sectionName: function() {\n    if (Roles.userIsInRole(Meteor.userId(),'teacher')) {\n      var selectedSection = Meteor.selectedSection();\n      return (selectedSection) ? selectedSection.name : 'all sections';\n    }\n    return '&nbsp;'\n  },\n  formatDate: function(date) {\n    var longLongAgo = new Date(0)\n    var notSoLongAgo = moment(longLongAgo).add(2,'weeks').toDate();\n    return ((Match.test(date,Date)) && (date > notSoLongAgo)) ? moment(date).format(dateFormat) : '_____';\n  },\n  formatDateTime: function(date) {\n    var longLongAgo = new Date(0)\n    var notSoLongAgo = moment(longLongAgo).add(2,'weeks').toDate();\n    return ((Match.test(date,Date)) && (date > notSoLongAgo)) ? moment(date).format(dateTimeFormat) : '_____';\n  },\n  disabled: function() {\n    return (Roles.userIsInRole(Meteor.userId(),'teacher')) ? '' : 'disabled';\n  }\n})\n",
-			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
-			"file_size": 10634,
-			"file_write_time": 130814947345390428,
+			"file": "client/custom-accounts-ui/login_buttons.js",
 			"settings":
 			{
-				"buffer_size": 10685,
+				"buffer_size": 28871,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/views/openlab/activities_list.js",
+			"settings":
+			{
+				"buffer_size": 12766,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+			"settings":
+			{
+				"buffer_size": 19083,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+			"settings":
+			{
+				"buffer_size": 4461,
 				"line_ending": "Unix"
 			}
 		},
@@ -63,18 +76,10 @@
 			}
 		},
 		{
-			"file": "client/views/openlab/activities_list.js",
-			"settings":
-			{
-				"buffer_size": 10907,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "server/publications.js",
 			"settings":
 			{
-				"buffer_size": 2937,
+				"buffer_size": 2958,
 				"line_ending": "Unix"
 			}
 		},
@@ -82,23 +87,15 @@
 			"file": "collections/workPeriods.js",
 			"settings":
 			{
-				"buffer_size": 4692,
+				"buffer_size": 6844,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "collections/activities.js",
+			"file": "client/stylesheets/workPeriod.css",
 			"settings":
 			{
-				"buffer_size": 8756,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
-			"settings":
-			{
-				"buffer_size": 4266,
+				"buffer_size": 1072,
 				"line_ending": "Unix"
 			}
 		}
@@ -142,28 +139,32 @@
 	[
 		"/home/solargreen/meteor/OpenLabv2",
 		"/home/solargreen/meteor/OpenLabv2/client",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
-		"/home/solargreen/meteor/OpenLabv2/client/views",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX",
-		"/home/solargreen/meteor/OpenLabv2/collections",
-		"/home/solargreen/meteor/OpenLabv2/lib",
-		"/home/solargreen/meteor/OpenLabv2/server"
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers"
 	],
 	"file_history":
 	[
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.html",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/alertOnError.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers/statusColors.js",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/parentTemplate.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/dateTimeHelpers.js",
+		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/dateTimeHelpers.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.js",
 		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/site.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
 		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
 		"/home/solargreen/meteor/OpenLabv2/server/schoolAccountsPublications.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
@@ -175,10 +176,8 @@
 		"/home/solargreen/meteor/OpenLabv2/collections/users.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
 		"/home/solargreen/meteor/OpenLabv2/server/users.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.js",
@@ -244,9 +243,7 @@
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/activityPageHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/inEditedWall.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/showHide.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/alertOnError.js",
 		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
-		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/plaintexteditor.css",
 		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.html",
 		"/home/solargreen/meteor/OpenLabv2/client/accountsui/accountsuiConfig.js",
@@ -276,13 +273,7 @@
 		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/student/activities_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/student/activities_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/student/studentView.html",
-		"/home/solargreen/meteor/OpenLabv2/collections/categories.js",
-		"/home/solargreen/meteor/OpenLab/collections/site.js",
-		"/home/solargreen/meteor/OpenLab/lib/router.js",
-		"/home/solargreen/meteor/OpenLab/server/fixtures.js",
-		"/home/solargreen/meteor/OpenLab/collections/users.js",
-		"/home/solargreen/meteor/OpenLab/client/views/includes/student_header.html"
+		"/home/solargreen/meteor/OpenLabv2/client/views/student/studentView.html"
 	],
 	"find":
 	{
@@ -300,6 +291,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"currentStatus",
+			"console",
+			"Future",
+			"Ago",
+			"Session.set",
+			"Seld",
+			"date(",
+			"Session.set",
 			"denormalize",
 			"Format",
 			"dateFormat",
@@ -419,15 +418,7 @@
 			"userTo",
 			"Note",
 			".Model",
-			"console.log",
-			".find",
-			"console",
-			"#invit",
-			"Meteor.call",
-			"cursor: d",
-			"Meteor.ca",
-			".hide",
-			"defaultText"
+			"console.log"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -455,15 +446,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1368,
+						"buffer_size": 3103,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								694,
-								694
+								1672,
+								1672
 							]
 						],
 						"settings":
@@ -473,10 +464,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 255.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -504,41 +495,11 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "client/views/openlab/activities_list.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3988,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3337,
-								3337
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1836.0,
-						"zoom_level": 1.0
-					},
 					"stack_index": 8,
 					"type": "text"
 				},
 				{
-					"buffer": 3,
+					"buffer": 2,
 					"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
 					"semi_transient": false,
 					"settings":
@@ -550,8 +511,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								239,
+								239
 							]
 						],
 						"settings":
@@ -562,30 +523,30 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 0,
+			"selected": 7,
 			"sheets":
 			[
 				{
-					"buffer": 4,
-					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+					"buffer": 3,
+					"file": "client/custom-accounts-ui/login_buttons.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10685,
+						"buffer_size": 28871,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6520,
-								6520
+								3597,
+								3597
 							]
 						],
 						"settings":
@@ -595,14 +556,104 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2907.0,
+						"translation.y": 1734.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "client/views/openlab/activities_list.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 12766,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2451,
+								2451
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
 					"buffer": 5,
+					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19083,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9501,
+								9501
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4080.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4461,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								103,
+								103
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
 					"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
 					"semi_transient": false,
 					"settings":
@@ -626,84 +677,24 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "client/views/openlab/activities_list.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 10907,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								10186,
-								10186
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 4802.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "server/publications.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2937,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1686,
-								1686
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 543.0,
-						"zoom_level": 1.0
-					},
 					"stack_index": 5,
 					"type": "text"
 				},
 				{
 					"buffer": 8,
-					"file": "collections/workPeriods.js",
+					"file": "server/publications.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4692,
+						"buffer_size": 2958,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4613,
-								4613
+								2738,
+								2738
 							]
 						],
 						"settings":
@@ -713,7 +704,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 747.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 10,
@@ -721,19 +712,19 @@
 				},
 				{
 					"buffer": 9,
-					"file": "collections/activities.js",
+					"file": "collections/workPeriods.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8756,
+						"buffer_size": 6844,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8753,
-								8753
+								1682,
+								1682
 							]
 						],
 						"settings":
@@ -743,7 +734,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3025.0,
+						"translation.y": 1326.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 9,
@@ -751,32 +742,32 @@
 				},
 				{
 					"buffer": 10,
-					"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+					"file": "client/stylesheets/workPeriod.css",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4266,
+						"buffer_size": 1072,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2815,
-								2815
+								230,
+								230
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"syntax": "Packages/CSS/CSS.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 408.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -810,7 +801,7 @@
 		"cols":
 		[
 			0.0,
-			0.473509933775,
+			0.5,
 			1.0
 		],
 		"rows":

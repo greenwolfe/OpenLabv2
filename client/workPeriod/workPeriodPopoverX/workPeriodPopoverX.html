@@ -25,9 +25,23 @@
           <div class='col-sm-12'>
             <p class='date-range text-center {{statusClass workPeriod}}'>
               This activity from 
-              <input type='text' class="form-control" id='startDatePicker' {{disabled}}/>
+              <div class="form-group">
+                <div class='input-group date' id='startDatePicker'>
+                  <input type='text' class="form-control"  {{disabled}}/>
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
+              </div>
               to 
-              <input type='text' class="form-control" id='endDatePicker'  {{disabled}}/>
+              <div class="form-group">
+                <div class='input-group date' id='endDatePicker'>
+                  <input type='text' class="form-control" {{disabled}}/>
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
+              </div>
             </p>
           </div>
         </div>
@@ -38,12 +52,43 @@
         </div>
       </div>
     </div>
-    <div class="popover-footer">
-        Save for: 
-        {{#if selectedSection}}
-          <button type="submit" id="saveForSection" class="btn btn-sm btn-primary">{{{sectionName}}}</button>
-        {{/if}}
-        <button type="submit" id="saveForAllSections" class="btn btn-sm btn-primary">all sections</button>
-    </div>
+    {{#if isInRole 'teacher'}}
+      {{>Template.dynamic template=footerTemplate}}
+    {{/if}}
   </div>
 </template>
+
+<template name="workPeriodSaveButtons">
+  <div class="popover-footer popover-default">
+    Save for: 
+    {{#if selectedSection}}
+      <button type="submit" id="saveForSection" class="btn btn-sm btn-primary">{{{sectionName}}}</button>
+    {{/if}}
+    <button type="submit" id="saveForAllSections" class="btn btn-sm btn-primary">all sections</button>
+  </div>
+</template>
+
+<template name="workPeriodAlert">
+  <div class="popover-footer popover-{{alertType}}">
+    <p class="text-left">
+      {{{alertMessage}}}
+    </p>
+    <p class="text-right">
+      <button type="dismiss" id="dismissWorkPeriodAlert" class="btn btn-sm btn-primary">OK</button>
+    </p>
+  </div>
+</template>
+
+<template name="workPeriodAlertDismiss">
+  <div class="popover-footer popover-{{alertType}}">
+    <p class="text-left">
+      {{{alertMessage}}}
+    </p>
+    <p class="text-right">
+      <button type="dismiss" id="returnWorkPeriodAlert" class="btn btn-sm btn-primary">Return</button>
+      <button type="close" id="closeWorkPeriodAlert" class="btn btn-sm btn-primary">Close</button>
+    </p>
+  </div>
+</template>
+
+

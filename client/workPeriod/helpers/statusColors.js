@@ -24,10 +24,11 @@ Meteor.getStatusClass = function(workPeriod) {
   var completed =  _.str.include(status.level,'done');
   if (completed) return 'completed'; //light blue completed color
 
-  var today = new Date();
-  var overdue = (today > workPeriod.endDate);
-  if (overdue) return "expected"; //orange overdue level
-
+  if (!dateIsNull(workPeriod.endDate)) {
+    var today = new Date();
+    if (today > workPeriod.endDate) return "expected"; //orange overdue level
+  }
+  
   return "";
 }
 Template.registerHelper('statusClass',Meteor.getStatusClass);
