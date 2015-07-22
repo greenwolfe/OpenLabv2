@@ -124,6 +124,8 @@ Meteor.methods({
     })
     var cU = Meteor.users.findOne(user._id); //current user (whose profile is being edited)
     var editor = Meteor.user(); //currently logged in user
+    if (!editor)
+      return; //not logged in
     if (!Roles.userIsInRole(editor,'teacher') && (editor._id != user._id))
       throw new Meteor.error('editOwnProfile',"Only a teacher can edit another user's' profile.")
 

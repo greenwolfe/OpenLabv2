@@ -35,11 +35,8 @@ Template.unitTitle.helpers({
   },
   hidden: function() {
     var activeUnit = openlabSession.get('activeUnit');
-    return (this._id == activeUnit) ? '' : 'hidden';
-  },
-  editable: function() {
-    var activeUnit = Session.get('activeUnit');
-    return (this._id == activeUnit) ? 'true' : '';
+    var activeUnit2 = openlabSession.get('activeUnit2');
+    return ((this._id == activeUnit) || (this._id == activeUnit2)) ? '' : 'hidden';
   },
   percentExpected: function() {
     var studentID = Meteor.impersonatedOrUserId();
