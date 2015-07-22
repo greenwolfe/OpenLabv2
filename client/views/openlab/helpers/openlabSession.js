@@ -62,11 +62,28 @@ openlabSession = {
     if (_.contains(['errorMessage', 'infoMessage'], key)){
       throw new Error("Don't set errorMessage or infoMessage directly. Instead, use errorMessage() or infoMessage().");
     }
-    if (key == 'impersonatedID') {
-      //set security ... is teacher
-      //or is parent impersonating one of their own childrenOrAdvisees
-      //can I set up an autorun on this variable that
-      //does the validation as well?
+    var cU;
+    if (key == 'impersonatedID') { //set security 
+      //must be teacher
+      //or parent or advisor impersonating one of their own chidren or advisees
+      cU = Meteor.user(); 
+      if (Roles.userIsInRole(cU,'teacher')) {
+        this._set(key,value);
+      } else if (Roles.userIsInRole(cU,'parentOrAdvisor') && _.contains(Meteor.childOrAdviseeIds(),value)) {
+        this._set(key,value);
+      }
+      return; //else don't set this key
+    }
+    if (key == 'activeUnit' || key == 'activeUnit2') {
+      //set users last active units
+      cU = Meteor.user();
+      if (cU) {
+        var profile = (_.str.contains(key,'2')) ? {lastViewedUnit2 : value} : {lastViewedUnit : value};
+        Meteor.call('updateUser',{
+          _id:cU._id,
+          profile: profile
+        });
+      }
     }
 
     this._set(key, value);
@@ -91,9 +108,7 @@ openlabSession = {
       return Meteor.users.findOne(Session.get(KEY_PREFIX + 'impersonatedID')) || Meteor.user();
   },
 
-  initializePage: function () {
-    this.set('editingMainPage', null);
-    //set active unit or active unit 2 here from user profile?
+  initializePage: function () { //replaced by startup callback
     this.resetMessages();
   },
 

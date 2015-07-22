@@ -2,10 +2,6 @@
  /*** ACTIVITIES LIST  ****/
 /*************************/
 
-//Template.activitiesList.rendered = function() {
-//  $('#activities').accordion({heightStyle: "content"});
-//}
-
 Template.activitiesList.helpers({
   units: function() {
     var selector = {};
@@ -32,16 +28,6 @@ Template.activitiesList.helpers({
 Template.unitTitle.helpers({
   active: function() {
     var activeUnit = openlabSession.get('activeUnit');
-    if (!activeUnit) {
-      var units = Units.find({visible:true},{sort: {order: 1}}).fetch();
-      var cU = Meteor.user();
-      activeUnit = units[0]._id;
-      if (cU && ('profile' in cU) && ('lastOpened' in cU.profile) && 
-        ('studentActivityList' in cU.profile.lastOpened) && 
-        Units.findOne(cU.profile.lastOpened.studentActivityList)) 
-          activeUnit = cU.profile.lastOpened.studentActivityList;
-      openlabSession.set('activeUnit', activeUnit);
-    }
     return (this._id == activeUnit) ? 'active' : '';
   },
   active2: function() {
@@ -116,10 +102,6 @@ Template.unitTitle.events({
       } else if ((activeUnit2) && (tmpl.data._id == activeUnit)) {
         openlabSession.set('activeUnit',activeUnit2);
         openlabSession.set('activeUnit2',null);
-        var cU = Meteor.user();
-        if (cU && ('profile' in cU)) {
-          Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":activeUnit2} });
-        }
       } else {
         openlabSession.set('activeUnit2',tmpl.data._id);
       }
@@ -127,10 +109,6 @@ Template.unitTitle.events({
       openlabSession.set('activeUnit',tmpl.data._id);
       if (tmpl.data._id == openlabSession.get('activeUnit2'))
         openlabSession.set('activeUnit2',null);
-      var cU = Meteor.user();
-      if (cU && ('profile' in cU)) {
-        Meteor.users.update({_id:cU._id}, { $set:{"profile.lastOpened.studentActivityList":tmpl.data._id} });
-      }
     }
   },
   'dragstart li > a': function(event,tmpl) {

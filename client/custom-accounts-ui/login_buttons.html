@@ -176,7 +176,7 @@
     <div class="form-group">
       Students you are observing:
       {{#unless verifiedStudents}}
-        <br/>
+        <p>none </p>
       {{/unless}}
       {{#each verifiedStudents}}
         <p> 
@@ -185,19 +185,21 @@
         </p>
       {{/each}}
 
-      Requests pending approval:
-      {{#unless unverifiedStudents}} 
-        <br/>
-      {{/unless}}
-      {{#each unverifiedStudents}}
-        <p> 
-          {{name}} 
-          <a href="#" class="glyphicon glyphicon-remove stop-observing" title="stop observing"></a> 
-          {{#if isInRole 'teacher'}}
-            <a href="#" class="glyphicon glyphicon-ok verify-child-or-advisee" title="verify child or advisee"></a> 
-          {{/if}}
-        </p>  
-      {{/each}}
+      {{#if unverifiedStudents}}
+        Requests pending approval:
+        {{#unless unverifiedStudents}} 
+          <br/>
+        {{/unless}}
+        {{#each unverifiedStudents}}
+          <p> 
+            {{name}} 
+            <a href="#" class="glyphicon glyphicon-remove stop-observing" title="stop observing"></a> 
+            {{#if isInRole 'teacher'}}
+              <a href="#" class="glyphicon glyphicon-ok verify-child-or-advisee" title="verify child or advisee"></a> 
+            {{/if}}
+          </p>  
+        {{/each}}
+      {{/if}}
 
       {{#if lostStudents}}
         Name(s) not found:

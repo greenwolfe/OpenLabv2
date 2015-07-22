@@ -7,10 +7,10 @@
       </a>
       <div id="view-as-dropdown-menu" class="dropdown-menu">
         <ul class="nav nav-pills">
-          {{#with currentUser}}
-            {{>userToView}}
-          {{/with}}
           {{#if isInRole 'teacher'}}
+            {{#with currentUser}}
+              {{>userToView}}
+            {{/with}}
             {{#each sections}}
               {{> sectionToView}}
             {{/each}} 

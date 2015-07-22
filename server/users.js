@@ -26,7 +26,6 @@ Meteor.methods({
     return userID;
   },
   createUnvalidatedUser: function(options) {
-    console.log(options);
     check(options,{ //redundant with checks performed on client before passing options to this method
       username: Match.nonEmptyString,
       email: Match.email,
@@ -106,22 +105,29 @@ Meteor.methods({
     check(user,{
       _id: Match.idString,
       username: Match.Optional(String),
-      emails: [Match.email],
-      profile: {
+      emails: Match.Optional([Match.email]),
+      profile: Match.Optional({
         firstName: Match.Optional(Match.nonEmptyString),
         lastName: Match.Optional(Match.nonEmptyString),
-        postEnrollmentInfo: { //needs different name here?
+        //session state:  last viewed section
+        lastViewedSectionID: Match.Optional(Match.idString),
+        lastViewedChildOrAdvisee: Match.Optional(Match.idString),
+        lastViewedUnit: Match.Optional(Match.idString),
+        lastViewedUnit2: Match.Optional(Match.idString),
+
+        postEnrollmentInfo: Match.Optional({ //needs different name here?
           role: Match.Optional(Match.OneOf('student','teacher','parentOrAdvisor')),
           sectionID: Match.Optional(Match.idString),
           childrenOrAdvisees: Match.Optional([String])
-        }
-      }
+        })
+      })
     })
     var cU = Meteor.users.findOne(user._id); //current user (whose profile is being edited)
     var editor = Meteor.user(); //currently logged in user
     if (!Roles.userIsInRole(editor,'teacher') && (editor._id != user._id))
       throw new Meteor.error('editOwnProfile',"Only a teacher can edit another user's' profile.")
 
+    /**** fields outside of profile ****/
     var username = user.username || null;
     if ((username) && (username != cU.username)) {
       //users.update throws error if username is already used
@@ -133,7 +139,7 @@ Meteor.methods({
       Meteor.users.update(user._id,{$set: {username:username}});
     }
 
-    var emails = user.emails || null;
+    var emails = user.emails || [];
     if (emails.length > 0) {
       emails = emails.map(function(email) {
         return {address:email,verified:false};
@@ -141,12 +147,39 @@ Meteor.methods({
       Meteor.users.update(user._id,{$addToSet:{emails: {$each:emails}}});
     }
 
+    /**** fields in profile ****/
+    if (!('profile' in user))
+      return; //nothing more to do
+
     var firstName = user.profile.firstName || null;
     if ((firstName) && (firstName != cU.profile.firstName))
       Meteor.users.update(user._id,{$set: {'profile.firstName':firstName}});
     var lastName = user.profile.lastName || null;
     if ((lastName) && (lastName != cU.profile.lastName))
       Meteor.users.update(user._id,{$set: {'profile.lastName':lastName}});
+
+    var lastViewedUnit = user.profile.lastViewedUnit || null;
+    if (lastViewedUnit)
+      Meteor.users.update(user._id,{$set: {'profile.lastViewedUnit':lastViewedUnit}});
+    var lastViewedUnit2 = user.profile.lastViewedUnit2 || null;
+    if (lastViewedUnit2)
+      Meteor.users.update(user._id,{$set: {'profile.lastViewedUnit2':lastViewedUnit2}});
+
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var lastViewedSectionID = user.profile.lastViewedSectionID || null;
+      if (lastViewedSectionID)
+        Meteor.users.update(cU._id, { $set:{"profile.lastViewedSectionID":lastViewedSectionID} });
+    }
+
+    if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
+      var lastViewedChildOrAdvisee = user.profile.lastViewedChildOrAdvisee || null;
+      if (lastViewedChildOrAdvisee)
+        Meteor.users.update(cU._id, { $set:{"profile.lastViewedChildOrAdvisee":lastViewedChildOrAdvisee} });        
+    }
+
+    /**** fields in profile.postEnrollmentInfo ****/
+    if (!('postEnrollmentInfo' in user.profile))
+      return; //nothing more to do
 
     if (Roles.userIsInRole(editor,'teacher')) {
       var role = user.profile.postEnrollmentInfo.role || null;

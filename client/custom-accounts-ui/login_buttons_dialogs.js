@@ -94,7 +94,7 @@ var setPassword = function(event,tmpl) {
     if (doneCallback) {
       doneCallback();
     }
-    Router.go('/');
+    FlowRouter.go('/');
   }); 
 }
 

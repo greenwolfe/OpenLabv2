@@ -8,7 +8,7 @@ var VALID_KEYS = [
   'viewAs', //either a userId or a sectionId
   'invitees', //array of user to invite
   'sectionID', //section ID for choosing a group
-  'viewParents' //boolean
+  'viewParents' //boolean (what is its function?  Would a better name be viewingAsParent?)
 ];
 
 var validateKey = function (key) {
@@ -88,11 +88,67 @@ loginButtonsSession = {
 
 /* is there a better place to do this?  Will this constrain any future use of onlogin callback? */
 Accounts.onLogin(function(){
-  loginButtonsSession.set('viewAs',null);
   loginButtonsSession.set('invitees',[]);
   loginButtonsSession.set('viewParents',false);
-  loginButtonsSession.set('sectionID',Meteor.currentSectionId());
+  openlabSession.set('editingMainPage',false);
+
+  var cU = Meteor.user();
+  //select lastViewed unit or units
+  if ('profile' in cU) {
+    var activeUnit = cU.profile.lastViewedUnit || null;
+    var activeUnit2 = cU.profile.lastViewedUnit2 || null;
+    if (activeUnit) 
+      openlabSession.set('activeUnit',activeUnit);
+    if (activeUnit2)
+      openlabSession.set('activeUnit2',activeUnit2);
+  }
+
+
+  //students cannot impersonate
+  if (Roles.userIsInRole(cU,'student'))
+    loginButtonsSession.set('viewAs',null);
+
+  //select lastViewed or a random section ID for teacher's initial view
+  var sectionID = Meteor.currentSectionId();
+  if (Roles.userIsInRole(cU,'teacher') && !sectionID) {
+    if ('profile' in cU) {
+      sectionID = cU.profile.lastViewedSectionID || Sections.findOne();
+    } else {
+      sectionID = Sections.findOne();
+    }
+    loginButtonsSession.set('viewAs',sectionID);
+  }
+  loginButtonsSession.set('sectionID',sectionID);
+
+  //select lastViewed or random child or advisee for parent or advisors initial view
+  var studentID = Meteor.impersonatedId() || null;
+  if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
+    if ('profile' in cU) 
+      studentID = cU.profile.lastViewedChildOrAdvisee || null;
+    var childrenOrAdvisees = Meteor.childrenOrAdvisees();
+    if ((childrenOrAdvisees) && (childrenOrAdvisees.length > 0) && (!studentID))
+      studentID = childrenOrAdvisees[0]._id;
+    loginButtonsSession.set('viewAs',studentID);
+  }
 })
+
+  /*****************************/ 
+ /***** ONLOGOUT CALLBACK *****/
+/*****************************/
+
+Tracker.autorun(function() {
+  if (!Meteor.userId() && !Meteor.loggingIn()) {
+    loginButtonsSession.set('viewAs',null);
+    var firstUnit = null;
+    if (FlowRouter.subsReady('units'))
+      firstUnit = Units.findOne({visible:true},{sort: {order: 1},fields:{_id:1}});
+    firstUnit = firstUnit || {_id:null};
+    openlabSession.set('activeUnit',firstUnit._id)
+    openlabSession.set('activeUnit2',null);
+    FlowRouter.go("/"); //redirect to main page on logout
+  }
+})
+
 
   /*********************************/ 
  /***** IMPERSONATION HELPERS *****/
@@ -101,6 +157,19 @@ Accounts.onLogin(function(){
 Meteor.impersonatedId = function() {
   var viewAs = loginButtonsSession.get('viewAs');
   var user = Meteor.users.findOne(viewAs);
+
+  //pausing to set last viewed child or advisee for parent or advisor before sending result
+  //so long as this is used in at least on reactive setting, it will be called
+  //when viewAs changes.  If it's not used in a reactive setting, then it doesn't matter anyway
+  var cU = Meteor.user();
+  if ((user) && Roles.userIsInRole(cU,'parentOrAdvisor'))
+    Meteor.call('updateUser',{
+      _id:cU._id,
+      profile: {
+        lastViewedChildOrAdvisee: user._id
+      }
+    });  
+
   return (user) ? user._id: '';
                           //!user => viewAs is null or is a sectionId
 }
@@ -143,6 +212,19 @@ Meteor.selectedSectionId = function() {
   var section = Sections.findOne(viewAs);
   if (!section) //viewAs is null or is a userId
     return Meteor.currentSectionId(); //could be undefined if no one is logged in or logged or impersonated user has no curren section
+
+  //pausing to set last viewed section for teacher before sending result
+  //so long as this is used in at least on reactive setting, it will be called
+  //when viewAs changes.  If it's not used in a reactive setting, then it doesn't matter anyway
+  var cU = Meteor.user();
+  if (Roles.userIsInRole(cU,'teacher'))
+    Meteor.call('updateUser',{
+      _id:cU._id,
+      profile: {
+        lastViewedSectionID: section._id
+      }
+    });
+
   return section._id;  
 }
 Template.registerHelper('selectedSection',function() {
