@@ -12,90 +12,40 @@
 	"buffers":
 	[
 		{
-			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
-			"settings":
-			{
-				"buffer_size": 3103,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.html",
-			"settings":
-			{
-				"buffer_size": 87,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
-			"settings":
-			{
-				"buffer_size": 239,
-				"line_ending": "Unix"
-			}
-		},
-		{
 			"file": "client/custom-accounts-ui/login_buttons.js",
 			"settings":
 			{
-				"buffer_size": 28871,
+				"buffer_size": 28644,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/activities_list.js",
+			"contents": "//Must be placed in a subfolder so that it is loaded before\n//the templates that use its global variables\n\nvar VALID_KEYS = [\n  'selectedForm',\n  'resetPasswordToken', \n  'enrollAccountToken',\n  'viewAs', //either a userId or a sectionId\n  'invitees', //array of user to invite\n  'sectionID', //section ID for choosing a group\n  'viewParents' //boolean\n];\n\nvar validateKey = function (key) {\n  if (!_.contains(VALID_KEYS, key))\n    throw new Meteor.Error(\"invalidKey\",\"Invalid key in loginButtonsSession: \" + key);\n};\n\nvar KEY_PREFIX = \"Meteor.loginButtons.\";\n\nloginButtonsSession = {\n  set: function(key, value) {\n    validateKey(key);\n    var user = Meteor.user();\n    if ( (key == 'viewAs') && \n          ( // a little security regarding impersonation, it is still important that publications and subscriptions be managed to prevent improper access to information\n          Roles.userIsInRole(user,'student') || //students cannot impersonate\n          (value == Meteor.userId()) || //cannot impersonate self\n          (Roles.userIsInRole(user,'parentOrAdvisor') && !_.contains(Meteor.childOrAdviseeIds(),value)) //parent or advisor can only impersonate verified students in their list\n          ))\n            value = null; \n    Session.set(KEY_PREFIX + key, value);\n  },\n  get: function(key) {\n    validateKey(key);\n    var user = Meteor.user();\n    var value = Session.get(KEY_PREFIX + key);\n    if ( (key == 'viewAs') && \n         ( // and a little extra security against the user setting viewAs directly through Session.set rather than loginButtonsSession.set\n          Roles.userIsInRole(user,'student') || //students cannot impersonate\n          (value == Meteor.userId()) || //cannot impersonate self\n          (Roles.userIsInRole(user,'parentOrAdvisor') && !_.contains(Meteor.childOrAdviseeIds(),value)) //parent or advisor can only impersonate verified students in their list\n          ))\n            value = null;\n    return value;\n  },\n  push: function (key,value) {\n    validateKey(key);\n    var currentValue = Session.get(KEY_PREFIX + key);\n    if (!currentValue) {\n      Session.set(KEY_PREFIX + key,[value]);\n    } else if (_.isArray(currentValue)) {\n      currentValue.push(value)\n      Session.set(KEY_PREFIX + key,currentValue)\n    } else {\n      throw new Meteor.Error(\"notArray\",\"Push only works for arrays.  Use set for a non-array variable.\")\n    }\n  },\n  pull: function(key,value) {\n    validateKey(key);\n    var currentValue = Session.get(KEY_PREFIX + key);\n    if (!currentValue)\n      return; //nothing to pull\n    if (_.isArray(currentValue)) {\n      Session.set(KEY_PREFIX + key,_.without(currentValue,value))\n    } else {\n      throw new Meteor.Error(\"notArray\",\"Pull only works for arrays.  Use set for a non-array variable.\")      \n    }\n  },\n  toggleArray: function(key,value) {\n    validateKey(key);\n    var currentValue = Session.get(KEY_PREFIX + key);\n    if (!currentValue) {\n      Session.set(KEY_PREFIX + key,[value]);\n    } else if (_.isArray(currentValue)) {\n      currentValue = (_.indexOf(currentValue,value) == -1) ? \n              _.union(currentValue,[value]) : _.without(currentValue,value);\n      Session.set(KEY_PREFIX + key,currentValue);\n    } else {\n      throw new Meteor.Error(\"notArray\",\"Toggle only works for arrays.  Use set for a non-array variable.\")      \n    }    \n  }\n};\n\n  /****************************/ \n /***** ONLOGIN CALLBACK *****/\n/****************************/\n\n/* is there a better place to do this?  Will this constrain any future use of onlogin callback? */\nAccounts.onLogin(function(){\n  loginButtonsSession.set('viewAs',null);\n  loginButtonsSession.set('invitees',[]);\n  loginButtonsSession.set('viewParents',false);\n  var cU = Meteor.user();\n  var sectionID = Meteor.currentSectionId();\n  if (Roles.userIsInRole(cU,'teacher') && !sectionID) {\n    if (('profile' in cU)) {\n      sectionID = cU.profile.sectionID || Sections.findOne();\n    } else {\n      sectionID = Sections.findOne();\n    }\n    loginButtonsSession.set('viewAs',sectionID);\n  }\n  loginButtonsSession.set('sectionID',sectionID);\n})\n\n  /*****************************/ \n /***** ONLOGOUT CALLBACK *****/\n/*****************************/\n\nTracker.autorun(function() {\n  //redirect to main page on logout\n  if (!Meteor.userId() && !Meteor.loggingIn()) {\n    FlowRouter.go(\"/\");\n  }\n})\n\n\n  /*********************************/ \n /***** IMPERSONATION HELPERS *****/\n/*********************************/\n\nMeteor.impersonatedId = function() {\n  var viewAs = loginButtonsSession.get('viewAs');\n  var user = Meteor.users.findOne(viewAs);\n  return (user) ? user._id: '';\n                          //!user => viewAs is null or is a sectionId\n}\nTemplate.registerHelper('impersonatedId',function() {\n  return Meteor.impersonatedId();\n});\nMeteor.impersonatedUser = function() {\n  return Meteor.users.findOne(Meteor.impersonatedId());\n}\nTemplate.registerHelper('impersonatedUser',function() {\n  return Meteor.impersonatedUser();\n});\n\nMeteor.impersonatedOrUserId = function() {\n  return Meteor.impersonatedId() || Meteor.userId(); //could be null \n}\nTemplate.registerHelper('impersonatedOrUserId',function() {\n  return Meteor.impersonatedOrUserId();\n});\nMeteor.impersonatedOrUser = function() {\n  return Meteor.users.findOne(Meteor.impersonatedId()) || Meteor.user();\n}\nTemplate.registerHelper('impersonatedOrUser',function() {\n  return Meteor.impersonatedOrUser();\n});\n\n  /****************************/ \n /***** SELECTED SECTION *****/\n/****************************/\n\nMeteor.selectedSection = function() {\n  var viewAs = loginButtonsSession.get('viewAs');\n  var section = Sections.findOne(viewAs);\n  if (!section) //viewAs is null or is a userId\n    return Meteor.currentSection(); //could be undefined if no one is logged in or logged or impersonated user has no curren section\n  return section;\n}\nMeteor.selectedSectionId = function() {\n  var viewAs = loginButtonsSession.get('viewAs');\n  var section = Sections.findOne(viewAs);\n  if (!section) //viewAs is null or is a userId\n    return Meteor.currentSectionId(); //could be undefined if no one is logged in or logged or impersonated user has no curren section\n  return section._id;  \n}\nTemplate.registerHelper('selectedSection',function() {\n  return Meteor.selectedSection();\n});\n\nTracker.autorun(function() {\n  var cU = Meteor.user();\n  if (!Roles.userIsInRole(cU,'teacher')) \n    return;\n  var sectionID = Meteor.selectedSectionId();\n  if (!('profile' in cU) || !()) \n\n})\n\n  /****************************************/ \n /***** CHILDREN OR ADVISEES HELPERS *****/\n/****************************************/\n\nMeteor.childrenOrAdvisees = function(parentOrAdvisor) {\n  var user = parentOrAdvisor || Meteor.user();\n  if (!Roles.userIsInRole(user,'parentOrAdvisor'))\n    return null;\n  var cOA = [];\n  var students = user.childrenOrAdvisees || '';\n  if (students) {\n    students.forEach(function(s,index,students) {\n      var student = Meteor.users.findOne(s.idOrFullname);\n      if (student && s.verified) \n        cOA.push(student);\n    });\n  }\n  return cOA;\n}\nMeteor.childOrAdviseeIds = function(parentOrAdvisor) {\n  var cOA = Meteor.childrenOrAdvisees(parentOrAdvisor);\n  return _.pluck(cOA,'_id');\n}\nTemplate.registerHelper('childrenOrAdvisees',function() {\n  return Meteor.childrenOrAdvisees();\n});",
+			"file": "client/custom-accounts-ui/helpers/login_buttons_session.js",
+			"file_size": 7083,
+			"file_write_time": 130819792714206109,
 			"settings":
 			{
-				"buffer_size": 12766,
+				"buffer_size": 7277,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+			"contents": "Meteor.methods({\n/* Assign role to new user */\n  assignRole: function(userID,role) {\n    check(userID, Match.idString)\n    check(role, Match.OneOf('teacher','student','parentOrAdvisor'))\n    var user = Meteor.users.findOne(userID);\n    if (!user)\n      throw new Meteor.Error('invalid user','Cannot change role.  Invalid user.');\n\n    var cU = Meteor.userId();\n    if (Roles.userIsInRole(cU,'teacher')) {\n      Roles.addUsersToRoles(userID,role); //teacher can change someone's role at any time\n      return userID;\n    } \n    if ( !(cU && (userID == cU)) ) {\n      throw new Meteor.Error('selfEnroll','Only a teacher can assign a role to anothe user.');\n    };\n    if (role == 'teacher')\n      throw new Meteor.Error('cantAssignTeacher','Only a teacher can assign a teacher role to another user.');\n    var usersRoles = Roles.getRolesForUser(userID);\n    if (usersRoles.length > 0)\n      throw new Meteor.Error('cantChangeOwnRole','Only a teacher can assign you a new role.');\n    //so this would only be called right after a new user is created and is\n    //being assigned their first role\n    Roles.addUsersToRoles(userID,role);\n    return userID;\n  },\n  createUnvalidatedUser: function(options) {\n    console.log(options);\n    check(options,{ //redundant with checks performed on client before passing options to this method\n      username: Match.nonEmptyString,\n      email: Match.email,\n      profile: {\n        firstName: Match.nonEmptyString,\n        lastName: Match.nonEmptyString,\n        postEnrollmentInfo: {\n          role: Match.OneOf('student','teacher','parentOrAdvisor'),\n          sectionID: Match.Optional(Match.idString),\n          childrenOrAdvisees: Match.Optional([String])\n        }\n      }\n    });\n\n    var pEi = options.profile.postEnrollmentInfo;\n    var role = pEi.role;\n    if (role == 'student') {\n      check(pEi.sectionID, Match.idString) //sectionID required to register as student\n      var section = Sections.findOne(pEi.sectionID);\n      if (!section) \n        throw new Meteor.Error('invalidSection','Invalid section.')\n      //options.profile.sectionID = pEi.sectionID; //add to memberships instead\n      delete pEi.sectionID;\n    } else if (role == 'parentOrAdvisor') { \n      check(pEi.childrenOrAdvisees,[String]);  //childrenOrAdvisees required, but could be empty array\n      options.childrenOrAdvisees = [];\n      pEi.childrenOrAdvisees.forEach(function(fullname,index,cOA) {\n        if (!Match.test(fullname,Match.nonEmptyString)) return;\n        var name = _.words(fullname);      \n        var firstName,lastName;\n        if (name.length == 2) {\n          firstName = name[0];\n          lastName = name[1]; \n        } else if (name.length > 2) {\n          firstName = name[0];\n          lastName = _.strRight(fullname,firstName);\n          lastName = _.trim(lastName);\n        }\n        var student = Meteor.users.findOne({'profile.firstName':firstName,'profile.lastName':lastName});\n        //if student is found, pass _id.  if student not found, pass fullname in the hopes that the\n        //teacher can find the correct spelling of the name from the roster\n        if (student) {\n          options.childrenOrAdvisees.push({idOrFullname:student._id,verified:false});\n        } else {\n          options.childrenOrAdvisees.push({idOrFullname:fullname,verified:false});\n        }\n      });\n    }\n    delete options.profile.postEnrollmentInfo;\n    var userID = Accounts.createUser(options);\n    Roles.addUsersToRoles(userID,[role]);\n    if (role == 'student') {\n      Meteor.call('addMember',{\n        memberID: userID,\n        itemID: section._id,\n        collectionName: 'Sections'\n      });\n    } else if (role == 'parentOrAdvisor') {\n      Meteor.users.update(userID, {$set: {childrenOrAdvisees:options.childrenOrAdvisees}});\n    }\n  },\n  sendEnrollmentEmail: function(userID) {\n    check(userID,Match.idString);\n    Accounts.sendEnrollmentEmail(userID);\n  },\n  isEmailVerified: function(email) {\n    check(email,Match.email);\n    var user = Meteor.users.findOne({ 'emails.address' : email });\n    if (!user)\n      throw new Meteor.Error('invalidEmail','Email not found. No user on the system has registered this email.');\n    var email = _.find(user.emails,function(e) {\n      return (e.address == email);\n    });\n    return email.verified;\n  },\n  updateUser: function(user) {\n    check(user,{\n      _id: Match.idString,\n      username: Match.Optional(String),\n      emails: [Match.email],\n      profile: {\n        firstName: Match.Optional(Match.nonEmptyString),\n        lastName: Match.Optional(Match.nonEmptyString),\n        postEnrollmentInfo: { //needs different name here?\n          role: Match.Optional(Match.OneOf('student','teacher','parentOrAdvisor')),\n          sectionID: Match.Optional(Match.idString),\n          childrenOrAdvisees: Match.Optional([String])\n        }\n      }\n    })\n    var cU = Meteor.users.findOne(user._id); //current user (whose profile is being edited)\n    var editor = Meteor.user(); //currently logged in user\n    if (!Roles.userIsInRole(editor,'teacher') && (editor._id != user._id))\n      throw new Meteor.error('editOwnProfile',\"Only a teacher can edit another user's' profile.\")\n\n    var username = user.username || null;\n    if ((username) && (username != cU.username)) {\n      //users.update throws error if username is already used\n      //but I couldn't find a way to catch the error and send a humanized message\n      //through to the client, so catching it myself here\n      var usernames = _.pluck(Meteor.users.find({},{$fields: {username:1}}).fetch(),'username');\n      if (_.contains(usernames,username))\n        throw new Meteor.Error('usernameAlreadyExists','Username already exists.');\n      Meteor.users.update(user._id,{$set: {username:username}});\n    }\n\n    var emails = user.emails || null;\n    if (emails.length > 0) {\n      emails = emails.map(function(email) {\n        return {address:email,verified:false};\n      });\n      Meteor.users.update(user._id,{$addToSet:{emails: {$each:emails}}});\n    }\n\n    var firstName = user.profile.firstName || null;\n    if ((firstName) && (firstName != cU.profile.firstName))\n      Meteor.users.update(user._id,{$set: {'profile.firstName':firstName}});\n    var lastName = user.profile.lastName || null;\n    if ((lastName) && (lastName != cU.profile.lastName))\n      Meteor.users.update(user._id,{$set: {'profile.lastName':lastName}});\n\n\n    if (Roles.userIsInRole(editor,'teacher')) {\n      var role = user.profile.postEnrollmentInfo.role || null;\n      if ((role) &&  !Roles.userIsInRole(cU,role)) {\n        if (editor._id == cU._id)\n          throw new Meteor.Error(\"cantChangeOwnRole\",'You cannot change your own role.');\n        var currentRoles = Roles.getRolesForUser(cU);\n        Roles.removeUsersFromRoles(cU,currentRoles);\n        Roles.addUsersToRoles(cU,role);\n      }\n    }\n\n    if (Roles.userIsInRole(cU,'student')) {\n      var sectionID = user.profile.postEnrollmentInfo.sectionID || null;\n      if (sectionID) {\n        var currentMembership = Memberships.find(\n          {memberID:user._id,collectionName:'Sections'},\n          {$sort:{to:-1}},\n          {limit:1}\n        ).fetch().pop();\n        if (!currentMembership || (currentMembership.in != sectionID)) {\n          Meteor.call('addMember',{\n            memberID: user._id,\n            itemID: sectionID,\n            collectionName: 'Sections'\n          });\n        }\n      }\n    }\n\n    if (Roles.userIsInRole(cU,'parentOrAdvisor')) {\n      user.profile.postEnrollmentInfo.childrenOrAdvisees.forEach(function(fullname,index,cOAs) {\n        if (!Match.test(fullname,Match.nonEmptyString)) return;\n        var name = _.words(fullname);      //options.profile.sectionID = pEi.sectionID;\n        var firstName,lastName,cOA;\n        if (name.length == 2) {\n          firstName = name[0];\n          lastName = name[1]; \n        } else if (name.length > 2) {\n          firstName = name[0];\n          lastName = _.strRight(fullname,firstName);\n          lastName = _.trim(lastName);\n        }\n        var student = Meteor.users.findOne({'profile.firstName':firstName,'profile.lastName':lastName});\n        if (student) {\n          cOA = {idOrFullname:student._id,\n                 verified:false};\n        } else {\n          cOA = {idOrFullname:fullname,\n                 verified:false};\n        }\n        Meteor.users.update(user._id,{$addToSet:{'childrenOrAdvisees': cOA}});\n      });\n    }\n  },\n  verifyChildOrAdvisee: function(userID,studentID) {\n    check(userID,Match.idString);\n    check(studentID,Match.idString);\n    var user = Meteor.users.findOne(userID);\n    if (!user)\n      throw new Meteor.Error('userNotFound','Error: User not found.');\n    var cU = Meteor.user();\n    if (!cU)\n      throw new Meteor.Error('notLoggedIn','You must be logged in.');\n    if (!Roles.userIsInRole(cU,'teacher'))\n      throw new Meteor.Error('notTeacher','Only teachers can verify a request to observe a student.');\n    var student = Meteor.users.findOne(studentID);\n    if (!student)\n      throw new Meteor.Error('studentNotFound','Error:  Student not found.');\n    if (!Roles.userIsInRole(student,'student')) \n      throw new Meteor.Error('notAStudent', 'You can only observe a registered student.');\n    Meteor.users.update(\n      {_id:userID,\n        'childrenOrAdvisees.idOrFullname':studentID},\n      {$set: {'childrenOrAdvisees.$.verified': true}});\n  },\n  removeEmail: function(userID,email) {\n    check(userID,Match.idString);\n    check(email,Match.email);\n    var user = Meteor.users.findOne(userID);\n    if (!user)\n      throw new Meteor.Error('invalid user','Cannot remove email.  Invalid user');\n    var emailObject = {\n      address:email,\n      verified: false //don't remove verified e-mail\n    }\n    Meteor.users.update(userID,{$pull: {emails:emailObject}});\n  },\n  removeChildOrAdvisee: function(userID,studentID) {\n    check(userID,Match.idString);\n    check(studentID,Match.OneOf(Match.idString,Match.nonEmptyString));\n    var user = Meteor.users.findOne(userID);\n    if (!user)\n      throw new Meteor.Error('invalid user','Cannot remove child or advisee.  Invalid user');\n    Meteor.users.update(\n      {_id:userID},\n      {$pull: {childrenOrAdvisees:{idOrFullname:studentID}}});\n    }\n});\n\n",
+			"file": "server/users.js",
+			"file_size": 10216,
+			"file_write_time": 130788064827882540,
 			"settings":
 			{
-				"buffer_size": 19083,
+				"buffer_size": 10217,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+			"file": "client/custom-accounts-ui/helpers/section_helpers.js",
 			"settings":
 			{
-				"buffer_size": 4461,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
-			"settings":
-			{
-				"buffer_size": 236,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "server/publications.js",
-			"settings":
-			{
-				"buffer_size": 2958,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/workPeriods.js",
-			"settings":
-			{
-				"buffer_size": 6844,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/stylesheets/workPeriod.css",
-			"settings":
-			{
-				"buffer_size": 1072,
+				"buffer_size": 1677,
 				"line_ending": "Unix"
 			}
 		}
@@ -139,36 +89,47 @@
 	[
 		"/home/solargreen/meteor/OpenLabv2",
 		"/home/solargreen/meteor/OpenLabv2/client",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers"
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX",
+		"/home/solargreen/meteor/OpenLabv2/server"
 	],
 	"file_history":
 	[
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.html",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/alertOnError.js",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers/statusColors.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/parentTemplate.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/workPeriods.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/dateTimeHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/dateTimeHelpers.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers/statusColors.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.html",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriod.css",
+		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.html",
+		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/alertOnError.js",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/parentTemplate.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/dateTimeHelpers.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
 		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/site.js",
-		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
 		"/home/solargreen/meteor/OpenLabv2/server/schoolAccountsPublications.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
 		"/home/solargreen/meteor/OpenLabv2/collections/files.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
@@ -176,7 +137,6 @@
 		"/home/solargreen/meteor/OpenLabv2/collections/users.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
 		"/home/solargreen/meteor/OpenLabv2/server/users.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js.bak",
@@ -186,12 +146,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.html",
 		"/home/solargreen/meteor/OpenLabv2/client/main.html",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriod.css",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.html",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js",
 		"/home/solargreen/meteor/OpenLabv2/client/bootstrap-popover-x/bootstrap-popover-x.min.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriodGauge.css",
@@ -243,7 +197,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/activityPageHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/inEditedWall.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/showHide.js",
-		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/plaintexteditor.css",
 		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.html",
 		"/home/solargreen/meteor/OpenLabv2/client/accountsui/accountsuiConfig.js",
@@ -272,8 +225,7 @@
 		"/home/solargreen/meteor/OpenLabv2/client/pages/student/studentView.js",
 		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/student/activities_list.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/student/activities_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/student/studentView.html"
+		"/home/solargreen/meteor/OpenLabv2/client/views/student/activities_list.html"
 	],
 	"find":
 	{
@@ -291,6 +243,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			".modal-backdrop",
+			"|| Sections.findOne()",
+			"selected",
 			"currentStatus",
 			"console",
 			"Future",
@@ -415,10 +370,7 @@
 			"author",
 			"student",
 			"currentG",
-			"userTo",
-			"Note",
-			".Model",
-			"console.log"
+			"userTo"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -442,41 +394,11 @@
 			[
 				{
 					"buffer": 0,
-					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
+					"file": "client/custom-accounts-ui/login_buttons.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3103,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1672,
-								1672
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 87,
+						"buffer_size": 28644,
 						"regions":
 						{
 						},
@@ -485,158 +407,6 @@
 							[
 								0,
 								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 239,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								239,
-								239
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 7,
-			"sheets":
-			[
-				{
-					"buffer": 3,
-					"file": "client/custom-accounts-ui/login_buttons.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 28871,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3597,
-								3597
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1734.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "client/views/openlab/activities_list.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12766,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2451,
-								2451
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 19083,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9501,
-								9501
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 4080.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "client/workPeriod/workPeriodGauge/workPeriodGauge.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4461,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								103,
-								103
 							]
 						],
 						"settings":
@@ -651,50 +421,28 @@
 					},
 					"stack_index": 3,
 					"type": "text"
-				},
+				}
+			]
+		},
+		{
+			"selected": 1,
+			"sheets":
+			[
 				{
-					"buffer": 7,
-					"file": "client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
+					"buffer": 1,
+					"file": "client/custom-accounts-ui/helpers/login_buttons_session.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 236,
+						"buffer_size": 7277,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								193,
-								193
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "server/publications.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2958,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2738,
-								2738
+								6444,
+								6444
 							]
 						],
 						"settings":
@@ -704,27 +452,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 747.0,
+						"translation.y": 2499.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 9,
-					"file": "collections/workPeriods.js",
+					"buffer": 2,
+					"file": "server/users.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6844,
+						"buffer_size": 10217,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1682,
-								1682
+								6380,
+								6380
 							]
 						],
 						"settings":
@@ -734,40 +482,40 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1326.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "client/stylesheets/workPeriod.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1072,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								230,
-								230
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2193.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "client/custom-accounts-ui/helpers/section_helpers.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1677,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
 					"type": "text"
 				}
 			]
@@ -839,7 +587,7 @@
 		[
 			[
 				"",
-				"~/meteor/dateTimePickerTest/dateTimePicker.sublime-workspace"
+				"~/meteor/OpenLab/OpenLab.sublime-project"
 			]
 		],
 		"width": 380.0

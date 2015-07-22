@@ -26,10 +26,6 @@
 *      currently handled by hiding the modal on the unit title click event
 *      would be better to handle it here
 
-*save teachers last viewed section, if not present, selecte a random section
-*    proved difficult to do unless a section is actually selected through viewAs on login
-*    but that may not be what is wanted in general ... difficult to do just for workPeriods
-*unrelated note: do same for parents selection of student
 *improve stub simulation 
 *     have all icons register the provisional change?
 *     have it extend to more than a half-circle to show extended deadline?
