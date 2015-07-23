@@ -113,7 +113,7 @@ Meteor.methods({
         lastViewedSectionID: Match.Optional(Match.idString),
         lastViewedChildOrAdvisee: Match.Optional(Match.idString),
         lastViewedUnit: Match.Optional(Match.idString),
-        lastViewedUnit2: Match.Optional(Match.idString),
+        lastViewedUnit2: Match.Optional(Match.OneOf(Match.idString,null)),
 
         postEnrollmentInfo: Match.Optional({ //needs different name here?
           role: Match.Optional(Match.OneOf('student','teacher','parentOrAdvisor')),
@@ -163,9 +163,8 @@ Meteor.methods({
     var lastViewedUnit = user.profile.lastViewedUnit || null;
     if (lastViewedUnit)
       Meteor.users.update(user._id,{$set: {'profile.lastViewedUnit':lastViewedUnit}});
-    var lastViewedUnit2 = user.profile.lastViewedUnit2 || null;
-    if (lastViewedUnit2)
-      Meteor.users.update(user._id,{$set: {'profile.lastViewedUnit2':lastViewedUnit2}});
+    if ('lastViewedUnit2' in user.profile) //this one can be set to null
+      Meteor.users.update(user._id,{$set: {'profile.lastViewedUnit2':user.profile.lastViewedUnit2}});
 
     if (Roles.userIsInRole(cU,'teacher')) {
       var lastViewedSectionID = user.profile.lastViewedSectionID || null;
