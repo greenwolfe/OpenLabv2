@@ -1,0 +1,28 @@
+
+    
+      title
+      
+        
+          
+        
+        
+          replace image
+          
+            delete
+          
+          send to group
+          send to section
+        
+      
+    
+    
+      
+
+      
+        
+      
+
+      
+
+    
+  

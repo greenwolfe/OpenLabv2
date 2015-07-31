@@ -8,7 +8,39 @@ var getBlocks = function(column) {
   return Blocks.find(selector,{sort: {order:1}});
 }
 
-//add a paste block(s) option to paste copied blocks into the column
+var getCreatedFor = function(wallID) {
+  var wall = Walls.findOne(wallID);
+  if (!wall)
+    return undefined;
+  var cU = Meteor.userId();
+  if (!cU) 
+    return undefined;
+  if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+    return undefined;
+
+  var userOrSection = loginButtonsSession.get('viewAs');
+  if (Roles.userIsInRole(cU,'teacher')) {
+    //userOrSection == null means teacher is viewing as self and has not selected a student or section
+    if ((!userOrSection) || (wall.type == 'teacher'))
+      return {Site:Site.findOne()._id};
+  }
+
+  var iU = Meteor.impersonatedOrUserId();
+  if ((wall.type == 'student') && Roles.userIsInRole(iU,'student'))
+    return {users:iU};
+  var cG = Meteor.currentGroupId();  //needs revision to find selected group if it is not users current group
+  if ((wall.type == 'group') && (cG)) 
+    return {Groups:cG};
+  var cS = Meteor.selectedSectionId();
+  if ((wall.type == 'section') && (cS)) //may be OK as is
+    return {Sections:cS};
+
+  if (Roles.userIsInRole(cU,'teacher') && (wall.type != 'teacher') && (cS))
+    return {Sections:cS}
+
+  return undefined;
+}
+
 Template.column.helpers({
   blocks: function() {
     return getBlocks(this);
@@ -84,8 +116,7 @@ Template.column.events({
     var block = {
       columnID: tmpl.data._id,
       type: 'text',
-      title: '',
-      text: ''
+      createdFor: getCreatedFor(tmpl.data.wallID)
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
@@ -93,8 +124,7 @@ Template.column.events({
     var block = {
       columnID: tmpl.data._id,
       type: 'embed',
-      title: '',
-      embedCode: ''
+      createdFor: getCreatedFor(tmpl.data.wallID)
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
@@ -102,7 +132,7 @@ Template.column.events({
     var block = {
       columnID: tmpl.data._id,
       type: 'file',
-      title: ''
+      createdFor: getCreatedFor(tmpl.data.wallID)
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
@@ -110,7 +140,7 @@ Template.column.events({
     var block = {
       columnID: tmpl.data._id,
       type: 'workSubmit',
-      title: ''
+      createdFor: getCreatedFor(tmpl.data.wallID)
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
@@ -118,7 +148,7 @@ Template.column.events({
     var block = {
       columnID: tmpl.data._id,
       type: 'subactivities',
-      title: ''
+      createdFor: getCreatedFor(tmpl.data.wallID)
     }
     Meteor.call('insertBlock',block,alertOnError);
   },

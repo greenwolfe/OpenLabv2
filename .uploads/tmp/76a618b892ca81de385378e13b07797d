@@ -1,0 +1,38 @@
+/*
+ * This is a JavaScript Scratchpad.
+ *
+ * Enter some JavaScript, then Right Click or choose from the Execute Menu:
+ * 1. Run to evaluate the selected text (Ctrl+r),
+ * 2. Inspect to bring up an Object Inspector on the result (Ctrl+i), or,
+ * 3. Display to insert the result in a comment after the selection. (Ctrl+l)
+ */
+
+/*
+ * This is a JavaScript Scratchpad.
+ *
+ * Enter some JavaScript, then Right Click or choose from the Execute Menu:
+ * 1. Run to evaluate the selected text (Ctrl+r),
+ * 2. Inspect to bring up an Object Inspector on the result (Ctrl+i), or,
+ * 3. Display to insert the result in a comment after the selection. (Ctrl+l)
+ */
+
+site = {};
+site.frozen = [{Dec_18_2014:true},{Dec_19_2014:false},{Dec_20_2014:true},{Dec_21_2014:true}];
+//console.log('test');
+//console.log(!!_.find(site.frozen,function(f){return ('Dec_21_2014' in f)}));
+section = {};
+section.frozen = [{Dec_19_2014:false},{Dec_20_2014:false}];
+user = {};
+user.frozen = [{Dec_18_2014:false},{Dec_19_2014:true}];
+
+frozen = function(date) {
+    var uf = _.find(user.frozen,function(f) {return (date in f)});
+    if (uf) return uf[date];
+    var us = _.find(section.frozen,function(f) {return (date in f)});
+    if (us) return us[date];
+    var uS = _.find(site.frozen,function(f) {return (date in f)});
+    if (uS)  return uS[date];
+    return false;
+}
+ 
+console.log(frozen("Dec_22_2014"));

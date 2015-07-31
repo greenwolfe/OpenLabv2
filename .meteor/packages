@@ -25,8 +25,8 @@ reactive-dict
 tsega:bootstrap3-datetimepicker
 clubfest:raphael
 reactive-var
-meteorhacks:flow-router
-meteorhacks:flow-layout
 meteorhacks:fast-render
 arillo:flow-router-helpers
 matb33:collection-hooks
+meteorhacks:flow-router
+meteorhacks:flow-layout

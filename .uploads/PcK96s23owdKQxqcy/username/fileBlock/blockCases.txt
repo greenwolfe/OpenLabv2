@@ -1,0 +1,38 @@
+cases:
+not logged in createdFor = undefined
+
+user is student
+teacher wall 	undefined
+student wall 	{'Meteor.user': studentID}
+group wall 	{Groups: id of students current group} (or undefined if student has no group) //must be ammended to selected group when that's available
+section wall 	{Sections: id of student's current section} 
+
+user is parent viewing student
+teacher wall 	undefined
+student wall 	undefined
+group wall 	undefined
+section wall 	undefined	
+
+user is teacher viewing as self
+teacher wall {Site:Site.findOne()._id}
+student wall {Site:Site.findOne()._id}
+group wall {Site:Site.findOne()._id}
+section wall {Site:Site.findOne()._id}
+
+user is teacher viewing a section
+teacher wall {Site:Site.findOne()._id}
+student wall {Sections: section ID}
+group wall  {Sections: section ID}
+section wall {Sections: section ID}
+
+user is teacher viewing as a particular student
+teacher wall {Site:Site.findOne()._id}
+student wall {'Meteor.user: student ID}
+group wall {Groups: id of students current group} //see above
+section wall {Sections: id of student's current section} 
+
+user is teacher viewing as a particular student -> and a selected group
+teacher wall {Site:Site.findOne()._id}
+student wall {'Meteor.user: student ID}
+group wall {Groups: id of students current group} //see above (must be amended especially for this case)
+section wall {Sections: id of student's current section}

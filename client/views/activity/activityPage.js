@@ -19,10 +19,21 @@ groups (that you are in) and check them off.
     Meteor.call('insertFile',file,alertOnError);
   }
 });*/
+Template.activityPage.onCreated(function() {
+  //reset to teacher if teacher reached the page while impersonating a parent
+  var iU = Meteor.impersonatedOrUserId();
+  var cU = Meteor.userId();
+  if (Roles.userIsInRole(cU,'teacher') && Roles.userIsInRole(iU,'parentOrAdvisor')) 
+    loginButtonsSession.set('viewAs',cU);
+})
 
 Template.activityPage.helpers({
   walls: function() {
-    return Walls.find({activityID:FlowRouter.getParam('_id')},{sort: {order:1}});
+    var selector = {activityID:FlowRouter.getParam('_id')}
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      selector.visible = true;
+    return Walls.find(selector,{sort: {order:1}});
   },
   sortableOpts: function() {
     return {

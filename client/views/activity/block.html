@@ -93,7 +93,7 @@
       {{>showHide collection='Files' itemName='file' item=this}}
       <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
     {{/if}}
-    <a href="/upload/{{path}}">{{name}}</a> 
+    <a href="/upload{{path}}">{{name}}</a> 
   </p> 
 </Template>
 
@@ -149,7 +149,7 @@
       checkout for review button, ghost appears in teacher files with button to return?-->
       <!-- /if -->
     {{/if}}
-    <a href="/upload/{{path}}" title="download file (for teacher - without checking out)">{{name}}</a> 
+    <a href="/upload{{path}}" title="download file (for teacher - without checking out)">{{name}}</a> 
   </p> 
 </Template>
 
@@ -160,7 +160,7 @@
       {{>showHide collection='Files' itemName='file' item=this}}
       <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
     {{/if}}
-    <a href="/upload/{{path}}">{{name}}</a> 
+    <a href="/upload{{path}}">{{name}}</a> 
   </p> 
 </Template>
 

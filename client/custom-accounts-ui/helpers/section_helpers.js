@@ -26,21 +26,26 @@ Meteor.currentSection = function(memberID) {
 Template.registerHelper('currentSection',Meteor.currentSection);
 
 //if sectionOrID is not passed, returns members of current section for currently impersonated user or current user
-Meteor.sectionMemberIds = function(sectionOrID) {
-  var sectionID = ((sectionOrID) && ('object' === typeof sectionOrID)) ? sectionOrID._id : sectionOrID;
-  sectionID = sectionID || Meteor.currentSectionId();
-  var today = new Date();
-  var memberships = Memberships.find({
-      collectionName:'Sections',
-      itemID:sectionID,
-      startDate: {$lt: today},
-      endDate: {$gt: today}
-    },
-    {fields:{memberID:1}}).fetch();
-  return _.pluck(memberships,'memberID');
-}
+
 Meteor.sectionMembers = function(sectionOrID) {
   var memberIDs = Meteor.sectionMemberIds(sectionOrID);
   return Meteor.users.find({_id: {$in: memberIDs}});
 }
 Template.registerHelper('sectionMembers',Meteor.sectionMembers);
+
+   /******************************************/
+  /********* OTHER SECTION HELPERS **********/
+ /**** DEFINED IN LOGIN BUTTONS SESSION ****/
+/******************************************/
+
+//Meteor.selectedSection
+//Meteor.selectedSectionId()
+//Template.registerHelper('selectedSection')
+
+   /********************************************/
+  /********* OTHER SECTION HELPERS ************/
+ /**** DEFINED /METHODS/sectionMETHODS.JS ****/
+/********************************************/
+
+//Meteor.sectionMemberIds
+//Meteor.isSectionMember

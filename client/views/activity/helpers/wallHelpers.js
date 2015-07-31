@@ -1,6 +1,6 @@
 inEditedWall = function(wallID) {
   //returns truthy value 'inEditedWall' if object is in a wall currently being edited
-  wallID = wallID || this.wallID;
+  wallID = wallID || this.wallID || this._id;
   return (activityPageSession.get('editedWall') == wallID) ? 'inEditedWall' : '';
 }
 
@@ -12,8 +12,9 @@ editingActivity = function() {
 inWallofType = function(type) {
   if (!Match.test(type,Match.OneOf('teacher','student','group','section')))
     return null;
-  return function() {
-    var wall = Walls.findOne(this.wallID);
+  return function(wallID) {
+    wallID = wallID || this.wallID || this._id;
+    var wall = Walls.findOne(wallID);
     if (!wall) return false;
     return (wall.type == type);
   }
