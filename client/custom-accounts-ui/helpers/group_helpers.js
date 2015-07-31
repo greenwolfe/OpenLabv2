@@ -10,6 +10,8 @@ Template.registerHelper('userIsInRole',function(user,role) {
  /***** GROUP HELPERS *****/
 /*************************/
 
+
+
 //if memberID is not passed, returns id of current group for currently impersonated user or current user
 Meteor.currentGroupId = function(memberID) {
   var today = new Date();
@@ -47,20 +49,6 @@ Meteor.openInvites = function(memberID) {
 }
 Template.registerHelper('openInvites',Meteor.openInvites)
 
-//if groupOrID is not passed, returns members of current group for currently impersonated user or current user
-Meteor.groupMemberIds = function(groupOrID) {
-  var groupID = ((groupOrID) && ('object' === typeof groupOrID)) ? groupOrID._id : groupOrID;
-  groupID = groupID || Meteor.currentGroupId();
-  var today = new Date();
-  var memberships = Memberships.find({
-      collectionName:'Groups',
-      itemID:groupID,
-      startDate: {$lt: today},
-      endDate: {$gt: today}
-    },
-    {fields:{memberID:1}}).fetch();
-  return _.pluck(memberships,'memberID');
-}
 Meteor.groupMembers = function(groupOrID) {
   var memberIDs = Meteor.groupMemberIds(groupOrID);
   return Meteor.users.find({_id: {$in: memberIDs}});
@@ -105,3 +93,19 @@ Meteor.groupies = function(groupID) {
   return groupies;
 }
 Template.registerHelper('groupies',Meteor.groupies);
+
+   /******************************************/
+  /*********** OTHER GROUP HELPERS **********/
+ /**** DEFINED IN LOGIN BUTTONS SESSION ****/
+/******************************************/
+
+//none at the present time
+
+   /*********************************************/
+  /*********** OTHER GROUP HELPERS *************/
+ /**** DEFINED IN /METHODS/groupMETHODS.JS ****/
+/*********************************************/
+
+//Meteor.groupMemberIds
+//Meteor.isGroupMember
+

@@ -4,24 +4,31 @@
       <div class='wallSortableHandle'>
         {{title}}
         <div class="pull-right">
-          <button class="btn btn-default editColumns"> 
-            {{editColumns}}
-          </button>
-          {{#if inEditedWall _id}}
-            {{>showHide collection='Walls' itemName='wall' item=this}}
+          {{#if canEditWall}}
+            <button class="btn btn-default editColumns"> 
+              {{editColumns}}
+            </button>
+            {{#if inEditedWall}}
+              {{>showHide collection='Walls' itemName='wall' item=this}}
+            {{/if}}
           {{/if}}
         </div>
+        <ul class="nav navbar-nav">
+          {{#if inStudentWall}}
+            {{>viewAs}}
+          {{/if}}
+        </ul>
       </div>
     </div>
-    <div class="panel-body">
-      {{#if inEditedWall _id}}
-        {{>helpBannerNavPills messages=helpMessages}}
-      {{/if}}
-      {{#if visibleOrEditing}}
-        {{#each columns}}
-          {{> column}}
-        {{/each}}
-      {{/if}}
-    </div>
+    {{#if visibleOrEditing}}
+      <div class="panel-body">
+        {{#if inEditedWall}}
+          {{>helpBannerNavPills messages=helpMessages}}
+        {{/if}}
+          {{#each columns}}
+            {{> column}}
+          {{/each}}
+      </div>
+    {{/if}}
   </div>
 </Template>

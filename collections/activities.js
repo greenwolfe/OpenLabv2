@@ -11,10 +11,8 @@ Meteor.methods({
       pointsTo: Match.Optional(Match.idString),
       title: Match.nonEmptyString,
       unitID: Match.idString,
-      //description:  Match.Optional(String), //deprecated ... now will just be text in a text block on the teacher wall
       studentID: Match.Optional(Match.idString), //in case is reassessment for an individual student
       //order: Match.Optional(Match.Integer), //for now, new activity always placed at end of list
-      //standardIDs: [], //now kept in a standards block on the page
       visible:  Match.Optional(Boolean),
       dueDate: Match.Optional(Date),
     });
@@ -91,34 +89,24 @@ Meteor.methods({
           //this places it on equal footing with the other subactivities
           Activities.update(_id,{$set: {pointsTo:_id}});
           Activities.update(_id,{$set: {suborder:0}});
-          Meteor.call('insertWall',{
+          var site = Site.findOne();
+          var wall = {
             activityID: _id,
-            type: 'teacher',
-            //owner: 'teacher', //probably no need for wall's owner?
+            createdFor: {Site:site._id},
             visible: true,
             order: 0
-          });
-          Meteor.call('insertWall',{
-            activityID: _id,
-            type: 'student',
-            //owner: 'st1',
-            visible: true,
-            order: 1
-          });
-          Meteor.call('insertWall',{
-            activityID: _id,
-            type: 'group',
-            //owner: ['st1','st2','st3'],
-            visible: true,
-            order: 2
-          });
-          Meteor.call('insertWall',{
-            activityID: _id,
-            type: 'section',
-            //owner: 'Bblock',
-            visible: true,
-            order: 3
-          });
+          }
+          wall.type = 'teacher'
+          Meteor.call('insertWall',wall);
+          wall.type = 'student';
+          wall.order = 1;
+          Meteor.call('insertWall',wall);
+          wall.type = 'group';
+          wall.order = 2;
+          Meteor.call('insertWall',wall);
+          wall.type = 'section';
+          wall.order = 3;
+          Meteor.call('insertWall',wall);
         }
       }
     });

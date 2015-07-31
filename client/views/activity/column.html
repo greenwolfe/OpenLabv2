@@ -29,7 +29,9 @@
               <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="#" class="addWorkSubmitBlock">submit work</a></li>
+              {{#if inStudentWall}}
+                <li><a href="#" class="addWorkSubmitBlock">submit work</a></li>
+              {{/if}}
               <li><a href="#" class='addTextBlock'>text</a></li>
               <li><a href="#" class="addFileBlock">files</a></li>
               <li><a href="#" class="addEmbedBlock">embed</a></li>

@@ -214,7 +214,7 @@ Meteor.selectedSectionId = function() {
     return Meteor.currentSectionId(); //could be undefined if no one is logged in or logged or impersonated user has no curren section
 
   //pausing to set last viewed section for teacher before sending result
-  //so long as this is used in at least on reactive setting, it will be called
+  //so long as this is used in at least one reactive setting, it will be called
   //when viewAs changes.  If it's not used in a reactive setting, then it doesn't matter anyway
   var cU = Meteor.user();
   if (Roles.userIsInRole(cU,'teacher'))

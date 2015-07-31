@@ -173,6 +173,13 @@ Template.fileBlock.helpers({
  /**** FILELINK  *******/
 /**********************/
 
+Template.fileLink.helpers({
+  //not using right now ... saving for later reference
+  absolutePath: function() {
+    return Meteor.absoluteUrl('.uploads' + this.path);
+  }
+})
+
 Template.fileLink.events({
   'click .deleteFile': deleteFile 
 });
@@ -182,7 +189,6 @@ Template.fileLink.events({
 /******************************/
 /*** needs a student ID - as all blocks do ***/
 /*** disable ability for student to copy/paste or move to another wall ***/
-
 Template.workSubmitBlock.helpers({
   helpMessages: function () {
     return [
@@ -196,7 +202,8 @@ Template.workSubmitBlock.helpers({
   },
   studentFiles: function() {
     var selector = {blockID:this._id};
-    selector.studentOrGroupID = theUserID;
+    //what if this is in a group wall?
+    selector.studentOrGroupID = Meteor.impersonatedOrUserId();;
     selector.purpose = 'submittedWork';
     if (!inEditedWall(this.wallID)) //if not editing
       selector.visible = true //show only visible blocks
@@ -204,7 +211,7 @@ Template.workSubmitBlock.helpers({
   },
   teacherFiles: function() {
     var selector = {blockID:this._id};
-    selector.studentOrGroupID = theUserID;
+    //selector.studentOrGroupID = theUserID; //show files for all teachers
     selector.purpose = 'teacherResponse';
     if (!inEditedWall(this.wallID)) //if not editing
       selector.visible = true //show only visible blocks
@@ -212,7 +219,8 @@ Template.workSubmitBlock.helpers({
   },
   processStudentUpload: function() {
     var blockID = this._id;
-    var studentOrGroupID = theUserID;
+    //what if this is in a group wall?
+    var studentOrGroupID = Meteor.impersonatedOrUserId();
     return {
       //make this a standard function at the top?
       finished: function(index, file, tmpl) {
@@ -231,7 +239,14 @@ Template.workSubmitBlock.helpers({
   },
   processTeacherUpload: function() {
     var blockID = this._id;
-    var studentOrGroupID = theUserID;
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      return null;
+    //what if this is in a group wall?
+    var student = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(student,'student'))
+      return null;
+    var studentOrGroupID = student;
     return {
       finished: function(index, file, tmpl) {
         file.blockID = blockID;
@@ -243,14 +258,20 @@ Template.workSubmitBlock.helpers({
     }
   },
   studentFormData: function() {
+    var student = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(student,'student'))
+      return null;
     var formData = this;
-    formData.user = 'username';
+    formData.user = student;
     formData.purpose = 'submittedWork';
     return formData;
   },
   teacherFormData: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      return null;
     var formData = this; //work out system, would be nice to store this together with student submission
-    formData.user = 'username';
+    formData.user = cU;
     formData.purpose = 'teacherResponse';
     return formData;
   }/*,

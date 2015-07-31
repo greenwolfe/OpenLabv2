@@ -20,6 +20,26 @@ Template.wall.helpers({
   columns: function() {
     return Columns.find({wallID:this._id},{sort: {order:1}});
   },
+  canEditWall: function() {
+    var cU = Meteor.user();
+    if (!cU)
+      return false;
+    if (Roles.userIsInRole(cU,'teacher'))
+      return true;
+    if (Roles.userIsInRole(cU,'parent'))
+      return false;
+    if ('Site' in this.createdFor)
+      return false;
+    if (Roles.userIsInRole(cU,'student')) { //should be true by default, but being sure
+      if (('Meteor.users' in this.createdFor) && (this.createdFor['Meteor.users'] == cU._id))
+        return true;
+      if (('Groups' in this.createdFor) && (Meteor.isGroupMember(cU,this.createdFor.Groups)))
+        return true;
+      if (('Sections' in this.createdFor) && (Meteor.isSectionMember(cU,this.createdFor.Sections)))
+        return true;
+    }
+    return false;
+  },
   editColumns: function() {
     return (inEditedWall(this._id)) ? 'Done' : 'Edit Wall';
   },

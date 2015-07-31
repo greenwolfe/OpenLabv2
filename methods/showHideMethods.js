@@ -14,3 +14,4 @@ Meteor.methods({
     return Collection.update(_id,{$set: {visible:show}});
   }
 });
+//make a userCanShowHide(userID,collection,_id) function that checks createdBy, createdFor and canEdit and returns boolean
