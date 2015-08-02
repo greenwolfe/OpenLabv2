@@ -10,25 +10,6 @@ Template.registerHelper('userIsInRole',function(user,role) {
  /***** GROUP HELPERS *****/
 /*************************/
 
-
-
-//if memberID is not passed, returns id of current group for currently impersonated user or current user
-Meteor.currentGroupId = function(memberID) {
-  var today = new Date();
-  var memberID = memberID || Meteor.impersonatedOrUserId();
-  var membership = Memberships.find({
-      memberID:memberID,
-      collectionName:'Groups',
-      startDate: {$lt: today}, //startDate < today < endDate
-      endDate: {$gt: today}
-    },
-    {sort:[["endDate","desc"]]}, 
-    {limit:1}
-  ).fetch().pop();
-  if (!membership)
-    return ''; 
-  return membership.itemID;
-}
 Meteor.currentGroup = function(memberID) {
   var groupID = Meteor.currentGroupId(memberID);
   return Groups.findOne(groupID);
@@ -108,4 +89,5 @@ Template.registerHelper('groupies',Meteor.groupies);
 
 //Meteor.groupMemberIds
 //Meteor.isGroupMember
+//Meteor.currentGroupId
 

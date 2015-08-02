@@ -1,3 +1,10 @@
+Template.column.onCreated(function() {
+  var instance = this;
+  instance.autorun(function() {
+    var blockSubscription = instance.subscribe('blocks', instance.data._id);
+  });
+})
+
   /**********************/
  /******* HELPERS ******/
 /**********************/
@@ -97,58 +104,47 @@ Template.column.events({
       });
     } //else do nothing ... add block to clipboard
     getBlocks(tmpl.data).forEach(function(block) {
-      block.idFromCopiedBlock = block._id;
       block.order = ClipboardBlocks.find().count() + 1;
-      delete block._id;
-      delete block.columnID;
       ClipboardBlocks.insert(block);
     });
   },
   'click .pasteBlock': function(event,tmpl) {
     ClipboardBlocks.find({},{sort:{order:-1}}).forEach(function(block) {
-      delete block._id;
-      delete block.order;
-      block.columnID = tmpl.data._id;
-      Meteor.call('insertBlock',block,alertOnError);
+      Meteor.call('insertBlock',block._id,block.columnID,alertOnError);
     });
   },
   'click .addTextBlock': function(event,tmpl) {
     var block = {
       columnID: tmpl.data._id,
-      type: 'text',
-      createdFor: getCreatedFor(tmpl.data.wallID)
+      type: 'text'
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
   'click .addEmbedBlock': function(event,tmpl) {
     var block = {
       columnID: tmpl.data._id,
-      type: 'embed',
-      createdFor: getCreatedFor(tmpl.data.wallID)
+      type: 'embed'
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
   'click .addFileBlock': function(event,tmpl) {
     var block = {
       columnID: tmpl.data._id,
-      type: 'file',
-      createdFor: getCreatedFor(tmpl.data.wallID)
+      type: 'file'
     }
     Meteor.call('insertBlock',block,alertOnError);
   },
-  'click .addWorkSubmitBlock': function(event,tmpl) {
+  /*'click .addWorkSubmitBlock': function(event,tmpl) {
     var block = {
       columnID: tmpl.data._id,
-      type: 'workSubmit',
-      createdFor: getCreatedFor(tmpl.data.wallID)
+      type: 'workSubmit'
     }
     Meteor.call('insertBlock',block,alertOnError);
-  },
+  },*/
   'click .addSubactivitiesBlock': function(event,tmpl) {
     var block = {
       columnID: tmpl.data._id,
-      type: 'subactivities',
-      createdFor: getCreatedFor(tmpl.data.wallID)
+      type: 'subactivities'
     }
     Meteor.call('insertBlock',block,alertOnError);
   },

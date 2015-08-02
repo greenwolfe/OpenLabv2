@@ -2,7 +2,7 @@
   <div class="wall wall-{{type}} panel panel-default row">
     <div class="panel-heading text-center clearfix">
       <div class='wallSortableHandle'>
-        {{title}}
+        {{{title}}}
         <div class="pull-right">
           {{#if canEditWall}}
             <button class="btn btn-default editColumns"> 
@@ -13,11 +13,11 @@
             {{/if}}
           {{/if}}
         </div>
-        <ul class="nav navbar-nav">
+        <!--<ul class="nav navbar-nav">
           {{#if inStudentWall}}
             {{>viewAs}}
           {{/if}}
-        </ul>
+        </ul>-->
       </div>
     </div>
     {{#if visibleOrEditing}}

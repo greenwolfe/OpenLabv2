@@ -4,62 +4,43 @@ Meteor.methods({
   insertWall: function(wall) {
     check(wall,{
       activityID: Match.idString,
-      createdFor: Match.OneOf(
-        {Site:Match.idString}, //idString must match site id as only one teacher wall per activity
-        {'Meteor.users':Match.idString}, //user must have student role
-        {Groups: Match.idString}, 
-        {Sections: Match.idString}
-      ),
+      createdFor: Match.idString, //must = siteID if teacher wall (only one Site object, so only one id possible)
+                                  //userID of a student if student wall
+                                  //id of a group if group wall
+                                  //id of a section if section wall
       type: Match.OneOf('teacher','student','group','section'),
-      visible: Boolean,
-      order: Match.Integer
+      /* set below, value not passed in
+      visible: activity.wallVisible[wall.type],
+      order: activity.wallOrder.indexOf(wall.type);
+      */
     });
-    
+    var cU = Meteor.user();
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to create a new block.");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    //if student, check if student is a member of createdFor group or section
+
     var activity = Activities.findOne(wall.activityID);
     if (!activity)
       throw new Meteor.Error('activity-not-found',"Cannot add wall, invalid activityID.");
+    //at a later stage, change to activity.wallOrder and update
+    //it whenever teacher re-organizes the walls
+    wall.order = activity.wallOrder.indexOf(wall.type);
+    wall.visible = activity.wallVisible[wall.type];
 
     //validate createdFor collection and specific item
-    var collectionName = _.keys(wall.createdFor)[0];
-    var itemID = wall.createdFor[collectionName];
+    var collectionNames = {teacher:'Site',student:'users',group:'Groups',section:'Sections'};
+    var collectionName = collectionNames[wall.type]
     var Collection = Mongo.Collection.get(collectionName);
     if (!Collection)
       throw new Meteor.Error('collection-not-found','Error creating wall.  Collection ' + collectionName + ' not found.');
-    item = Collection.find(itemID);
+    var item = Collection.findOne(wall.createdFor);
     if (!item) 
-      throw new Meteor.Error('item-not-found','Error creating wall.  Could not find itme ' + itemID + ' of the' + collectionName + 'collection.');
-
-    //compare type and assigned collection and get collectionName for later error message
-    var createdForName = itemID;
-    if (collectionName == 'Site') {
-      createdForName = item.title;
-      //any wall.type allowed as all can have a generic site wall for the teacher to fill with blocks to be cloned to all students/sections/groups as appropriate.
-    } else if (collectionName == 'Sections') {
-      createdForName = item.name;
-      if (wall.type != 'section') 
-        throw new Meteor.Error('not-section','A section wall must be assigned to Site or a specific section.');
-    } else if (collectionName == 'Meteor.users') {
-      if (wall.type != 'student') 
-        throw new Meteor.Error('not-student','A student wall must be assigned to Site or a specific student.');
-      var name = item.username;
-      if (('profile' in item) && ('firstName' in item.profile) && ('lastName' in item.profile))
-        name = item.profile.firstName + ' ' + item.profile.lastName;
-      if (!Roles.userIsInRole(item,'student'))
-        throw new Meteor.Error('not-a-student','Error creating wall. ' + name + ' is not a student.');
-    } else if (collectionName == 'Groups') {
-      if (wall.type != 'group') 
-        throw new Meteor.Error('not-a-group', 'A group wall must be assigned to Site or a specific group.');
-    }
-
-    var existingWall = Walls.find({
-      activityID: wall.activityID,
-      type: wall.type,
-      createdFor: wall.createdFor
-    }).count();
-    if (existingWall) {
-      throw new Meteor.Error('existing-wall', 'This activity (' + activity.title  + ') already has a ' + wall.type + ' wall for ' + createdForName + '.');
-    }
-
+      throw new Meteor.Error('item-not-found','Error creating wall.  Could not find item in ' + collectionNames + 'with id ' + wall.createdFor);
+    if ((wall.type == 'student') && (!Roles.userIsInRole(item,'student')))
+      throw new Meteor.Error('notStudent','Could not create student wall.  Assigned user is not a student.');
+    
     return Walls.insert(wall , function( error, _id) { 
       if ( error ) console.log ( error ); //info about what went wrong
       if ( _id ) {
@@ -68,36 +49,71 @@ Meteor.methods({
         Meteor.call('insertColumn',_id,1,'right');
       }
     });
+  },
+  deleteWallIfEmpty: function(wallID) {
+    check(wallID,Match.idString);
+    if (this.isSimulation)
+      return;
+    var wall = Walls.findOne(wallID);
+    if (!wall)
+      return; //already deleted on the server, but apparently its ghost was left in the browser
+      //throw new Meteor.Error('wallNotFound','Cannot delete wall.  Wall not found.')
+    var blockCount = Blocks.find({wallID:wallID}).count();
+    if (blockCount > 0)
+      return; //only delete empty walls
+    if (wall.type == 'teacher') {
+      var teacherWallCount = Walls.find({activityID:wall.activityID,type:'teacher'}).count();
+      if (teacherWallCount == 1)
+        return; //don't delete last teacher wall
+    }
+    return Walls.remove(wallID);
+  },
+  addDefaultWalls: function(studentID,activityID) {
+    check(studentID,Match.idString);
+    check(activityID,Match.idString);
+    var activity = Activities.findOne(activityID);
+    if (!activity)
+      throw new Meteor.Error('activityNotFound','Cannot create default walls.  Activity not found.');
+    var student = Meteor.users.findOne(studentID);
+    if (!student)
+      return; //viewing activity page without student selected
+              //only teacher wall visible
+    if (!Roles.userIsInRole(student,'student'))
+      return;
+
+    var wall = {
+      activityID: activityID,
+      type: 'student',
+      createdFor: studentID
+    }
+    if (Walls.find(wall).count() == 0) 
+      Meteor.call('insertWall',wall);
+
+    wall.type = 'group';
+    delete wall.createdFor;
+    if ((Walls.find(wall).count() == 0)) {
+      wall.createdFor = Meteor.currentGroupId(studentID);
+      if (wall.createdFor)
+        Meteor.call('insertWall',wall);
+    }
+
+    wall.type = 'section';
+    wall.createdFor = Meteor.currentSectionId(studentID);
+    if ((wall.createdFor) && (Walls.find(wall).count() == 0))
+       Meteor.call('insertWall',wall);
   }
-  //when a teacher visits an activity page, create its site walls if not present yet
-
-  //or simplify:  Have one group wall.  It defaults to the most recent group with content
-  //provides a dropdown menu in the header to select other groups with content 
-  //or current group if it didn't have content
-
-  //better behavior than below, when a user visits an activity page
-  //check for existing group walls, 
-  //if with current group, keep it
-  //if with past group, check if empty 
-  //  if empty and there isn't a current group wall, convert to current group
-  //  else delete it (or just hide it?)
-  //create an isEmpty function for each block type
-  //create an isEmpty function for walls, that finds all blocks and checks if they have student-created contents
-
-  //not making update or delete functions at this time, because
-  //not forseeing a need for them.  The only case I am
-  //pondering is group walls created as a user browses future
-  //activities while assigned to a particular group, but without doing
-  //anything.  Then what happens when the user joins a new group
-  //and visits the activity for real.  There is an old group wall
-  //hanging around with only cloned teacher content.  
-  //renormalize data?  make a "hasStudentContent" field that is
-  //filled at the block level whenever a student adds content, and then
-  //then gets added up the line to column and wall?
 });
 
-//need collection hook for show/hide site walls, all specif
-//walls of that type for that activity should then
-//also be hidden or shown
 
+//collection hook if wall reordered, then reorder all walls of same type 
+// for this activity for all users 
+// ... what happens if two group walls get reordered?
+// ... it appears this is OK.  sortable1c would interpret
+//this as not reordering anything, so no change would be made
+//hook must also update activity.wallOrder
+//first update activity.wallOrders
+//then call updateOrder method for each wall in the activity
+//which updates its order based on the activity
 
+//similar collection hook for visibility - changes all other 
+//walls of same type for activity, and activity.wallVisible

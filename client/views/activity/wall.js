@@ -1,10 +1,28 @@
-//put button bar in wall header with option to hide 
+Template.wall.onCreated(function() {
+  var instance = this;
+  instance.autorun(function() {
+    var columnSubscription = instance.subscribe('columns', instance.data._id);
+  });
+})
+
+Template.wall.onDestroyed(function() {
+  Meteor.call('deleteWallIfEmpty',this.data._id);
+})
+
 Template.wall.helpers({
   title: function() {
     if (this.type == 'teacher') return 'Teacher Wall';
-    if (this.type == 'student') return 'Student Wall';
-    if (this.type == 'group') return 'Group Wall: list of names';
-    if (this.type == 'section') return 'B block Wall';
+    if (this.type == 'student') {
+      var student = Meteor.impersonatedOrUser();
+      if (student)
+        return 'Student Wall for ' + student.profile.firstName + ' ' + student.profile.lastName;
+    }
+    if (this.type == 'group') return 'Group Wall for ' +  Meteor.groupies(this.createdFor);
+    if (this.type == 'section') {
+      var section = Sections.findOne(this.createdFor);
+      if (section)
+        return section.name + ' Wall';
+    }
     return '';
   },
   helpMessages: function () {
@@ -22,21 +40,11 @@ Template.wall.helpers({
   },
   canEditWall: function() {
     var cU = Meteor.user();
-    if (!cU)
-      return false;
-    if (Roles.userIsInRole(cU,'teacher'))
-      return true;
-    if (Roles.userIsInRole(cU,'parent'))
-      return false;
-    if ('Site' in this.createdFor)
-      return false;
+    if (!cU) return false;
+    if (Roles.userIsInRole(cU,'teacher')) return true;
+    if (Roles.userIsInRole(cU,'parentOrAdvisor')) return false;
     if (Roles.userIsInRole(cU,'student')) { //should be true by default, but being sure
-      if (('Meteor.users' in this.createdFor) && (this.createdFor['Meteor.users'] == cU._id))
-        return true;
-      if (('Groups' in this.createdFor) && (Meteor.isGroupMember(cU,this.createdFor.Groups)))
-        return true;
-      if (('Sections' in this.createdFor) && (Meteor.isSectionMember(cU,this.createdFor.Sections)))
-        return true;
+      return Meteor.studentCanEditWall(cU._id,this);
     }
     return false;
   },

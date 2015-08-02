@@ -5,7 +5,7 @@
   <div class="block block-{{type}} panel panel-default row">
     <div class="panel-heading">
       <div class="blockSortableHandle {{editingActivity}}">
-        {{#if inEditedWall}} 
+        {{#if editingBlock}}  
           <div class="pull-right">
             <a class="glyphicon glyphicon-copy copyBlock" title='Copy to clipboard.  Holding "Ctrl" adds to existing list.'></a>
             {{>showHide collection='Blocks' itemName='block' item=this}}
@@ -20,7 +20,10 @@
             <i class="transparentBox buttonRaiseVirtualHand"></i>
           </div>
           <div class="blockTitle">{{{title}}}</div>
-          <!--is there a better way to get the raise hand and drag functions to work together, especially on those walls that aren't currently being edited themselves, but whose blocks are draggable because another wall is being edited-->
+          <!--is there a better way to get the raise hand and drag functions to work together, especially on those walls that aren't currently being edited themselves, but whose blocks are draggable because another wall is being edited
+
+          use a specific drag icon for the handle
+          -->
         {{/if}}
       </div>
       <div>
@@ -34,8 +37,8 @@
     </div>
     <div class="panel-footer">
       {{#if inEditedWall}}
-        <span class="avoidwrap">created 9:30pm 3/29/15  by Matt Greenwolfe, </span>
-        <span class="avoidwrap">last modified 10:05am 3/30/15 by Matt Greenwolfe</span>
+        <span class="avoidwrap">created {{formatDateTime createdOn}}  by {{getname createdBy true}}, </span>
+        <span class="avoidwrap">last modified {{formatDateTime modifiedOn}} by {{getname modifiedBy true}}</span>
       {{/if}}
     </div>
   </div>
@@ -97,6 +100,7 @@
   </p> 
 </Template>
 
+<!--
 <Template name="workSubmitBlock">
   {{#if inEditedWall}}
     {{>helpBannerNavPills messages=helpMessages}}
@@ -106,13 +110,13 @@
     <p>
       {{>summernote collection='Blocks' field='studentText' _id=_id enabled=inEditedWall options=summernoteOptions}}
     </p>
-    <!--{{#sortable1c items=studentFiles  options=sortableOpts}} right now sortable cannot handle a more complicated selector involving two fields-->
+    <!--{{#sortable1c items=studentFiles  options=sortableOpts}} right now sortable cannot handle a more complicated selector involving two fields->
     <p>
       {{#each studentFiles}}
         {{>workSubmitLink}}
       {{/each}}
     </p>
-    <!--{{/sortable1c}}-->
+    <!--{{/sortable1c}}->
     {{#if inEditedWall}}
       <p>
         {{>upload_bootstrap formData=studentFormData callbacks=processStudentUpload}}
@@ -121,15 +125,14 @@
   </p>
   <p class="teacherResponse bg-warning">
     Teacher Name (date)
-    <!--teacher sees checkout button above, clicks that instead of just downloading the file, then has return button ... return button checks if file has changed and issues confirmation if not (how?)-->
     <p>
       {{>summernote collection='Blocks' field='teacherText' _id=_id enabled=inEditedWall options=summernoteOptions}}
     </p>
-    <!--{{#sortable1c items=teacherFiles  options=sortableOpts}} -->
+    <!--{{#sortable1c items=teacherFiles  options=sortableOpts}} ->
     {{#each teacherFiles}}
       {{>teacherResponseLink}}
     {{/each}}
-    <!--{{/sortable1c}}-->
+    <!--{{/sortable1c}}->
     {{#if inEditedWall}}
       <p>
         {{>upload_bootstrap formData=teacherFormData callbacks=processTeacherUpload}}
@@ -141,13 +144,13 @@
 <Template name="workSubmitLink">
   <p class="file">
     {{#if inEditedWall}}
-      <!-- <a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>-->
+      <!-- <a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>->
       {{>showHide collection='Files' itemName='file' item=this}}
-      <!--if is teacher-->
+      <!--if is teacher->
       <a class="glyphicon glyphicon-remove deleteFile" title="delete file (only available for teacher)"></a>
       <!--<i class="fa fa-download checkoutFile" title="download and checkout file for automatic return (only available for teacher)"></i>
       checkout for review button, ghost appears in teacher files with button to return?-->
-      <!-- /if -->
+      <!-- /if ->
     {{/if}}
     <a href="/upload{{path}}" title="download file (for teacher - without checking out)">{{name}}</a> 
   </p> 
@@ -155,14 +158,16 @@
 
 <Template name="teacherResponseLink">
   <p class="file">
-    {{#if inEditedWall}} <!-- and if is teacher-->
-      <!--<a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>-->
+    {{#if inEditedWall}} <!-- and if is teacher->
+      <!--<a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>->
       {{>showHide collection='Files' itemName='file' item=this}}
       <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
     {{/if}}
     <a href="/upload{{path}}">{{name}}</a> 
   </p> 
 </Template>
+-->
+
 
 <Template name='subactivitiesBlock'>
   {{#if inEditedWall}}

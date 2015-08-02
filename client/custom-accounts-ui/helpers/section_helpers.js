@@ -2,23 +2,6 @@
  /***** SECTION HELPERS *****/
 /***************************/
 
-//if memberID is not passed, returns id of current section for currently impersonated user or current user
-Meteor.currentSectionId = function(memberID) {
-  var today = new Date();
-  var memberID = memberID || Meteor.impersonatedOrUserId();
-  var membership = Memberships.find({
-      memberID:memberID,
-      collectionName:'Sections',
-      startDate: {$lt: today}, //startDate < today < endDate
-      endDate: {$gt: today}
-    },
-    {sort:[["endDate","desc"]]}, 
-    {limit:1}
-  ).fetch().pop();
-  if (!membership)
-    return ''; 
-  return membership.itemID;
-}
 Meteor.currentSection = function(memberID) {
   var sectionID = Meteor.currentSectionId(memberID);
   return Sections.findOne(sectionID);
@@ -49,3 +32,4 @@ Template.registerHelper('sectionMembers',Meteor.sectionMembers);
 
 //Meteor.sectionMemberIds
 //Meteor.isSectionMember
+//Meteor.currentSectionId

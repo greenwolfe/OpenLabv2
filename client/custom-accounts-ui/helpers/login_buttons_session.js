@@ -195,6 +195,23 @@ Meteor.impersonatedOrUser = function() {
 Template.registerHelper('impersonatedOrUser',function() {
   return Meteor.impersonatedOrUser();
 });
+Meteor.getname = function(userOrId,full) {
+  var user =  ('object' === typeof userOrId ) ? userOrId : Meteor.users.findOne(userOrId);
+  user = user || Meteor.impersonatedOrUser();
+  if (!user)
+    return 'error: user not found';
+  full = full || false;
+  var name = user.username;
+  if (('profile' in user) && ('firstName' in user.profile) && ('lastName' in user.profile)) {
+    name = user.profile.firstName;
+    if (full) 
+      name +=  ' ' + user.profile.lastName;
+  }
+  return name;
+}
+Template.registerHelper('getname',function(userOrId,full) {
+  return Meteor.getname(userOrId,full);
+});
 
   /****************************/ 
  /***** SELECTED SECTION *****/

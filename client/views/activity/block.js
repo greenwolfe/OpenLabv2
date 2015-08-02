@@ -13,9 +13,22 @@ var deleteFile = function(event,template) {
   /**********************/
  /******* BLOCK** ******/
 /**********************/
-
+var dateTimeFormat = "[at] h:mm a MM[/]DD[/]YY";
+var dateFormat = "ddd, MMM D YYYY";
 
 Template.block.helpers({
+  editingBlock: function() {
+    var cU = Meteor.userId();
+    var iU = Meteor.importedOrUserId();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      return false;
+    var isEditing = inEditedWall(this);
+    if (Roles.userIsInRole(cU,'teacher'))
+      return isEditing;
+    if (Roles.userIsInRole('student') && Meteor.studentCanEditBlock(iU,this))
+      return isEditing;
+    return false;
+  },
   blockType: function() {
     return this.type + 'Block';
   },
@@ -30,6 +43,12 @@ Template.block.helpers({
   },
   raiseHand: function () {
     return this.raiseHand || '';
+  },
+  formatDate: function(date) {
+    return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
+  },
+  formatDateTime: function(date) {
+    return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateTimeFormat) : '_____';
   }
 });
 
@@ -46,10 +65,7 @@ Template.block.events({
       });
     } //else do nothing ... add block to clipboard
     var block = Blocks.findOne(this._id);
-    block.idFromCopiedBlock = block._id;
     block.order = ClipboardBlocks.find().count() + 1;
-    delete block._id;
-    delete block.columnID;
     ClipboardBlocks.insert(block);
   },
   'click .buttonRaiseVirtualHand': function() {
@@ -142,20 +158,20 @@ Template.fileBlock.helpers({
   processUpload: function() { //passed to insertFile method to create object referring to file
     var blockID = this._id
     var studentOrGroupID = Meteor.impersonatedOrUserId();
-    var purpose = 'fileBlock';
+    //var purpose = 'fileBlock';
     return {
       finished: function(index, file, tmpl) {
         file.blockID = blockID;
-        file.purpose='fileBlock';
         var fileId = Meteor.call('insertFile',file,alertOnError);
       },
       validate: validateFiles
     }
   },
   formData: function() { //passed to uploads to create file path
+    //is this actually used?  If so, for what?
     var formData = this;
-    formData.user = 'username';
-    formData.purpose = 'fileBlock';
+    formData.createdBy = Meteor.userId();
+    //formData.purpose = 'fileBlock'; //deprecated?
     return formData;
   },
   sortableOpts: function() {
@@ -189,6 +205,7 @@ Template.fileLink.events({
 /******************************/
 /*** needs a student ID - as all blocks do ***/
 /*** disable ability for student to copy/paste or move to another wall ***/
+/*
 Template.workSubmitBlock.helpers({
   helpMessages: function () {
     return [
@@ -285,25 +302,26 @@ Template.workSubmitBlock.helpers({
       selectField: 'blockID',
       selectValue: this._id
     }
-  }*/
-});
+  }//
+});*/
 
   /******************************/
  /**** WORK SUBMIT LINK  *******/
 /******************************/
 
 //make this a standard helper at the top?
-Template.workSubmitLink.events({
+/*Template.workSubmitLink.events({
   'click .deleteFile': deleteFile 
-});
+});*/
 
   /***********************************/
  /**** TEACHER RESPONSE LINK  *******/
 /***********************************/
 
-Template.teacherResponseLink.events({
+/*Template.teacherResponseLink.events({
   'click .deleteFile': deleteFile 
-})
+})*/
+
 
   /******************************/
  /**** SUBACTIVITIES BLOCK *****/
