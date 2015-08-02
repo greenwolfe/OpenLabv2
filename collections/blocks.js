@@ -5,22 +5,16 @@ Meteor.methods({
     check(block,{
       //required fields to create the new block
       columnID: Match.idString,
-      createdFor: Match.OneOf( //validation will ensure that current user has rights to create block for this user or group
-        {Site:Match.idString}, //idString must match site id as only one teacher wall per activity
-        {users:Match.idString}, //user must have student role
-        {Groups: Match.idString}, 
-        {Sections: Match.idString}
-      ),
       type: Match.OneOf('workSubmit','text','file','embed','subactivities'), 
-
+        //workSubmit blocks probably deprecated
       /*fields that will be initially filled based on the information passed in
       createdBy: Match.idString,              //current user
-      isCloneParent: Match.Optional(Boolean), //true if 'Site' in createdFor
-      isCloneOf: Match.Optional(Boolean),     //false will be set true in the cloneBlock routine, but not here
-      canEdit = {}    //whether someone on the createdFor list can edit each listed field, include visible in the fields
-                      //format:  {fieldName1:Boolean,fieldName2:Boolean, ...}
-                      //so can check as block.canEdit['text'] ... a general template helper would be really nice!
       createdOn: Match.Optional(Date),            //today's date
+      createdFor: Match.idString, //must = siteID if teacher teacher (only one Site object, so only one id possible)
+                                  //userID of a student if student wall
+                                  //id of a group if group wall
+                                  //id of a section if section wall
+
       modifiedBy: Match.Optional(Match.idString), //current user
       modifiedOn: Match.Optional(Date),           //current date
       wallID: Match.Optional(Match.idString),     //denormalized value from column
@@ -49,6 +43,7 @@ Meteor.methods({
     if (Roles.userIsInRole(cU,'student')) {
       //for workSubmit block, put a teacherID in createdBy at all times, even if a student creates it
       //restrict certain fields by default so student can never edit them
+      //workSubmit blocks probably deprecated ... no harm done leaving this in for now
       if (block.type == 'workSubmit') {
         var teachers = Roles.getUsersInRole('teacher');
         if (!teachers.count()) 
@@ -71,56 +66,17 @@ Meteor.methods({
       throw new Meteor.Error('column-not-found', "Cannot add block, not a valid wall");
     block.wallID = column.wallID; //denormalize block
     block.activityID = column.activityID;
-
-    //validate createdFor collection and specific item
-    var collectionName = _.keys(block.createdFor)[0];
-    var itemID = block.createdFor[collectionName];
-    var Collection = Mongo.Collection.get(collectionName);
-    if (!Collection)
-      throw new Meteor.Error('collection-not-found','Error creating block.  Collection ' + collectionName + ' not found.');
-    item = Collection.find(itemID);
-    if (!item) 
-      throw new Meteor.Error('item-not-found','Error creating block.  Could not find itme ' + itemID + ' of the' + collectionName + 'collection.');
-
+    block.createdFor = wall.createdFor;
 
     block.order = 0;  //always insert at top of column
     block.raiseHand = '';
-    block.isCloneOf = false; //clones are created in cloneBlock method, not here
-    block.isCloneParent = false;
-    if ((Roles.userIsInRole(cU,'teacher')) && ('Site' in block.createdFor) && (wall.type != 'teacher'))
-      block.isCloneParent = true;
-
     block.visible = true;
-    block.title = '';
-    block.canEdit = {
-      'visible':false,
-      'title':false,
-      'text':false,
-      'studentText':false,
-      'teacherText':false,
-      'embedCode':false
-    };
+
     block.title = '';
     block.text = '';
-    block.studentText = '';
-    block.teacherText = '';
+    block.studentText = ''; //probably deprecated
+    block.teacherText = ''; //probably deprecated
     block.embedCode = '';
-    if (block.type == 'workSubmit') {
-      block.canEdit.studentText = true;
-      if (Roles.userIsInRole(block.modifiedBy,'student'))
-        block.canEdit.title = true;
-    } else if ((block.type == 'text') || (block.type == 'file')) {
-      if (wall.type != 'teacher') {
-        block.canEdit.title = true;
-        block.canEdit.text = true;
-      }
-    } else if (block.type == 'embed') {
-      if (wall.type != 'teacher') {
-        block.canEdit.title = true;
-        block.canEdit.text = true;
-        block.canEdit.embedCode = true;
-      }
-    }
 
     //move other blocks in column down to make room
     var ids = _.pluck(Blocks.find({columnID:block.columnID},{fields: {_id: 1}}).fetch(), '_id');
@@ -130,78 +86,57 @@ Meteor.methods({
   },
   //make a pasteBlock method pasteBlock: function(blockID,columnID)
   //is it necessary to pass in anything else?
-  pasteBlock: function(block) {
-    check(block,{
-      //required fields
-      columnID: Match.idString,
-      createdBy: Match.idString, //validation will ensure this is the current user
-      createdFor: Match.OneOf( //validation will ensure that current user has rights to create block for this user or group
-        {Site:Match.idString}, //idString must match site id as only one teacher wall per activity
-        {users:Match.idString}, //user must have student role
-        {Groups: Match.idString}, 
-        {Sections: Match.idString}
-      ),
-            type: Match.OneOf('workSubmit','text','file','embed','subactivities'), 
-      //hasClones
-      //isCloneOf
-      //canEdit[]
-      //optional fields - could be passed in from a copied block
-      createdOn: Match.Optional(Date), //value passed in OR today's date
-      modifiedBy: Match.Optional(Match.idString), //value passed in OR current user
-      modifiedOn: Match.Optional(Date), //value passed in OR current date
-      wallID: Match.Optional(Match.idString),  //will be overwritten with denormalized value from column
-      activityID: Match.Optional(Match.idString), //same as above
-      idFromCopiedBlock: Match.Optional(Match.idString), //not part of permanent record
-      visible: Match.Optional(Boolean), //passed Or true
+  pasteBlock: function(blockID,columnID) {
+    check(blockID,Match.idString);
+    check(columnID,Match.idString);
 
-      //content fields, block types indicated
-      title: Match.Optional(String), //all
-      text: Match.Optional(String), //text, embed, file
-      studentText: Match.Optional(String), //workSubmit
-      teacherText: Match.Optional(String), //workSubmit
-      embedCode: Match.Optional(String), //embed
-      raiseHand: Match.Optional(Match.OneOf('visible','')) //could be included from copied block
-    });
-    block.visible = block.visible || true; //might be pasting hidden block
-    block.order = 0;  //always insert at top of column
+    var block = Blocks.findOne(blockID);
+    if (!block)
+      throw new Meteor.Error('blockNotFound','Cannot past block.  Block not found.');
+    if (block.type == 'subactivities') 
+      throw new Meteor.Error('cannotCopyActivityBlock',"Error, cannot copy and paste an activity block.  Only one allowed per activity page.")
+    delete block._id;
 
-    var column = Columns.findOne(block.columnID)
+    var column = Columns.findOne(columnID)
     if (!column)
       throw new Meteor.Error('column-not-found', "Cannot add block, not a valid column");
+    block.collumnID = columnID;
     block.wallID = column.wallID; //denormalize block
     block.activityID = column.activityID;
 
-    if ('idFromCopiedBlock' in block) {
-      if (block.type == 'subactivities') 
-        throw new Meteor.Error('cannotCopyActivityBlock',"Error, cannot copy and paste an activity block.  Only one allowed per activity page.")
-      var idFCB = block.idFromCopiedBlock;
-      delete block.idFromCopiedBlock;
-    }
-
+    block.order = 0;  //always insert at top of column
     //move other blocks in column down to make room
-    var ids = _.pluck(Blocks.find({columnID:block.columnID},{fields: {_id: 1}}).fetch(), '_id');
+    var ids = _.pluck(Blocks.find({columnID:columnID},{fields: {_id: 1}}).fetch(), '_id');
     Blocks.update({_id: {$in: ids}}, {$inc: {order:1}}, {multi: true});
     //add new block at top
-    return Blocks.insert(block, function(error,blockID) {
+    return Blocks.insert(block, function(error,id) {
       //copy links to any associated files
-      Files.find({blockID:idFCB}).forEach(function(file) {
-        file.blockID = blockID;
+      Files.find({blockID:blockID}).forEach(function(file) {
+        file.blockID = id;
         delete file._id;
         Meteor.call('insertFile',file);
       });      
     });
   },
-  //also make a cloneBlock method:  function(blockID)
-  //necessary to pass in anything else?  find the activityID and wall type from the block itself
-  //then clone for all other walls of this type for this activity
   deleteBlock: function(blockID) {
     check(blockID,Match.idString);
+    var cU = Meteor.user();
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to delete a block.");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot delete any content.");
+
     block = Blocks.findOne(blockID);
     if (!block)
       throw new Meteor.Error('block-not-found',"Cannot delete block, block not found.")
+
     var fileCount = Files.find({blockID:blockID}).count();
     if (fileCount > 0) return; 
       //throw error as well?
+    if (Roles.userIsInRole(cU,'student')) {
+      if (cU._id != block.createdBy)
+        throw new Meteor.Error('noPermissions','You did not create this block, and do not have permissions to delete it.');
+    }
 
     var ids = _.pluck(Blocks.find({columnID:block.columnID,order:{$gt: block.order}},{fields: {_id: 1}}).fetch(), '_id');
     var numberRemoved = Blocks.remove(blockID); 
@@ -230,17 +165,9 @@ Meteor.methods({
       activityID: Match.Optional(Match.idString),
       type: Match.Optional(String), 
       order: Match.Optional(Match.Integer), 
-      createdFor: Match.Optional(Match.OneOf( //allow to edit???
-        {Site:Match.idString}, 
-        {users:Match.idString}, 
-        {Groups: Match.idString}, 
-        {Sections: Match.idString}
-      )),
-      createdBy: Match.Optional(Match.idString), 
-      isCloneParent: Match.Optional(Boolean), 
-      isCloneOf: Match.Optional(Boolean),     
+      createdFor: Match.Optional(Match.idString),
+      createdBy: Match.Optional(Match.idString),  
       createdOn: Match.Optional(Date), 
-      canEdit = [], //set in toggleBlockEditPermissions
       visible: Match.Optional(Boolean),  //set in showHideMethod.js
       */ 
     }));
@@ -253,41 +180,26 @@ Meteor.methods({
       throw new Meteor.Error('notLoggedIn', "You must be logged in to create a new block.");
     if (Roles.userIsInRole(cU,'parentOrAdvisor'))
       throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
-    if (!Meteor.canEditBlock(cU._id,originalBlock))
-      throw new Meteor.Error('cannotEdit','You do not have editing privileges to update this block.');
+    if (Roles.userIsInRole(cU,'student')) {
+      if (!Meteor.studentCanEditBlock(cU._id,originalBlock))
+        throw new Meteor.Error('noPermissions','You did not create this block, and do not have permissions to change its contents.');
+    }    
     block.modifiedBy = cU._id;
     block.modifiedOn = new Date();
 
-    var fields = ['title','text','studentText','teacherText','embedCode','raiseHand'];
+    var fields = ['title','text','studentText','teacherText','embedCode','raiseHand','modifiedBy','modifiedOn'];
     fields.forEach(function(field) {
-      if ((field in block) && (block.field != originalBlock.field)) {
-        if (originalBlock.canEdit[field]) {
-          var set = {};
-          set[field] = block[field];
-          Blocks.update(block._id,{$set: set});
-        } else {
-          throw new Meteor.Error('cannotEdit','You do not have editing rights for the ' + field + ' field of this block.');
-        }
+      if ((field in block) && (block[field] != originalBlock[field])) {
+        var set = {};
+        set[field] = block[field];
+        Blocks.update(block._id,{$set: set});
       }
     });
-    /* //difficult to implement now that I changed the method of identifying the valid fields above
-    //probably not necessary anyway
-    if (_.intersection(keys,['columnID','wallID','activityID']).length > 0) 
-      throw new Meteor.Error('use-moveItem',"Use moveItem (from sortable1c method) instead of updateBlock to move the block to a new column.");
-    if (_.contains(keys,'order'))
-      throw new Meteor.Error('use-sortItem',"Use sortItem (from sortable1c method) instead of updateBlock to move a block to a new position in the list.");
-    if (_.contains(keys,'type'))
-      throw new Meteor.Error('blockTypeFixed',"Cannot change the type of a block.");
-    */
-    //messages for canEdit and visible?
     return block._id; 
   }
-  //need method just to toggle edit on fields?
-  //would changing raiseHand be better in a separate toggle method?
 });
 
 /**** HOOKS *****/
-//will need handler to propagate changes to clones
 Blocks.after.update(function (userID, doc, fieldNames, modifier) {
   if (doc.columnID !== this.previous.columnID) {
     //denormalizing
@@ -302,23 +214,4 @@ Blocks.after.update(function (userID, doc, fieldNames, modifier) {
     });  
   }
 });
-
-/**** UTILITIES ****/
-
-
-var sectionMemberIds = function(sectionID) {
-  var today = new Date();
-  var memberships = Memberships.find({
-      collectionName:'Sections',
-      itemID:sectionID,
-      startDate: {$lt: today},
-      endDate: {$gt: today}
-    },
-    {fields:{memberID:1}}).fetch();
-  return _.pluck(memberships,'memberID');
-}
-var isSectionMember = function(userID,sectionID) {
-  var memberIDs = Meteor.sectionMemberIds(sectionOrID);
-  return _.contains(userID,memberIDs);
-}
 

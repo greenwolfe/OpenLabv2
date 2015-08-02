@@ -41,6 +41,11 @@ Meteor.methods({
   },
   deleteColumn: function(_id) {
     check(_id,Match.idString);
+    var cU = Meteor.user();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    //may need additional validation for students - owner or part of createdFor group
+
     var column = Columns.findOne(_id);
     if (!column)
       throw new Meteor.Error('column-not-found',"Cannot delete column, invalid column ID.");
@@ -56,6 +61,11 @@ Meteor.methods({
   },
   expandColumn: function(_id) {
     check(_id,Match.idString);
+    var cU = Meteor.user();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    //may need additional validation for students - owner or part of createdFor group
+
     var column = Columns.findOne(_id);
     if (!column)
       throw new Meteor.Error('column-not-found',"Cannot expand column, invalid column ID.");
@@ -67,6 +77,11 @@ Meteor.methods({
   },
   shrinkColumn: function(_id) {
     check(_id,Match.idString);
+    var cU = Meteor.user();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    //may need additional validation for students - owner or part of createdFor group
+
     var column = Columns.findOne(_id);
     if (!column)
       throw new Meteor.Error('column-not-found',"Cannot shrink column, invalid column ID.");

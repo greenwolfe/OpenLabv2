@@ -11,15 +11,21 @@ Meteor.methods({
       pointsTo: Match.Optional(Match.idString),
       title: Match.nonEmptyString,
       unitID: Match.idString,
-      studentID: Match.Optional(Match.idString), //in case is reassessment for an individual student
-      //order: Match.Optional(Match.Integer), //for now, new activity always placed at end of list
+      studentID: Match.Optional(Match.idString), //in case is reassessment for an individual student      
+        //automatically make a subactivity for any assessment?
+
+      /*set below, value not passed in
       visible:  Match.Optional(Boolean),
-      dueDate: Match.Optional(Date),
+      order: Match.Optional(Match.Integer), //for now, new activity always placed at end of list
+      suborder: Match.Optional(Match.Integer),
+      wallOrder: ['teacher','student','group','section'],
+      wallVisible: {teacher:true,student:true,group:true,section:true}
+      */
     });
+    activity.wallOrder = ['teacher','student','group','section'];
+    activity.wallVisible = {teacher:true,student:true,group:true,section:true};
     activity.studentID = activity.studentID || ''; //add default values for optional parameters
-    //activity.description = activity.description || '';
-    activity.dueDate = activity.dueDate || null;
-    activity.visible = activity.visible || true;
+    activity.visible = true;
     //don't want order passed in.  Always add new activity at end of list
     var unit = Units.findOne(activity.unitID); //verify unit first
     if (!unit)
@@ -69,6 +75,8 @@ Meteor.methods({
     var cU = Meteor.user(); //currentUser
     if (!cU)  
       throw new Meteor.Error('notLoggedIn', "You must be logged in to post an activity");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
     if (!Roles.userIsInRole(cU,'teacher') && (cU._id != activity.ownerID))
       throw new Meteor.Error('notTeacher', 'Only teachers can post activities for the whole class.')
     
@@ -89,23 +97,11 @@ Meteor.methods({
           //this places it on equal footing with the other subactivities
           Activities.update(_id,{$set: {pointsTo:_id}});
           Activities.update(_id,{$set: {suborder:0}});
-          var site = Site.findOne();
           var wall = {
             activityID: _id,
-            createdFor: {Site:site._id},
-            visible: true,
-            order: 0
+            createdFor: Site.findOne()._id,
+            type: 'teacher',
           }
-          wall.type = 'teacher'
-          Meteor.call('insertWall',wall);
-          wall.type = 'student';
-          wall.order = 1;
-          Meteor.call('insertWall',wall);
-          wall.type = 'group';
-          wall.order = 2;
-          Meteor.call('insertWall',wall);
-          wall.type = 'section';
-          wall.order = 3;
           Meteor.call('insertWall',wall);
         }
       }
@@ -124,6 +120,8 @@ Meteor.methods({
     if (!activity)
       throw new Meteor.Error(412, "Cannot delete activity.  Invalid ID.");
 
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
     if (!Roles.userIsInRole(cU,'teacher') && (cU._id != activity.studentID))
       throw new Meteor.Error(409, 'You must be a teacher to delete a whole class activity.')
       
@@ -137,42 +135,39 @@ Meteor.methods({
   }, 
 
   /***** UPDATE ACTIVITY ****/
-  updateActivity: function(activity) { 
-    check(activity,{
-      _id: Match.idString,
-      unitID: Match.Optional(Match.idString), //excluded below
-      studentID: Match.Optional(String), //excluded below
-      order: Match.Optional(Match.Integer), //excluded below
-      suborder: Match.Optional(Match.Integer), //excluded below
-      title: Match.Optional(Match.nonEmptyString), 
-      visible:  Match.Optional(Boolean),
-      dueDate: Match.Optional(Date),
-      //description:  Match.Optional(String), //deprecated
-      //standardIDs: [], //now kept in a standards block on the page
-    });
+
+  /* list of properties of activity object and where/how set
+
+  pointsTo: Match.Optional(Match.idString), //cannot be changed
+  title: Match.Optional(Match.nonEmptyString), //see method below
+  unitID: Match.Optional(Match.idString), //set by sortable1c and drag/drop
+  studentID: Match.Optional(String), //cannot be changed
+  visible:  Match.Optional(Boolean), //set by show/hide methods
+  order: Match.Optional(Match.Integer), //set by sortable1c and drag/drop
+  suborder: Match.Optional(Match.Integer), //set by sortable1c and drag/drop
+  wallOrder: [Match.OneOf('teacher','student','group','section')], //set in collection Hook after sortable1c reorders walls
+  wallVisible: {teacher:Boolean,student:Boolean,group:Boolean,section:Boolean} //set in collection Hook after show/hide hides a wall
+  */
+
+  activityUpdateTitle: function(activityID,newTitle) {
+    check(activityID,Match.idString);
+    check(newTitle,Match.nonEmptyString);
 
     var cU = Meteor.user(); //currentUser
     if (!cU)  
-      throw new Meteor.Error(401, "You must be logged in to update an activity");
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to update an activity");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
     if (!Roles.userIsInRole(cU,'teacher') && (cU._id != activity.studentID))
-      throw new Meteor.Error(409, 'You must be a teacher to update a whole class activity.')
+      throw new Meteor.Error('onlyTeacher', 'You must be a teacher to update a whole class activity.')
 
-    var keys = Object.keys(activity);
-    var fields = _.without(keys,'_id','order','suborder','unitID','studentID');
-    fields.forEach(function(field) {
-      var set = {};
-      set[field] = activity[field];
-      Activities.update(activity._id,{$set: set});
-    });
+    var activity = Activities.findOne(activityID);
+    if (!activity)
+      throw new Meteor.Error('activityNotFound','Cannot update activity title.  Activity not found.');
 
-    if (_.contains(keys,'unitID'))
-      throw new Meteor.Error('use-moveItem',"Use moveItem (from sortable1c method) instead of updateActivity to move an activity to a new unit.");
-    if (_.intersection(keys,['order','suborder']).length > 0)
-      throw new Meteor.Error('use-sortItem',"Use sortItem (from sortable1c method) instead of updateActivity to move an activity to a new position in the list.");
-    if (_.contains(keys,'studentID'))
-      throw new Meteor.Error('individualAssessment',"An individual assessment is assigned to a particular student and cannot be changed.");
-    
-    return activity._id;
+    if (newTitle != activity.title)
+      Activities.update(activityID,{$set: {title:newTitle}});
+
   }
 });
 

@@ -26,16 +26,44 @@ Meteor.publish('files',function() {  //change to user or section ID in order to 
   return Files.find();
 });
 
-Meteor.publish('walls',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  return Walls.find();
+//issue with sections - right now sending all of a user's
+//sections, even if the student switched sections in the past and has two
+//memberships.  How to select also those section walls with content that
+//overlaps the time period of the student's past membership
+//and only serve those blocks created during that overlap time
+//does not arise to the same degree with groups, because the
+//group will not tend to continue creating content for other activities
+//once it is disolved.  Still should be handled in a similar way
+Meteor.publish('walls',function(studentID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  check(activityID,Match.idString); 
+  studentID = studentID || this.userId; 
+
+  var selector = {};
+  var createdFors = [Site.findOne()._id]
+  if (Roles.userIsInRole(studentID,'student')) {
+    createdFors.push(studentID);
+    var studentsGroupSectionIds = _.pluck(Memberships.find({
+      memberID:studentID,
+      collectionName: {$in: ['Groups','Sections']},
+    },{fields: {itemID: 1}}).fetch(), 'itemID');
+    createdFors = _.union(createdFors,studentsGroupSectionIds);
+  }
+  selector.createdFor = {$in: createdFors};
+  if (Activities.find({_id:activityID}).count() > 0)
+    selector.activityID = activityID;
+
+  return Walls.find(selector);
 });
 
-Meteor.publish('columns',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  return Columns.find();
+Meteor.publish('columns',function(wallID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(wallID,Match.idString);
+  return Columns.find({wallID:wallID});
 });
 
-Meteor.publish('blocks',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  return Blocks.find();
+Meteor.publish('blocks',function(columnID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(columnID,Match.idString);
+  return Blocks.find({columnID:columnID});
 });
 
 Meteor.publish('activityStatuses',function(studentID,unitID) { 

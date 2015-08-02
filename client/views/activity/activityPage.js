@@ -25,14 +25,46 @@ Template.activityPage.onCreated(function() {
   var cU = Meteor.userId();
   if (Roles.userIsInRole(cU,'teacher') && Roles.userIsInRole(iU,'parentOrAdvisor')) 
     loginButtonsSession.set('viewAs',cU);
+
+  var instance = this;
+  instance.autorun(function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = FlowRouter.getParam('_id');
+    var wallSubscription = instance.subscribe('walls', studentID,activityID);
+  });
+
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if ((!cU) || Roles.userIsInRole(cU,'parentOrAdvisor'))
+      return;
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = FlowRouter.getParam('_id');
+    if ((studentID) && (activityID))
+      Meteor.call('addDefaultWalls',studentID,activityID,alertOnError);
+  })
 })
 
 Template.activityPage.helpers({
   walls: function() {
+    //need to put studentID, groupID's, sectionID in this selector? or should I trust the template level subscription?
     var selector = {activityID:FlowRouter.getParam('_id')}
     var cU = Meteor.userId();
     if (!Roles.userIsInRole(cU,'teacher'))
       selector.visible = true;
+
+    var studentID = Meteor.impersonatedOrUserId();
+    var createdFors = [Site.findOne()._id]
+    if (Roles.userIsInRole(studentID,'student')) {
+      createdFors.push(studentID);
+      var studentsGroupIds = _.pluck(Memberships.find({
+        memberID:studentID,
+        collectionName: 'Groups',
+      },{fields: {itemID: 1}}).fetch(), 'itemID');
+      createdFors = _.union(createdFors,studentsGroupIds);
+    }
+    createdFors.push(Meteor.selectedSectionId());
+    selector.createdFor = {$in: createdFors};
+
     return Walls.find(selector,{sort: {order:1}});
   },
   sortableOpts: function() {

@@ -1,24 +1,49 @@
-  /*************************/
- /***** BLOCK HELPERS *****/
-/*************************/
+Meteor.studentCanEditBlock = function(studentID,block) {
+  if (Roles.userIsInRole(block.createdBy,'teacher'))
+    return false;
+  if (studentID == block.createdBy)
+    return true;
+  if (Meteor.isGroupMember(studentID,block.createdFor))
+    return true;
+  if (Meteor.isSectionMember(studentID,block.createdFor))
+    return true;
+  return false;
+}
 
-Meteor.canEditBlock = function(userID,block) { //rights for specific fields will be checked below
-  if (Roles.userIsInRole(userID,'parentOrAdvisor')) return false;
-  if (Roles.userIsInRole(userID,'teacher')) return true;
-  if (Roles.userIsInRole(userID,'student')) {
-    var wall = Walls.findOne(block.wallId);
-    if ((!wall) || (wall.type == 'teacher')) return false;
-    if (block.createdBy == userID) return true;
-    if ('Site' in block.createdFor) return true;
-    if (('users' in block.createdFor) && 
-        (block.createdFor.users == cU._id))
-      return true;
-    if (('Groups' in block.createdFor) &&
-       (Meteor.isGroupMember(userID,block.createdFor.Groups)))
-      return true;
-    if (('Sections' in block.createdFor) &&
-       (Meteor.isSectionMember(userID,block.createdFor.Sections)))
-      return true;
-  }
-  return false
+Meteor.studentCanEditWall = function(studentID,wall) {
+  if (wall.type == 'teacher')
+    return false;
+  if (studentID == wall.createdFor)
+    return true;
+  if (Meteor.isGroupMember(studentID,wall.createdFor))
+    return true;
+  if (Meteor.isSectionMember(studentID,wall.createdFor))
+    return true;
+  return false;
+}
+
+//returns ids for current section and group
+//as well as old sections and groups with wall contents
+//created during the student's membership in that section or group
+//this failed - caused infinite loop with creation of default walls
+//and is not currently being used
+Meteor.currentAndOldGroupAndSectionIDs = function(studentID,activityID) {
+  var memberships = Memberships.find({
+    memberID:studentID,
+    collectionName: {$in: ['Groups','Sections']}
+  });
+  if (!memberships)
+    return [];
+  var today = new Date();
+  memberships.forEach(function(membership) {
+    var blockCount = Blocks.find({
+      activityID: activityID,
+      createdFor: membership.itemID,
+      createdOn: {$gt:membership.startDate,$lt:membership.endDate}
+    },{fields:{createdFor:1}}).count();
+    var isCurrent = ((membership.startDate < today) && (today < membership.endDate));
+    if (blockCount || isCurrent)
+      createdFors.push(membership.itemID);
+  })
+  return createdFors;
 }
