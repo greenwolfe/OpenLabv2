@@ -15,7 +15,7 @@ Template.wall.helpers({
     if (this.type == 'student') {
       var student = Meteor.impersonatedOrUser();
       if (student)
-        return 'Student Wall for ' + student.profile.firstName + ' ' + student.profile.lastName;
+        return 'Student Wall for ' + Meteor.getname(student,'full');
     }
     if (this.type == 'group') return 'Group Wall for ' +  Meteor.groupies(this.createdFor);
     if (this.type == 'section') {

@@ -69,6 +69,8 @@ Meteor.methods({
     return Walls.remove(wallID);
   },
   addDefaultWalls: function(studentID,activityID) {
+    if (Meteor.isSimulation)
+      return;
     check(studentID,Match.idString);
     check(activityID,Match.idString);
     var activity = Activities.findOne(activityID);
@@ -90,9 +92,10 @@ Meteor.methods({
       Meteor.call('insertWall',wall);
 
     wall.type = 'group';
-    delete wall.createdFor;
-    if ((Walls.find(wall).count() == 0)) {
-      wall.createdFor = Meteor.currentGroupId(studentID);
+    var groupIds = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
+    wall.createdFor = {$in: groupIds}; 
+    if (Walls.find(wall).count() == 0) { //count non-empty walls for all past groups
+      wall.createdFor = Meteor.currentGroupId(studentID); //if none, create wall for current group
       if (wall.createdFor)
         Meteor.call('insertWall',wall);
     }
@@ -104,6 +107,28 @@ Meteor.methods({
   }
 });
 
+Walls.after.update(function (userID, doc, fieldNames, modifier) {
+  if (doc.order != this.previous.order) {
+    var activity = Activities.findOne(doc.activityID);
+    var to = doc.order;
+    var from = activity.wallOrder.indexOf(doc.type);
+    if (to != from) {
+      activity.wallOrder.splice(to, 0, activity.wallOrder.splice(from, 1)[0]);
+      Activities.update(activity._id,{$set:{wallOrder:activity.wallOrder}});
+      Walls.find({activityID:doc.activityID}).forEach(function(wall){
+        var newOrder = activity.wallOrder.indexOf(wall.type);
+        if (wall.order != newOrder)
+          Walls.direct.update(wall._id,{$set:{order:newOrder}});
+      })
+    }
+  }
+  if (doc.visible != this.previous.visible) {
+    Walls.find({activityID:doc.activityID,type:doc.type}).forEach(function(wall){
+      if (wall.visible != doc.visible)
+        Walls.direct.update(wall._id,{$set:{visible:doc.visible}});
+    });    
+  }
+});
 
 //collection hook if wall reordered, then reorder all walls of same type 
 // for this activity for all users 

@@ -110,7 +110,7 @@ Template.column.events({
   },
   'click .pasteBlock': function(event,tmpl) {
     ClipboardBlocks.find({},{sort:{order:-1}}).forEach(function(block) {
-      Meteor.call('insertBlock',block._id,block.columnID,alertOnError);
+      Meteor.call('pasteBlock',block._id,tmpl.data._id,alertOnError);
     });
   },
   'click .addTextBlock': function(event,tmpl) {

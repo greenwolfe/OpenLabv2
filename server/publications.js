@@ -22,8 +22,9 @@ Meteor.publish('site',function() {
   return Site.find();
 });
 
-Meteor.publish('files',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  return Files.find();
+Meteor.publish('files',function(blockID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(blockID,Match.idString);
+  return Files.find({blockID:blockID});
 });
 
 //issue with sections - right now sending all of a user's

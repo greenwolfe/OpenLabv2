@@ -10,25 +10,36 @@ var deleteFile = function(event,template) {
   }
 }
 
+editingBlock = function(blockID) {
+  var block = Blocks.findOne(blockID) || this;
+  var cU = Meteor.userId();
+  var iU = Meteor.impersonatedOrUserId();
+  if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+    return false;
+  var isEditing = inEditedWall(block.wallID);
+  if (Roles.userIsInRole(cU,'teacher'))
+    return isEditing;
+  if (Roles.userIsInRole(cU,'student') && Meteor.studentCanEditBlock(iU,block))
+    return isEditing;
+  return false;
+}
+
   /**********************/
  /******* BLOCK** ******/
 /**********************/
+
+Template.block.onCreated(function() {
+  var instance = this;
+  instance.autorun(function() {
+    var fileSubscription = instance.subscribe('files', instance.data._id);
+  });
+})
+
 var dateTimeFormat = "[at] h:mm a MM[/]DD[/]YY";
 var dateFormat = "ddd, MMM D YYYY";
 
 Template.block.helpers({
-  editingBlock: function() {
-    var cU = Meteor.userId();
-    var iU = Meteor.importedOrUserId();
-    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
-      return false;
-    var isEditing = inEditedWall(this);
-    if (Roles.userIsInRole(cU,'teacher'))
-      return isEditing;
-    if (Roles.userIsInRole('student') && Meteor.studentCanEditBlock(iU,this))
-      return isEditing;
-    return false;
-  },
+  editingBlock: editingBlock,
   blockType: function() {
     return this.type + 'Block';
   },
@@ -43,6 +54,32 @@ Template.block.helpers({
   },
   raiseHand: function () {
     return this.raiseHand || '';
+  },
+  isParentAndCantView: function() {
+    var cU = Meteor.user();
+    if (Roles.userIsInRole(cU,['teacher','student']))
+      return false;
+    var wall = Walls.find(this.wallID);
+    if (wall.type == 'teacher')
+      return false;
+    if ((wall.type == 'student') && (this.type = 'file'))
+      return false;
+    return true;
+  },
+  createdForName: function() {
+    var site = Site.findOne(this.createdFor);
+    if (site)
+      return 'all students';
+    var student = Meteor.users.findOne(this.createdFor);
+    if (student)
+      return Meteor.getname(this.createdFor,'full');
+    var group = Groups.findOne(this.createdFor);
+    if (group)
+      return Meteor.groupies(this.createdFor);
+    var section = Sections.findOne(this.createdFor);
+    if (section)
+      return section.name;
+    return '';
   },
   formatDate: function(date) {
     return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
@@ -81,6 +118,9 @@ Template.block.events({
  /***** TEXTBLOCK ******/
 /**********************/
 
+Template.textBlock.helpers({
+  editingBlock:editingBlock
+})
 
   /**********************/
  /**** EMBEDBLOCK ******/
@@ -93,7 +133,8 @@ Template.embedBlock.helpers({
   },
   embedCodeAfterIframe: function() { //includes an html after the iframe
     return _.strRight(this.embedCode, '</iframe>') 
-  }
+  },
+  editingBlock:editingBlock
 });
 
 /* to embed javascript ... currently disabled as
@@ -182,17 +223,31 @@ Template.fileBlock.helpers({
       selectField: 'blockID',
       selectValue: this._id
     }
-  }
+  },
+  editingBlock:editingBlock
 });
 
   /**********************/
  /**** FILELINK  *******/
 /**********************/
 
+Template.fileLink.onRendered(function() {
+  $('a[data-toggle="tooltip"]').tooltip();
+})
+
 Template.fileLink.helpers({
   //not using right now ... saving for later reference
   absolutePath: function() {
     return Meteor.absoluteUrl('.uploads' + this.path);
+  },
+  editingBlock: function() {
+    return editingBlock(this.blockID);
+  },
+  formatDate: function(date) {
+    return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
+  },
+  formatDateTime: function(date) {
+    return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateTimeFormat) : '_____';
   }
 })
 

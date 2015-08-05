@@ -4,7 +4,7 @@
   </div>
   <div class="block block-{{type}} panel panel-default row">
     <div class="panel-heading">
-      <div class="blockSortableHandle {{editingActivity}}">
+      <div>
         {{#if editingBlock}}  
           <div class="pull-right">
             <a class="glyphicon glyphicon-copy copyBlock" title='Copy to clipboard.  Holding "Ctrl" adds to existing list.'></a>
@@ -15,7 +15,13 @@
             <i class="icon-raise-virtual-hand-small buttonRaiseVirtualHand"></i>
           </div>
           <div>&nbsp;</div>
-        {{else}}
+        {{/if}}
+        {{#if inEditedWall}}
+          <div>
+            <a class="glyphicon glyphicon-move blockSortableHandle {{editingActivity}}" title="move block"></a>
+          </div>
+        {{/if}}
+        {{#unless editingBlock}}
           <div class="pull-right">
             <i class="transparentBox buttonRaiseVirtualHand"></i>
           </div>
@@ -24,32 +30,33 @@
 
           use a specific drag icon for the handle
           -->
-        {{/if}}
+        {{/unless}}
       </div>
       <div>
-        {{#if inEditedWall}}
+        {{#if editingBlock}}
           {{>summernote collection='Blocks' field='title' _id=_id enabled=inEditedWall options=summernoteTitleOptions}}
         {{/if}}
       </div>
     </div>
     <div class="panel-body fullwidth"> <!-- fullwidth corrects mysterious bug that only seems to affect workSubmitBlock and not other -->
-      {{>Template.dynamic template=blockType }}
+      {{#unless isParentAndCantView}}
+        {{>Template.dynamic template=blockType }}
+      {{/unless}}
     </div>
     <div class="panel-footer">
       {{#if inEditedWall}}
-        <span class="avoidwrap">created {{formatDateTime createdOn}}  by {{getname createdBy true}}, </span>
-        <span class="avoidwrap">last modified {{formatDateTime modifiedOn}} by {{getname modifiedBy true}}</span>
+        <span class="avoidwrap">Created for {{{createdForName}}} by {{getname createdBy 'full'}} {{formatDateTime createdOn}}. Last modified by {{getname modifiedBy 'full'}} {{formatDateTime modifiedOn}}.</span>
       {{/if}}
     </div>
   </div>
 </Template>
 
 <Template name="textBlock">
-  {{>summernote collection='Blocks' field='text' _id=_id enabled=inEditedWall options=summernoteOptions}}
+  {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
 </Template>
 
 <Template name="embedBlock">
-  {{#if inEditedWall}}
+  {{#if editingBlock}}
     Paste/edit embed code.
     {{>codemirror }}
   {{else}}
@@ -60,11 +67,11 @@
       {{{embedCodeAfterIframe}}}
     </div>
   {{/if}}
-  {{#if inEditedWall}}
+  {{#if editingBlock}}
     Add/edit a description.
   {{/if}}
   <p>
-    {{>summernote collection='Blocks' field='text' _id=_id enabled=inEditedWall options=summernoteOptions}}
+    {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
   </p>
 </Template>
 
@@ -77,12 +84,12 @@
 
 <Template name="fileBlock">
   <p>
-    {{>summernote collection='Blocks' field='text' _id=_id enabled=inEditedWall options=summernoteOptions}}
+    {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
   </p>
   {{#sortable1c items=files  options=sortableOpts}} 
     {{>fileLink}}
   {{/sortable1c}}
-  {{#if inEditedWall}}
+  {{#if editingBlock}}
     <p>
       {{>upload_bootstrap formData=formData callbacks=processUpload}}
     </p> 
@@ -91,12 +98,20 @@
 
 <Template name="fileLink">
   <p class="file">
-    {{#if inEditedWall}}
+    {{#if editingBlock}}
       <a class="glyphicon glyphicon-move moveFile" title="move file (within this list only)"></a>
       {{>showHide collection='Files' itemName='file' item=this}}
       <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
     {{/if}}
-    <a href="/upload{{path}}">{{name}}</a> 
+    {{#if inTeacherWall}}
+      <a href="/upload{{path}}">{{name}}</a> 
+    {{else}}
+      {{#if isInRole 'parentOrAdvisor'}}
+        <a href="#" data-toggle="tooltip" title = "uploaded by {{getname createdBy 'full'}} {{formatDateTime createdOn}}">{{name}}</a>
+      {{else}}
+        <a href="/upload{{path}}" data-toggle="tooltip" title = "uploaded by {{getname createdBy 'full'}} {{formatDateTime createdOn}}">{{name}}</a> 
+      {{/if}}
+    {{/if}}
   </p> 
 </Template>
 

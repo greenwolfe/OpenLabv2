@@ -149,9 +149,11 @@ Meteor.methods({
   wallVisible: {teacher:Boolean,student:Boolean,group:Boolean,section:Boolean} //set in collection Hook after show/hide hides a wall
   */
 
-  activityUpdateTitle: function(activityID,newTitle) {
-    check(activityID,Match.idString);
-    check(newTitle,Match.nonEmptyString);
+  updateActivity: function(newActivity) {
+    check(newActivity,{
+      _id:Match.idString,
+      title:Match.nonEmptyString
+    })
 
     var cU = Meteor.user(); //currentUser
     if (!cU)  
@@ -161,12 +163,12 @@ Meteor.methods({
     if (!Roles.userIsInRole(cU,'teacher') && (cU._id != activity.studentID))
       throw new Meteor.Error('onlyTeacher', 'You must be a teacher to update a whole class activity.')
 
-    var activity = Activities.findOne(activityID);
+    var activity = Activities.findOne(newActivity._id);
     if (!activity)
       throw new Meteor.Error('activityNotFound','Cannot update activity title.  Activity not found.');
 
-    if (newTitle != activity.title)
-      Activities.update(activityID,{$set: {title:newTitle}});
+    if (newActivity.title != activity.title)
+      Activities.update(newActivity._id,{$set: {title:newActivity.title}});
 
   }
 });

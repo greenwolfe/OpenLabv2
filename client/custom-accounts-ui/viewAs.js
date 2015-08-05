@@ -16,7 +16,7 @@ Template.viewAs.helpers({
         return 'self';
       return '';
     }
-    var selectedText = "<span title='" + Meteor.getname(impersonatedUser,true) + "'>" + Meteor.getname(impersonatedUser,false) + "</span>";
+    var selectedText = "<span title='" + Meteor.getname(impersonatedUser,'full') + "'>" + Meteor.getname(impersonatedUser,'first') + "</span>";
     if (Roles.userIsInRole(user,'parentOrAdvisor')) 
       return selectedText;
     if (!section) 

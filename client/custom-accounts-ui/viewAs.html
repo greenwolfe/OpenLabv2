@@ -2,7 +2,7 @@
   {{#if isInRole 'teacher,parentOrAdvisor'}}
     <li id="view-as-dropdown-list" class="dropdown">
       <a class="dropdown-toggle" data-toggle="dropdown">
-        <span title = '{{getname currentUser true}}'>{{getname currentUser false}}</span>  viewing as: {{{selectedText}}}
+        <span title = "{{getname currentUser 'full'}}">{{getname currentUser 'first'}}</span>  viewing as: {{{selectedText}}}
         <b class="caret"></b>
       </a>
       <div id="view-as-dropdown-menu" class="dropdown-menu">
@@ -42,7 +42,7 @@
 
 <template name = 'userToView'>
   <li class='userToView {{active}}'>
-    <a href="#" title="{{profile.firstName}} {{profile.lastName}}">{{username}}</a>
+    <a href="#" title="{{getname _id 'full'}}">{{username}}</a>
   </li>
 </template>
 

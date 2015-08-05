@@ -63,7 +63,9 @@ Meteor.methods({
       throw new Meteor.Error('column-not-found', "Cannot add block, not a valid column");
     var wall = Walls.findOne(column.wallID);
     if (!wall)
-      throw new Meteor.Error('column-not-found', "Cannot add block, not a valid wall");
+      throw new Meteor.Error('wall-not-found', "Cannot add block, not a valid wall");
+    if (Roles.userIsInRole(cU,'student') && !Meteor.studentCanEditWall(cU._id,wall))
+      throw new Meteor.Error('cannodEditWall', "You do not have permissions to edit this wall.");
     block.wallID = column.wallID; //denormalize block
     block.activityID = column.activityID;
     block.createdFor = wall.createdFor;
@@ -87,6 +89,7 @@ Meteor.methods({
   //make a pasteBlock method pasteBlock: function(blockID,columnID)
   //is it necessary to pass in anything else?
   pasteBlock: function(blockID,columnID) {
+    //validation ... rights to copy this specific block to another wall?
     check(blockID,Match.idString);
     check(columnID,Match.idString);
 
@@ -100,9 +103,25 @@ Meteor.methods({
     var column = Columns.findOne(columnID)
     if (!column)
       throw new Meteor.Error('column-not-found', "Cannot add block, not a valid column");
-    block.collumnID = columnID;
+    block.columnID = columnID;
     block.wallID = column.wallID; //denormalize block
     block.activityID = column.activityID;
+
+    var wall = Walls.findOne(column.wallID);
+    if (!wall)
+      throw new Meteor.Error('wall-not-found', "Cannot paste block, not a valid wall");
+    var cU = Meteor.user();
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to paste a block.");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    if (Roles.userIsInRole(cU,'student')) {
+      if (!Meteor.studentCanEditWall(cU._id,wall))
+        throw new Meteor.Error('cannotEditWall', "You do not have permissions to edit this wall.");
+      if (!Meteor.studentCanEditBlock(cU._id,block))
+        throw new Meteor.Error('cannotCopyBlock',"You do not have permissions to copy this block.");
+    }
+    //block.createdFor = wall.createdFor;
 
     block.order = 0;  //always insert at top of column
     //move other blocks in column down to make room
