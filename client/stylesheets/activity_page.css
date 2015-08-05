@@ -107,9 +107,9 @@ body div.container {
 .wall .column .block div.panel-heading {
     background-color: #F8F8F8 !important;
 }
-.wall .column .block div.panel-heading div.blockSortableHandle {
+/*.wall .column .block div.panel-heading div.blockSortableHandle {
     min-width: 100%;
-}
+}*/
 .wall .column .block div.panel-heading div.blockSortableHandle.editing {
     cursor: move;
 }

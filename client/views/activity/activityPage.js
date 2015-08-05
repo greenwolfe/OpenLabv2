@@ -25,6 +25,7 @@ Template.activityPage.onCreated(function() {
   var cU = Meteor.userId();
   if (Roles.userIsInRole(cU,'teacher') && Roles.userIsInRole(iU,'parentOrAdvisor')) 
     loginButtonsSession.set('viewAs',cU);
+  activityPageSession.set('editedWall',null);
 
   var instance = this;
   instance.autorun(function() {
