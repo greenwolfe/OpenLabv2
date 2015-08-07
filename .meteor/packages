@@ -28,5 +28,5 @@ reactive-var
 meteorhacks:fast-render
 arillo:flow-router-helpers
 matb33:collection-hooks
-meteorhacks:flow-router
-meteorhacks:flow-layout
+kadira:flow-router
+kadira:blaze-layout

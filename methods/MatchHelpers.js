@@ -53,3 +53,21 @@ $                            # end-of-string
 //The minimal password length is 8 character
 //cannot contain the username embedded in it
 //very difficult to implement in regexp
+
+Match.calcMethodString = Match.Where(function(c) {
+  if (!Match.test(Match.nonEmptyString)) return false;
+  if (c == 'latest') return true;
+  var param;
+  if (_.str.startsWith(c,'average')) {
+    param = _.str.strRight(c,'average');
+    if (!param) return true;
+    if ((param) && (_.str.toNumber(param))) return true;
+    return false;
+  } 
+  if (_.str.startsWith(c,'decayingAverage')) {
+    param = _.str.strRight(c,'decayingAverage');
+    if ((param) && (_.str.toNumber(param))) return true;
+    return false;
+  } 
+  return false;
+})
