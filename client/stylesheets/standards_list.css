@@ -49,9 +49,10 @@
   background-color: #e4e4e4;
 }
 #categories li div[contenteditable="true"][class~='plaintexteditor'] {
-  width: 78%;
+  width: 100%;
   cursor: text;
-  margin-left: 12%;
+  margin-left: 1%;
+  margin-right: 1%;
 }
 
 #standardList, #standardListHeader {
