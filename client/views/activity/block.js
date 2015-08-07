@@ -55,15 +55,16 @@ Template.block.helpers({
   raiseHand: function () {
     return this.raiseHand || '';
   },
-  isParentAndCantView: function() {
+  canView: function() {
     var cU = Meteor.user();
-    if (Roles.userIsInRole(cU,['teacher','student']))
-      return false;
-    var wall = Walls.find(this.wallID);
-    if (wall.type == 'teacher')
-      return false;
-    if ((wall.type == 'student') && (this.type = 'file'))
-      return false;
+    if (!cU) return false;
+    if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
+      var wall = Walls.findOne(this.wallID);
+      if ((wall.type == 'group') || (wall.type == 'section'))
+        return false;
+      if ((wall.type == 'student') && (this.type != 'file'))
+        return false;
+    }
     return true;
   },
   createdForName: function() {

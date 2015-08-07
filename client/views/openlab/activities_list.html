@@ -3,7 +3,7 @@
     <h4 >activities</h4>
     <span class="progress-bar-warning"> should be completed </span>
     <span class="progress-bar-info"> you have completed </span>
-    <i class="fa fa-question-circle" title="Click title to select unit.  Ctrl-click another to view two units side-by-side."></i>
+    <i class="fa fa-question-circle" data-toggle = "tooltip" title="Click title to select unit.  Ctrl-click another to view two units side-by-side."></i>
   </div>
   <ul id='units' class="nav nav-pills">
     {{#sortable1c items=units options=sortableOpts}}
@@ -14,6 +14,7 @@
     {{/if}}
   </ul>
   {{#with activeUnit}}
+    {{> activityListHeader}}
     {{> activityList}}
   {{/with}}
 </template>
@@ -26,10 +27,10 @@
         {{>showHide collection='Units' itemName='unit' item=this}}
       </div>
     {{else}}
-      <div class="progress">
-        <div class="progress-bar progress-bar-warning" style="width: {{percentExpected}}%;" title="18/20"></div>
+      <div class="progress" title="should be completed">
+        <div class="progress-bar progress-bar-warning" style="width: {{percentExpected}}%;"></div>
       </div>
-      <div class="progress">
+      <div class="progress"  title="you have completed">
         <div class="progress-bar progress-bar-info" style="width: {{percentCompleted}}%;"></div>
       </div>
     {{/if}}
@@ -54,6 +55,31 @@
       {{>plaintexteditor collection='Units' field='title' editable='true' placeholder='type title here' clearOnSave=true}}
     </div>
   </li>
+</template>
+
+<template name='activityListHeader'>
+  <div id='activityListHeader' class="row">
+    <div class='activityColumn column {{colWidth}} {{bgprimary}}'>
+      <h2 class='text-center'>{{{title}}}</h2>
+      <div class="progress"  title="should be completed">
+        <div class="progress-bar progress-bar-warning" style="width: {{percentExpected}}%;"></div>
+      </div>
+      <div class="progress" title="you have completed">
+        <div class="progress-bar progress-bar-info" style="width: {{percentCompleted}}%;"></div>
+      </div>
+    </div>
+    {{#with activeUnit2}}
+      <div class='activityColumn column col-md-6 {{bgsuccess}}'>
+        <h2 class='text-center'>{{{title}}}</h2>
+        <div class="progress" title="should be completed">
+          <div class="progress-bar progress-bar-warning" style="width: {{percentExpected}}%;"></div>
+        </div>
+        <div class="progress" title="you have completed">
+          <div class="progress-bar progress-bar-info" style="width: {{percentCompleted}}%;"></div>
+        </div>
+      </div>
+    {{/with}}
+  </div>
 </template>
 
 <template name='activityList'>
