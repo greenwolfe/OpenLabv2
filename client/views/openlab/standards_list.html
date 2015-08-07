@@ -1,0 +1,51 @@
+<template name = 'standardsList'> 
+  <div id="standardsListTitle">
+    <h4>standards</h4>
+    <span class="progress-bar-warning"> should be mastered </span>
+    <span class="progress-bar-info"> you have mastered </span>
+    <i class="fa fa-question-circle" data-toggle = "tooltip" title="Click title to select category.  Ctrl-click another to view two categories side-by-side."></i>
+  </div>
+  <ul id='categories' class="nav nav-pills">
+    {{#sortable1c items=categories options=sortableOpts}}
+      {{> categoryTitle}}
+    {{/sortable1c}}
+    <!--
+    {{#if editingMainPage}}
+      {{>newCategory}}
+    {{/if}}
+    -->
+  </ul>
+  <!--
+  {{#with activeCategory}}
+    {{> categoryListHeader}}
+    {{> categoryList}}
+  {{/with}}
+  -->
+</template>
+
+<template name="categoryTitle">
+  <li class="categorytitle {{active}} {{active2}} col-md-2">
+    {{#if editingMainPage}}
+      <div>
+        <a class="glyphicon glyphicon-move sortCategory" title="Drag to reorder."></a>
+        {{>showHide collection='Categories' itemName='category' item=this}}
+      </div>
+    {{else}}
+      <div class="progress" title="should be mastered">
+        <div class="progress-bar progress-bar-warning" style="width: {{percentExpected}}%;"></div>
+      </div>
+      <div class="progress"  title="you have mastered">
+        <div class="progress-bar progress-bar-info" style="width: {{percentCompleted}}%;"></div>
+      </div>
+    {{/if}}
+    <a href="#" title="{{longname}}">      
+      {{{title}}}
+    </a>
+    {{#if editingMainPage}}
+      <div class='editTitle' {{hidden}}>
+        {{>plaintexteditor collection='Categories' field='title' _id=_id editable='true'}}
+        {{>plaintexteditor collection='Categories' field='longname' _id=_id placeholder = 'add hover text' editable='true'}}
+      </div>
+    {{/if}}
+  </li>
+</template>

@@ -18,6 +18,16 @@ Meteor.publish('units',function(showHidden) {
   return Units.find();
 });
 
+Meteor.publish('categories',function(showHidden) {
+  /*if (showHidden) {
+    return Units.find();
+  } else {
+    return Units.find({visible:true});
+  }*/
+  check(showHidden,Boolean);
+  return Categories.find();
+});
+
 Meteor.publish('site',function() {
   return Site.find();
 });

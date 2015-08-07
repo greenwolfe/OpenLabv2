@@ -1,0 +1,132 @@
+#standardsListTitle h4 {
+  display: inline-block;
+}
+#standardsListTitle span {
+  margin-right: 4px;
+  font-size: small;
+  border-radius: 5px;
+}
+
+#categories { /* makes bootstrap nav-pills equal height so they wrap in distinct rows */
+  display: flex;
+  flex-wrap: wrap;
+}
+#categories li {
+  margin-bottom: 10px;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 3px;
+  padding-right: 3px;
+  user-drag: none;
+}
+#categories li > a {
+  color: black;
+  border-style: solid;
+  border-radius: 5px;
+  border-width: thin;
+  border-color: black;
+  text-align: center;
+  word-wrap: break-word;
+  padding-left: 0;
+  padding-right: 0;
+}
+#categorytitle div.editTitle {
+  padding-left: 0;
+  padding-right: 0;
+}
+#categories li > a.newcategory {
+  margin-top: 15pt;
+}
+#categories li div.progress {
+  margin-bottom: 0;
+  margin-top: 1.5pt;
+  height: 10px;
+}
+#categories > li:nth-child(odd) {
+  background-color: #eaeaea;
+}
+#categories > li:nth-child(even) {
+  background-color: #e4e4e4;
+}
+#categories li div[contenteditable="true"][class~='plaintexteditor'] {
+  width: 78%;
+  cursor: text;
+  margin-left: 12%;
+}
+
+#standardList, #standardListHeader {
+  outline: 1px solid #AAA;
+}
+li.categorytitle.active2 > a {
+  background-color: #DFF0D8;
+  border: thin none;
+  border-radius: 4px;
+}
+#categories li.categorytitle.active > a {
+  background-color: DarkMagenta;
+}
+#categories li.categorytitle.active > a:hover {
+  background-color: DarkMagenta;
+}
+#standardList div.standardColumn {
+  min-height: 20px;
+}
+#standardList div.standardColumn.bgprimary{
+  /*background-color: #337AB7*/
+  background-color: DarkMagenta;
+}
+#standardList div.standardColumn.bgsuccess {
+  background-color: #DFF0D8;
+}
+#standardListHeader div.standardColumn.bgprimary{
+  /*background-color: #337AB7*/
+  background-color: DarkMagenta;
+}
+#standardListHeader h2 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+#standardListHeader div.standardColumn.bgsuccess {
+  background-color: #DFF0D8;
+}
+#standardListHeader div.standardColumn div.progress {
+  margin-bottom: 4px;
+}
+#standardList p {
+  background-color: #afafaf;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#afafaf));
+  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #afafaf);
+  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+#standardList p a {
+    color: #555555;
+    font-size: small;
+}
+#standardList p a.glyphicon {
+  font-size: medium;
+}
+#standardList p div[contenteditable="true"][class~='plaintexteditor'] {
+  width: 80%;
+  float: right;
+  cursor: text;
+  background: inherit;
+}
+#standardList p.newItem div[contenteditable="true"][class~='plaintexteditor'] {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+#standardList i.progressstripe {
+  float: right;
+}
+#standardList i.progressstripe.expected {
+  background-color: #FAA732;
+}
+#standardList i.progressstripe.completed {
+  background-color: #08C; 
+}

@@ -102,6 +102,15 @@ Accounts.onLogin(function(){
     if (activeUnit2)
       openlabSession.set('activeUnit2',activeUnit2);
   }
+  //select lastViewed category or categories
+  if ('profile' in cU) {
+    var activeCategory = cU.profile.lastViewedCategory || null;
+    var activeCategory2 = cU.profile.lastViewedCategory2 || null;
+    if (activeCategory) 
+      openlabSession.set('activeCategory',activeCategory);
+    if (activeUnit2)
+      openlabSession.set('activeCategory2',activeCategory2);
+  }
 
 
   //students cannot impersonate
@@ -143,8 +152,15 @@ Tracker.autorun(function() {
     if (FlowRouter.subsReady('units'))
       firstUnit = Units.findOne({visible:true},{sort: {order: 1},fields:{_id:1}});
     firstUnit = firstUnit || {_id:null};
+    var firstCategory = null;
+    if (FlowRouter.subsReady('categories'))
+      firstCategory = Categories.findOne({visible:true},{sort: {order: 1},fields:{_id:1}});
+    firstCategory = firstCategory || {_id:null};    
     openlabSession.set('activeUnit',firstUnit._id)
     openlabSession.set('activeUnit2',null);
+    openlabSession.set('activeCategory',firstCategory._id)
+    openlabSession.set('activeCategory2',null);
+    openlabSession.set('editingMainPage',null);
     FlowRouter.go("/"); //redirect to main page on logout
   }
 })
