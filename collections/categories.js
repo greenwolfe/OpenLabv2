@@ -76,13 +76,13 @@ Meteor.methods({
     var fields = _.without(keys,'_id','order','visible');
     fields.forEach(function(field) {
       var set = {};
-      set[field] = unit[field];
-      Units.update(unit._id,{$set: set});
+      set[field] = category[field];
+      Categories.update(category._id,{$set: set});
     });
 
     if (_.contains(keys,'order'))
-      throw new Meteor.Error('use-sortItem',"Use sortItem (from sortable1c method) instead of updateUnit to move an activity to a new position in the list.");
+      throw new Meteor.Error('use-sortItem',"Use sortItem (from sortable1c method) instead of updateCategory to move a category to a new position in the list.");
 
-    return unit._id;
+    return category._id;
   }
 });

@@ -80,3 +80,136 @@ Template.categoryTitle.events({
     event.preventDefault();
   }
 })
+
+  /*****************************/
+ /** ACTIVITY LIST HEADER  ****/
+/*****************************/
+
+Template.standardListHeader.helpers({
+  colWidth: function() {
+    return openlabSession.get('activeCategory2') ? 'col-md-6' : 'col-md-12';
+  },
+  bgsuccess: function() {
+    return openlabSession.get('activeCategory2') ? 'bgsuccess' : 'bgprimary';
+  },
+  bgprimary: function() {
+    //return 'bgprimary';
+    return openlabSession.get('activeCategory2') ? 'bgprimary' : '';
+  },
+  percentExpected: function() { //percentExpected,
+    return 70;
+  },
+  percentCompleted: function() { //percentCompleted 
+    return 30;
+  }
+});
+
+
+  /*************************/
+ /** STANDARD LIST  *******/
+/*************************/
+
+Template.standardList.onCreated(function() {
+  instance = this;
+
+  instance.autorun(function() {
+    var userID = Meteor.impersonatedOrUserId();
+    if (!userID)
+      return;
+    var sectionID = Meteor.selectedSectionId();
+    var categoryID = instance.data._id;
+    //first get the info that will be immediately shown
+    //var activitiesThisCategory = Meteor.subscribe('LoMs',userID,categoryID);
+
+    /*if (activitiesThisCategory.ready()) { //then load the rest in the background
+      var LoMs = Meteor.subscribe('LoMs',userID); 
+      if (LoMs.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
+        Meteor.subscribe('LoMs');
+    }*/
+  })
+})
+
+Template.standardList.helpers({
+  colWidth: function() {
+    return openlabSession.get('activeCategory2') ? 'col-md-6' : 'col-md-12';
+  },
+  standards0: function() {
+    var selector = {
+      categoryID: this._id
+    };
+    if (!editingMainPage())
+      selector.visible = true; //show only visible activities
+    return Standards.find(selector,{sort: {order: 1}}); 
+  },
+  standards2: function() {
+    var activeCategory2 = openlabSession.get('activeCategory2');
+    var selector = {
+      categoryID: this._id
+    };
+    if (!editingMainPage())
+      selector.visible = true; //show only visible activities
+    return Standards.find(selector,{sort: {order: 1}}); 
+  },
+  bgsuccess: function() {
+    return openlabSession.get('activeCategory2') ? 'bgsuccess' : '';
+  },
+  bgprimary: function() {
+    //return 'bgprimary';
+    return openlabSession.get('activeCategory2') ? 'bgprimary' : '';
+  },
+  sortableOpts2: function() {
+    var activeCategory2 = openlabSession.get('activeCategory2');
+    return {
+      draggable:'.sItem',
+      handle: '.sortStandard',
+      group: 'standardColumn',
+      collection: 'Standards',
+      selectField: 'categoryID',
+      selectValue: activeCategory2,
+      disabled: !editingMainPage() //currently not working
+      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
+    }    
+  },
+  sortableOpts: function() {
+    return {
+      draggable:'.sItem',
+      handle: '.sortStandard',
+      group: 'standardColumn',
+      collection: 'Standards',
+      selectField: 'categoryID',
+      selectValue: this._id,
+      //disabled: !editingMainPage() //currently not working
+      //disabled: (!Session.get('editedWall')), //!= this.wallID to apply to a single wall 
+    }
+  }
+});
+
+
+  /*************************/
+ /** STANDARD ITEM  *******/
+/*************************/
+
+/* currentStatus */
+/* need current LoM? ... or maybe just provided by denormailzation
+var currentStatus = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+}
+*/
+
+Template.standardItem.helpers({
+  //helpers for displaying LoM badge here
+})
+
+  /*************************/
+ /*** NEW STANDARD  *******/
+/*************************/
+
+Template.newStandard.helpers({
+  fixedFields: function() {
+    return {categoryID:this._id}
+  }
+})
+

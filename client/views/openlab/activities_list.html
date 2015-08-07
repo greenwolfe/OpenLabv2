@@ -51,7 +51,7 @@
     <a href="#"  class="newunit">
       Add new unit
     </a>
-    <div class="row">
+    <div class="editTitle">
       {{>plaintexteditor collection='Units' field='title' editable='true' placeholder='type title here' clearOnSave=true}}
     </div>
   </li>
@@ -129,8 +129,6 @@
         <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> 
         {{{title}}} 
-          <!--<i class="progressstripe {{expected}}">&nbsp;</i>
-          <i class="progressstripe {{completed}}">&nbsp;</i>-->
         </a>        
       {{/if}}
     </p>
