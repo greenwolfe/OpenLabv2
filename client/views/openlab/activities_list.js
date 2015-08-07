@@ -1,6 +1,60 @@
+  /*******************/
+ /**** UTILITIES ****/
+/*******************/
+
+percentExpected =  function() {
+  var studentID = Meteor.impersonatedOrUserId();
+  var activityIDs = _.pluck(Activities.find(
+    {
+      unitID:this._id,
+      visible:true
+    },
+    {fields:{_id:1}}).fetch(),'_id')
+  var total = activityIDs.length; 
+  if (total == 0) return 0;
+
+  var endDates = _.pluck(WorkPeriods.find(
+    {
+      unitID:this._id,
+      activityVisible:true,
+      sectionID: Meteor.selectedSectionId()
+    },
+    {fields:{endDate:1}}).fetch(),'endDate')
+  var today = new Date();
+  var expected = endDates.filter(function(date) {
+      return (today > date);
+    }).length
+  return 100*expected/total;
+}
+percentCompleted = function() {
+  var studentID = Meteor.impersonatedOrUserId();
+  var activityIDs = _.pluck(Activities.find(
+    {
+      unitID:this._id,
+      visible:true
+    },
+    {fields:{_id:1}}).fetch(),'_id')
+  var total = activityIDs.length; 
+  if (total == 0) return 0;
+
+  var statuses = ActivityStatuses.find(
+    {
+      activityID:{$in:activityIDs},
+      studentID:studentID
+    }).fetch();
+  var completed = statuses.filter(function(status) {
+    return _.str.include(status.level,'done')
+  }).length
+  return 100*completed/total;
+}  
+
   /*************************/
  /*** ACTIVITIES LIST  ****/
 /*************************/
+
+Template.activitiesList.onRendered(function() {
+  $('.fa.fa-question-circle[data-toggle="tooltip"]').tooltip();
+});
 
 Template.activitiesList.helpers({
   units: function() {
@@ -38,51 +92,8 @@ Template.unitTitle.helpers({
     var activeUnit2 = openlabSession.get('activeUnit2');
     return ((this._id == activeUnit) || (this._id == activeUnit2)) ? '' : 'hidden';
   },
-  percentExpected: function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityIDs = _.pluck(Activities.find(
-      {
-        unitID:this._id,
-        visible:true
-      },
-      {fields:{_id:1}}).fetch(),'_id')
-    var total = activityIDs.length; 
-    if (total == 0) return 0;
-
-    var endDates = _.pluck(WorkPeriods.find(
-      {
-        unitID:this._id,
-        activityVisible:true,
-        sectionID: Meteor.selectedSectionId()
-      },
-      {fields:{endDate:1}}).fetch(),'endDate')
-    var today = new Date();
-    var expected = endDates.filter(function(date) {
-        return (today > date);
-      }).length
-    return 100*expected/total;
-  },
-  percentCompleted: function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityIDs = _.pluck(Activities.find(
-      {
-        unitID:this._id,
-        visible:true
-      },
-      {fields:{_id:1}}).fetch(),'_id')
-    var total = activityIDs.length; 
-    if (total == 0) return 0;
-
-    var statuses = ActivityStatuses.find(
-      {
-        activityID:{$in:activityIDs},
-        studentID:studentID
-      }).fetch();
-    var completed = statuses.filter(function(status) {
-      return _.str.include(status.level,'done')
-    }).length
-    return 100*completed/total;
-  }  
+  percentExpected: percentExpected,
+  percentCompleted: percentCompleted 
 });
 
 Template.unitTitle.events({
@@ -115,6 +126,26 @@ Template.unitTitle.events({
     event.preventDefault();
   }
 })
+
+  /*****************************/
+ /** ACTIVITY LIST HEADER  ****/
+/*****************************/
+
+Template.activityListHeader.helpers({
+  colWidth: function() {
+    return openlabSession.get('activeUnit2') ? 'col-md-6' : 'col-md-12';
+  },
+  bgsuccess: function() {
+    return openlabSession.get('activeUnit2') ? 'bgsuccess' : 'bgprimary';
+  },
+  bgprimary: function() {
+    //return 'bgprimary';
+    return openlabSession.get('activeUnit2') ? 'bgprimary' : '';
+  },
+  percentExpected: percentExpected,
+  percentCompleted: percentCompleted 
+});
+
 
   /*************************/
  /** ACTIVITY LIST  *******/
@@ -183,6 +214,7 @@ Template.activityList.helpers({
     return openlabSession.get('activeUnit2') ? 'bgsuccess' : '';
   },
   bgprimary: function() {
+    //return 'bgprimary';
     return openlabSession.get('activeUnit2') ? 'bgprimary' : '';
   },
   activities2: function() {

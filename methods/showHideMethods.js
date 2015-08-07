@@ -11,16 +11,35 @@ Meteor.methods({
     if (!item)
       throw new Meteor.Error(330,"Cannot show/hide item, invalid id.");
 
-    var cU = Meteor.user();
-    if (!cU)
-      throw new Meteor.Error('notLoggedIn','You cannot show or hide anything unless you are logged in.')
-    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
-      throw new Meteor.Error('parentNotAllowed','Parents and advisors cannot show or hide items.');
-    if (Roles.userIsInRole(cU,'student')) {
-      if (!('createdFor' in item) || (createdFor != cU._id))
-        throw new Meteor.Error('studentNotAllowed','You do not have permissions to show or hide this item.');
-    }
+    if (!Meteor.canShowHide(collection,item))
+      throw new Meteor.Error('notPermitted','You do not have permission to show or hide this item.')
 
     return Collection.update(_id,{$set: {visible:show}});
   }
 });
+
+Meteor.canShowHide = function(collection,item) {
+  var cU = Meteor.userId();
+  if (Roles.userIsInRole(cU,'teacher')) return true;
+  if (Roles.userIsInRole(cU,'student')) {
+    if (collection == 'Blocks') {
+      var wall = Walls.findOne(item.wallID);
+      return Meteor.studentCanEditBlock(cU,item); 
+    }
+    if (collection == 'Files') {
+      var block = Blocks.findOne(item.blockID);
+      return Meteor.studentCanEditBlock(cU,block);
+    }
+    if (collection == 'Columns') {
+      var wall = Walls.findOne(item.wallID);
+      if (Meteor.studentCanEditWall(cU,wall)) {
+        var canEditAllBlocks = true;
+        Blocks.find({columnID:item._id}).forEach(function(block) {
+          canEditAllBlocks = canEditAllBlocks && Meteor.studentCanEditBlock(cU,block);
+        });
+        return canEditAllBlocks;
+      }
+    }
+  }
+  return false;
+}

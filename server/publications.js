@@ -64,6 +64,18 @@ Meteor.publish('columns',function(wallID) {  //change to user or section ID in o
 
 Meteor.publish('blocks',function(columnID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
   check(columnID,Match.idString);
+  //if parent, only publish titles (except for text blocks in student wall)
+  if (Roles.userIsInRole(this.userId,'parentOrAdvisor')) {
+    var column = Columns.findOne(columnID);
+    if (!column) return this.ready();
+    var wall = Walls.findOne(column.wallID);
+    if (!wall) return this.ready();
+    if ((wall.type == 'group') || (wall.type == 'section'))
+      return this.ready();
+    if (wall.type == 'student') 
+      return Blocks.find({columnID:columnID,type:'file'});
+  }
+  //below includes teacher wall for parent
   return Blocks.find({columnID:columnID});
 });
 

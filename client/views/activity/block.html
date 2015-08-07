@@ -38,11 +38,13 @@
         {{/if}}
       </div>
     </div>
+    {{#if canView}}
     <div class="panel-body fullwidth"> <!-- fullwidth corrects mysterious bug that only seems to affect workSubmitBlock and not other -->
-      {{#unless isParentAndCantView}}
+
         {{>Template.dynamic template=blockType }}
-      {{/unless}}
+
     </div>
+    {{/if}}
     <div class="panel-footer">
       {{#if inEditedWall}}
         <span class="avoidwrap">Created for {{{createdForName}}} by {{getname createdBy 'full'}} {{formatDateTime createdOn}}. Last modified by {{getname modifiedBy 'full'}} {{formatDateTime modifiedOn}}.</span>

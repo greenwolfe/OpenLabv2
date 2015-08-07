@@ -27,6 +27,8 @@ Meteor.methods({
     var item = Collection.findOne(itemID);
     if (!item)
       throw new Meteor.Error(230,"Cannot sort collection, invalid item.");
+    if (!Meteor.canSort(collection,item))
+      throw new Meteor.Error('notPermitted','You do not have permissoins to move this item.');
     if (!(sortField in item))
       throw new Meteor.Error(235,"Cannot sort collection, item does not have sort field.");
     var startOrder = item[sortField];
@@ -70,6 +72,8 @@ Meteor.methods({
     var item = Collection.findOne(itemID);
     if (!item)
       throw new Meteor.Error(230,"Cannot sort collection, invalid item.");
+    if (!Meteor.canMove(collection,item,selectValue))
+      throw new Meteor.Error('notPermitted','You do not have permissoins to move this item.');
     if (!(sortField in item))
       throw new Meteor.Error(237,"Cannot sort collection, no order field present.");
     var startOrder = item[sortField];
@@ -134,3 +138,48 @@ Meteor.methods({
     return Collection.update({_id:item._id},{$set: updateOperator});
   }
 });
+
+Meteor.canSort = function(collection,item) {
+  var cU = Meteor.userId();
+  if (Roles.userIsInRole(cU,'teacher')) return true;
+  if (Roles.userIsInRole(cU,'student')) {
+    if (collection == 'Blocks') {
+      var wall = Walls.findOne(item.wallID);
+      return (Meteor.studentCanEditBlock(cU,item) || Meteor.studentCanEditWall(cU,wall)); 
+    }
+    if (collection == 'Files') {
+      var block = Blocks.findOne(item.blockID);
+      return Meteor.studentCanEditBlock(cU,block);
+    }
+    if (collection == 'Columns') {
+      var wall = Walls.findOne(item.wallID);
+      return Meteor.studentCanEditWall(cU,wall);
+    }
+  }
+  return false;
+}
+
+Meteor.canMove = function(collection,item,selectValue) {
+  var cU = Meteor.userId();
+  if (Roles.userIsInRole(cU,'teacher')) return true;
+  if (Roles.userIsInRole(cU,'student')) {
+    if (collection == 'Blocks') {
+      var wall = Walls.findOne(item.wallID);
+      if (wall.type == 'student') {
+        var newColumn = Columns.findOne(selectValue);
+        if ((!newColumn.visible) && Roles.userIsInRole(item.createdBy,'teacher'))
+          return false; //prevent student from copying teacher feedback into hidden column
+      }
+      return (Meteor.studentCanEditBlock(cU,item) || Meteor.studentCanEditWall(cU,wall)); 
+    }
+    if (collection == 'Files') {
+      var block = Blocks.findOne(item.blockID);
+      return Meteor.studentCanEditBlock(cU,block);
+    }
+    if (collection == 'Columns') {
+      var wall = Walls.findOne(item.wallID);
+      return Meteor.studentCanEditWall(cU,wall);
+    }
+  }
+  return false;
+}
