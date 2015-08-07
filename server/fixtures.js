@@ -32,11 +32,23 @@ Meteor.startup(function () {
   };
 
   if (Units.find().count() == 0) {
-    for (i = 1; i <= 8; i++) {
+    for (i = 1; i <= 2; i++) {
       Units.insert({
         title: 'unit' + i,
-	app: 'openlab',
+	      app: 'openlab',
         longname: 'unit of instruction' + i,
+        order: i,
+        visible: true
+      });
+    };
+  }
+
+  if (Categories.find().count() == 0) {
+    for (i = 1; i <= 2; i++) {
+      Categories.insert({
+        title: 'category' + i,
+        app: 'openlab',
+        longname: 'category for standards ' + i,
         order: i,
         visible: true
       });

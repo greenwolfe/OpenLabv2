@@ -3,6 +3,8 @@
 var VALID_KEYS = [
   'activeUnit',
   'activeUnit2',
+  'activeCategory',
+  'activeCategory2',
   'impersonatedID', 
   'editingMainPage',
   'errorMessage', //deprecated
@@ -25,6 +27,10 @@ VALID_KEYS.forEach(function(key) {
   if ((key == 'activeUnit') || (key == 'activeUnit2')) {
     Template.registerHelper(key,function() {
       return Units.findOne(Session.get(KEY_PREFIX + key));
+    })
+  } else if ((key == 'activeCategory') || (key == 'activeCategory2')) {
+    Template.registerHelper(key,function() {
+      return Categories.findOne(Session.get(KEY_PREFIX + key));
     })
   } else if (key == 'impersonatedID') {
     Template.registerHelper(key,function() { 
@@ -79,6 +85,17 @@ openlabSession = {
       cU = Meteor.user();
       if (cU) {
         var profile = (_.str.contains(key,'2')) ? {lastViewedUnit2 : value} : {lastViewedUnit : value};
+        Meteor.call('updateUser',{
+          _id:cU._id,
+          profile: profile
+        });
+      }
+    }
+    if (key == 'activeCategory' || key == 'activeCategory2') {
+      //set users last active categories
+      cU = Meteor.user();
+      if (cU) {
+        var profile = (_.str.contains(key,'2')) ? {lastViewedCategory2 : value} : {lastViewedCategory : value};
         Meteor.call('updateUser',{
           _id:cU._id,
           profile: profile

@@ -38,7 +38,7 @@
       {{{title}}}
     </a>
     {{#if editingMainPage}}
-      <div {{hidden}}>
+      <div class='editTitle' {{hidden}}>
         {{>plaintexteditor collection='Units' field='title' _id=_id editable='true'}}
         {{>plaintexteditor collection='Units' field='longname' _id=_id placeholder = 'add hover text' editable='true'}}
       </div>

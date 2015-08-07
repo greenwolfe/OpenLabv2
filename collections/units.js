@@ -8,6 +8,10 @@ Meteor.methods({
       title: Match.nonEmptyString,
       longname:  Match.Optional(String), 
       visible:  Match.Optional(Boolean),
+      /* fields filled in below
+      app: 'openlab' //redundant field, the same for all units, because sortable 1c needs a field to match to find a subset of items in a collection
+      order: 0 //end of list or 0
+      */
     });
     unit.visible = unit.visible || true;
     unit.longname = unit.longname || '';

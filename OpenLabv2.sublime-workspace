@@ -20,165 +20,53 @@
 	"buffers":
 	[
 		{
-			"file": "client/views/activity/activityPage.html",
+			"file": "collections/units.js",
 			"settings":
 			{
-				"buffer_size": 127,
+				"buffer_size": 3242,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/activity/wall.html",
+			"file": "collections/categories.js",
 			"settings":
 			{
-				"buffer_size": 1210,
+				"buffer_size": 3260,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "Meteor.publish('activities',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!\n  /*var userToShow = Meteor.users.findOne(userID);\n  var Acts = Activities.find({visible:true});\n  if (!userToShow) return Acts;\n  if (Roles.userIsInRole(userToShow,'teacher')) \n    return Activities.find();  */\n  //check(userID,Match.oneOf(Match.idString,null));\n  return Activities.find();\n});\n\nMeteor.publish('units',function(showHidden) {\n  /*if (showHidden) {\n    return Units.find();\n  } else {\n    return Units.find({visible:true});\n  }*/\n  check(showHidden,Boolean);\n  return Units.find();\n});\n\nMeteor.publish('site',function() {\n  return Site.find();\n});\n\nMeteor.publish('files',function(blockID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!\n  check(blockID,Match.idString);\n  return Files.find({blockID:blockID});\n});\n\n//issue with sections - right now sending all of a user's\n//sections, even if the student switched sections in the past and has two\n//memberships.  How to select also those section walls with content that\n//overlaps the time period of the student's past membership\n//and only serve those blocks created during that overlap time\n//does not arise to the same degree with groups, because the\n//group will not tend to continue creating content for other activities\n//once it is disolved.  Still should be handled in a similar way\nMeteor.publish('walls',function(studentID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!\n  check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); \n  check(activityID,Match.idString); \n  studentID = studentID || this.userId; \n\n  var selector = {};\n  var createdFors = [Site.findOne()._id]\n  if (Roles.userIsInRole(studentID,'student')) {\n    createdFors.push(studentID);\n    var studentsGroupSectionIds = _.pluck(Memberships.find({\n      memberID:studentID,\n      collectionName: {$in: ['Groups','Sections']},\n    },{fields: {itemID: 1}}).fetch(), 'itemID');\n    createdFors = _.union(createdFors,studentsGroupSectionIds);\n  }\n  selector.createdFor = {$in: createdFors};\n  if (Activities.find({_id:activityID}).count() > 0)\n    selector.activityID = activityID;\n\n  return Walls.find(selector);\n});\n\nMeteor.publish('columns',function(wallID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!\n  check(wallID,Match.idString);\n  return Columns.find({wallID:wallID});\n});\n\nMeteor.publish('blocks',function(columnID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!\n  check(columnID,Match.idString);\n  //if parent, only publish titles (except for text blocks in student wall)\n  if (Roles.userIsInRole(this.userId,'parentOrAdvisor')) {\n    var column = Columns.find(columnID);\n    if (!column) return this.ready();\n    var wall = Walls.find(column.wallID);\n    if (!wall) return this.ready();\n    \n\n  }\n  return Blocks.find({columnID:columnID});\n});\n\nMeteor.publish('activityStatuses',function(studentID,unitID) { \n  check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); \n  studentID = studentID || this.userId;  \n  var selector = {}\n  if (Roles.userIsInRole(studentID,'student'))\n    selector.studentID = studentID;\n\n  check(unitID,Match.Optional(Match.OneOf(Match.idString,null)));\n  if (unitID)\n    selector.unitID = unitID;\n\n  return ActivityStatuses.find(selector);\n});\n\nMeteor.publish('subActivityStatuses',function(studentID,pointsTo){\n  check(studentID,Match.Optional(Match.idString)); \n  studentID = studentID || this.userId;  //setting default here because flow router cannot pass in user id\n  var selector = {}\n  if (Roles.userIsInRole(studentID,'student'))\n    selector.studentID = studentID;\n\n  check(pointsTo,Match.Optional(Match.idString));\n  if (pointsTo)\n    selector.pointsTo = pointsTo;\n\n  return ActivityStatuses.find(selector);  \n})\n\n//passing in sectionID and unitID allows initial loading of just enough data to render the visible unit\n//passing in just sectionID allows loading workperiods for other units in the background after the first data comes through\n//passing in neither allows loading all workperiods for teacher\nMeteor.publish('workPeriods',function(sectionID,unitID) { \n  check(sectionID,Match.Optional(Match.OneOf(Match.idString,'',null)));\n  var selector = {};\n  if (sectionID)\n    selector.sectionID = sectionID;\n\n  check(unitID,Match.Optional(Match.idString));\n  if (unitID)\n    selector.unitID = unitID;\n\n  return WorkPeriods.find(selector);\n});\n\n",
 			"file": "server/publications.js",
-			"file_size": 4444,
-			"file_write_time": 130832695283538379,
 			"settings":
 			{
-				"buffer_size": 4670,
+				"buffer_size": 5108,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/activity/activityHeader.html",
-			"settings":
-			{
-				"buffer_size": 1040,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/activity/column.html",
-			"settings":
-			{
-				"buffer_size": 2293,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/activity/block.html",
-			"settings":
-			{
-				"buffer_size": 8022,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/openlab/activities_list.html",
-			"settings":
-			{
-				"buffer_size": 4048,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "methods/groupMethods.js",
-			"settings":
-			{
-				"buffer_size": 1579,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "methods/blockMethods.js",
-			"settings":
-			{
-				"buffer_size": 1635,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/activity/activityPage.js",
-			"settings":
-			{
-				"buffer_size": 3011,
-				"line_ending": "Unix"
-			}
-		},
-		{
+			"contents": "FlowRouter.subscriptions = function() {\n  this.register('site',Meteor.subscribe('site'));\n  //sections here, too? (or with accounts ui?)\n  //userList here, too?\n};\n//load userList, sections, groups, memberships, childrenOrAdvisees with\n//custom accounts UI on as needed basis, with extra data for teacher loaded in background?\n\nFlowRouter.route('/', {\n  //openlabSession.initializePage()  ... how to do with flow router?  \n  subscriptions: function (params, queryParams) {\n    //decide to load for whole app, this page or specific template\n    //only activities list needs: units, activities ... but then available for rest so long as all needed are loaded in background\n    //memberships only for currently impersonatedOrUser (others loaded in background for teacher?)\n    //same with childrenOrAdvisees and groups \n\n    //units, activities, sections, userList ... are pretty much the same for all users\n    //keep them here, but load hidden stuff in template for teacher\n    //memberships, childrenOrAdvisees, groups ... depend on the user\n    this.register('categories',Meteor.subscribe('categories',false)); \n    this.register('units',Meteor.subscribe('units',false)); \n    this.register('activities',Meteor.subscribe('activities')); \n    this.register('sections',Meteor.subscribe('sections'));\n    this.register('userList',Meteor.subscribe('userList'));\n    this.register('memberships',Meteor.subscribe('memberships'));\n    this.register('childrenOrAdvisees',Meteor.subscribe('childrenOrAdvisees'));\n    this.register('groups',Meteor.subscribe('groups'));\n  },\n  action: function (params, queryParams) {\n    FlowLayout.render('layout', { header: 'openlabHeader', main: 'openlab' });\n  },\n  name: 'openlab'\n});\n\nFlowRouter.route('/activity/:_id', {  \n  //activityPageSession.initializePage() ... how to do with flow router?\n  subscriptions: function (params, queryParams) {\n    //decide to load for whole app, this page or specific template\n    //units needed at all?\n    //only one activity needed\n    //files, walls, columns and blocks only need for the one activity and for the user and his or her current group and section\n    //load above line with activityPage template itself?\n    //groups, memberships and sections only needed for the specific user\n    //teacher may want to load content for other students in the background\n    //load childrenoradvisees for user when parent logs in or is impersonated only?\n    //only leaves loading the activity from here ... hmmm.\n    this.register('categories',Meteor.subscribe('categories',false)); \n    this.register('units',Meteor.subscribe('units',false)); \n    this.register('activities',Meteor.subscribe('activities')); \n    this.register('sections',Meteor.subscribe('sections'));\n    this.register('userList',Meteor.subscribe('userList'));\n    this.register('memberships',Meteor.subscribe('memberships'));\n    this.register('childrenOrAdvisees',Meteor.subscribe('childrenOrAdvisees'));\n    this.register('groups',Meteor.subscribe('groups'));\n  },\n  action: function (params, queryParams) {\n    FlowLayout.render('layout', { header: 'activityHeader', main: 'activityPage' });\n  },\n  name: 'activityPage'\n});\n\nFlowRouter.route('/activity/:_id', {  \n  //activityPageSession.initializePage() ... how to do with flow router?\n  subscriptions: function (params, queryParams) {\n    //decide to load for whole app, this page or specific template\n    //units needed at all?\n    //only one activity needed\n    //files, walls, columns and blocks only need for the one activity and for the user and his or her current group and section\n    //load above line with activityPage template itself?\n    //groups, memberships and sections only needed for the specific user\n    //teacher may want to load content for other students in the background\n    //load childrenoradvisees for user when parent logs in or is impersonated only?\n    //only leaves loading the activity from here ... hmmm.\n    this.register('categories',Meteor.subscribe('categories',false)); \n    this.register('units',Meteor.subscribe('units',false)); \n    this.register('activities',Meteor.subscribe('activities')); \n    this.register('sections',Meteor.subscribe('sections'));\n    this.register('userList',Meteor.subscribe('userList'));\n    this.register('memberships',Meteor.subscribe('memberships'));\n    this.register('childrenOrAdvisees',Meteor.subscribe('childrenOrAdvisees'));\n    this.register('groups',Meteor.subscribe('groups'));\n  },\n  action: function (params, queryParams) {\n    FlowLayout.render('layout', { header: 'activityHeader', main: 'activityPage' });\n  },\n  name: 'activityPage'\n});\n\nFlowRouter.route('/validateAccounts', {  \n  //activityPageSession.initializePage() ... how to do with flow router?\n  subscriptions: function (params, queryParams) {\n    //decide to load for whole app, this page or specific template\n    //all loaded with headers and custom accounts ui above?\n    this.register('sections',Meteor.subscribe('sections'));\n    this.register('userList',Meteor.subscribe('userList'));\n    this.register('memberships',Meteor.subscribe('memberships'));\n    this.register('childrenOrAdvisees',Meteor.subscribe('childrenOrAdvisees'));\n    this.register('emails',Meteor.subscribe('emails'));\n  },\n  triggersEnter: [function(context, redirect) {\n    var user = Meteor.user();\n    if(!Roles.userIsInRole(user, ['teacher']))\n      redirect('/');\n  }],\n  action: function (params, queryParams) {\n    FlowLayout.render('layout', { header: 'activityHeader', main: 'validateAccounts' });\n  },\n  name: 'validateAccounts'\n});\n\nvar parentPath;\nFlowRouter.triggers.exit([function(context,redirect) {\n  parentPath = context.path;\n}])\n\n//pass fileID as a parameter, then look up file\n//object to find path? Might need file ID to\n//do validation and permission checks\nvar uploadRoutes = FlowRouter.group({\n  prefix: '/upload',\n  triggersEnter: [function(context, redirect) {\n    window.open(Meteor.absoluteUrl(context.path),\"\",\"\",true);\n    redirect(parentPath);\n  }]\n});\n\nuploadRoutes.route('/(.*)',{})\n",
 			"file": "lib/routes.js",
+			"file_size": 4577,
+			"file_write_time": 130833987094136440,
 			"settings":
 			{
-				"buffer_size": 4435,
+				"buffer_size": 6026,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/activity/column.js",
+			"file": "collections/levelsOfMastery.js",
 			"settings":
 			{
-				"buffer_size": 5460,
+				"buffer_size": 240,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/activity/block.js",
+			"file": "collections/standards.js",
 			"settings":
 			{
-				"buffer_size": 16114,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/blocks.js",
-			"settings":
-			{
-				"buffer_size": 10851,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/stylesheets/activity_page.css",
-			"settings":
-			{
-				"buffer_size": 4366,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/walls.js",
-			"settings":
-			{
-				"buffer_size": 6228,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/activities.js",
-			"settings":
-			{
-				"buffer_size": 8481,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/summernote/summernote.js",
-			"settings":
-			{
-				"buffer_size": 8139,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/columns.js",
-			"settings":
-			{
-				"buffer_size": 3679,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/files.js",
-			"settings":
-			{
-				"buffer_size": 3479,
+				"buffer_size": 0,
 				"line_ending": "Unix"
 			}
 		}
@@ -224,12 +112,10 @@
 		"/home/solargreen/meteor/OpenLabv2/client",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers",
 		"/home/solargreen/meteor/OpenLabv2/client/views",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX",
 		"/home/solargreen/meteor/OpenLabv2/collections",
 		"/home/solargreen/meteor/OpenLabv2/lib",
 		"/home/solargreen/meteor/OpenLabv2/methods",
@@ -237,47 +123,54 @@
 	],
 	"file_history":
 	[
-		"/home/solargreen/meteor/OpenLabv2/methods/sortable1cMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/files.js",
+		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
+		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/groupMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.html",
+		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
+		"/home/solargreen/meteor/OpenLabv2/methods/showHideMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
+		"/home/solargreen/meteor/OpenLabv2/server/users.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/sortable1cMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/columns.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/blockMethods.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers/wallHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers/activityPageSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.html",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.js",
-		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
-		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/blockMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/groupMethods.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/sectionMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/showHideMethods.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/columns.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/groups.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/units.js",
-		"/home/solargreen/meteor/OpenLabv2/server/users.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/helpers/statusColors.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons_dialogs.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/workPeriods.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/dateTimeHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
@@ -286,18 +179,13 @@
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.html",
-		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/alertOnError.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/parentTemplate.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/dateTimeHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/site.js",
 		"/home/solargreen/meteor/OpenLabv2/server/schoolAccountsPublications.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
-		"/home/solargreen/meteor/OpenLabv2/collections/files.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/users.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/client/layout.html",
 		"/home/solargreen/meteor/OpenLabv2/client/main.html",
@@ -314,7 +202,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/progressPlan.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/helpers/openlabSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/activities_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/application/layout.html",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/progressandplan/helpers/openlabSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/progressandplan/helpers/editingMainPage.js",
@@ -363,8 +250,7 @@
 		"/home/solargreen/meteor/OpenLabv2/client/pages/includes/student_header.js",
 		"/home/solargreen/meteor/OpenLabv2/client/helpers/editingProgressPage.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/showhide.css",
-		"/home/solargreen/meteor/OpenLabv2/client/pages/application/layout.html",
-		"/home/solargreen/meteor/OpenLabv2/client/sortable1c/sortable1c.html"
+		"/home/solargreen/meteor/OpenLabv2/client/pages/application/layout.html"
 	],
 	"find":
 	{
@@ -382,6 +268,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"unittitle.active",
 			"cu",
 			"glyphicon",
 			"check",
@@ -508,8 +395,7 @@
 			"disabled",
 			":hover",
 			"attendance",
-			"TeacherViewAs",
-			"TVA"
+			"TeacherViewAs"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -528,65 +414,73 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "client/views/activity/activityPage.html",
+					"file": "collections/units.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 127,
+						"buffer_size": 3242,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								2179,
+								2179
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 15,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "client/views/activity/wall.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1210,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								571,
-								571
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 969.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 3,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 1,
+					"file": "collections/categories.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3260,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2894,
+								2894
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 884.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -595,165 +489,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4670,
+						"buffer_size": 5108,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3066,
-								3066
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 918.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "client/views/activity/activityHeader.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1040,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								786,
-								786
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "client/views/activity/column.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2293,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1719,
-								1719
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 52.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "client/views/activity/block.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8022,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1944,
-								1944
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 459.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "client/views/openlab/activities_list.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4048,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 408.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "methods/groupMethods.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1579,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
+								854,
+								854
 							]
 						],
 						"settings":
@@ -764,122 +508,26 @@
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "methods/blockMethods.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1635,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 1,
-			"sheets":
-			[
-				{
-					"buffer": 9,
-					"file": "client/views/activity/activityPage.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3011,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1233,
-								1233
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "lib/routes.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4435,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2413,
-								2413
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 459.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 11,
-					"file": "client/views/activity/column.js",
+					"buffer": 3,
+					"file": "lib/routes.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5460,
+						"buffer_size": 6026,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3893,
-								3893
+								3192,
+								3192
 							]
 						],
 						"settings":
@@ -889,169 +537,47 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1836.0,
+						"translation.y": 833.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 0,
 					"type": "text"
 				},
 				{
-					"buffer": 12,
-					"file": "client/views/activity/block.js",
+					"buffer": 4,
+					"file": "collections/levelsOfMastery.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16114,
+						"buffer_size": 240,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1856,
-								1856
+								240,
+								240
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 714.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 13,
-					"file": "collections/blocks.js",
+					"buffer": 5,
+					"file": "collections/standards.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10851,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5961,
-								5961
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1776.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 16,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "client/stylesheets/activity_page.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4366,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1990,
-								1990
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1402.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "collections/walls.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6228,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								5245,
-								5245
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1683.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
-					"file": "collections/activities.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8481,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								8051,
-								8051
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2652.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				},
-				{
-					"buffer": 17,
-					"file": "client/summernote/summernote.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8139,
+						"buffer_size": 0,
 						"regions":
 						{
 						},
@@ -1064,75 +590,13 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 765.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 19,
-					"type": "text"
-				},
-				{
-					"buffer": 18,
-					"file": "collections/columns.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3679,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3435,
-								3435
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 18,
-					"type": "text"
-				},
-				{
-					"buffer": 19,
-					"file": "collections/files.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3479,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3470,
-								3470
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 255.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 17,
+					"stack_index": 5,
 					"type": "text"
 				}
 			]
@@ -1218,7 +682,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},

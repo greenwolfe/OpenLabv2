@@ -26,6 +26,13 @@
   border-width: thin;
   border-color: black;
   text-align: center;
+  word-wrap: break-word;
+  padding-left: 0;
+  padding-right: 0;
+}
+#unittitle div.editTitle {
+  padding-left: 0;
+  padding-right: 0;
 }
 #units li > a.newunit {
   margin-top: 15pt;
