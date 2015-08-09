@@ -55,6 +55,12 @@ Meteor.startup(function () {
     };
   }
 
+  if (Sections.find().count() === 0) {
+    Meteor.call('insertSection',{name : 'Bblock'});
+    Meteor.call('insertSection',{name : 'Fblock'});
+    Meteor.call('insertSection',{name : 'Gblock'});
+  }
+
  /* if (Activities.find().count() == 0) {
     var units = Units.find().fetch();
     units.forEach( function(u) {
@@ -67,7 +73,6 @@ Meteor.startup(function () {
     });
   }*/
 
-  //put code to convert models to units and categories here
 
 });
 

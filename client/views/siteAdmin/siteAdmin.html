@@ -1,0 +1,76 @@
+<template name="siteAdmin">
+  {{#with Site}}
+    {{> editSiteParams}}
+  {{/with}}
+  {{#each sections}}
+    {{> editSection}}
+  {{/each}}
+  {{#with name = ''}}
+    {{>editSection}}
+  {{/with}}
+  {{#each gradingPeriods}}
+    {{> editGradingPeriod}}
+  {{/each}}
+  {{#with name=''}}
+    {{> editGradingPeriod}}
+  {{/with}}
+</template>
+
+<template name="editSection">
+  <form class="form-inline" role="form">
+    <div class="form-group">
+      <label>{{new}} Section:
+        <input type="text" class="form-control name" value = "{{name}}"/>  
+      </label> 
+    </div>
+    <button type="submit" class="btn btn-default">{{SaveSubmit}}</button>
+    {{#if empty}}
+      <button type="delete" class="btn btn-default">Delete</button>
+    {{/if}}
+  </form>
+</template>
+
+<template name="editSiteParams">
+  <form class="form-inline" role="form">
+    <div class="form-group">
+      <label>Site Title:
+        <input type="text" class="form-control sitetitle" value = "{{title}}"/>  
+      </label> 
+    </div>
+    <button type="submit" class="btn btn-default">Save</button>
+  </form>
+</template>
+
+<template name="editGradingPeriod">
+  <form class="form-inline" role="form">
+    <div class="form-group">
+      <label>{{new}} Grading Period:
+        <input type="text" class="form-control name" value = "{{name}}"/>  
+      </label> 
+    </div>
+    <div class="form-group">
+      <label>from
+        <div class='input-group date startDatePicker'>
+          <input type='text' class="form-control"/>
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-calendar"></span>
+          </span>
+        </div>
+      </label>
+    </div>
+    <div class="form-group">
+      <label>to
+        <div class='input-group date endDatePicker'>
+          <input type='text' class="form-control" {{disabled}}/>
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-calendar"></span>
+          </span>
+        </div>
+      </label>
+    </div>
+    <button type="submit" class="btn btn-default">{{SaveSubmit}}</button>
+    {{#if _id}}
+      <button type="delete" class="btn btn-default">Delete</button>
+    {{/if}}
+  </form>
+</template>
