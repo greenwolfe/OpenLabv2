@@ -19,12 +19,18 @@ Template.validateAccounts.helpers({
         user.emails.forEach(function(email) {
           verified = verified || email.verified;
         });
+      } else { //emails haven't come through yet, don't show
+        verified = true;
       }
       //require all childrenOrAdvisees verified
-      if (Roles.userIsInRole(user,'parentOrAdvisor') && ('childrenOrAdvisees' in user)) {
-        user.childrenOrAdvisees.forEach(function(student) {
-          verified = verified && student.verified;
-        });
+      if (Roles.userIsInRole(user,'parentOrAdvisor')) {
+         if ('childrenOrAdvisees' in user) {
+          user.childrenOrAdvisees.forEach(function(student) {
+            verified = verified && student.verified;
+          });
+        } else { //childrenOrAdvisees hasn't come through yet, don't show
+          verified = true;
+        }
       }
       return !verified;  //keep only users without a verified email
     })

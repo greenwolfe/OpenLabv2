@@ -56,18 +56,27 @@ $                            # end-of-string
 
 Match.calcMethodString = Match.Where(function(c) {
   if (!Match.test(Match.nonEmptyString)) return false;
+//latest means average (or total) is just the latest score
   if (c == 'latest') return true;
   var param;
+//average means average all scores, average 5 means average the five latest scores
   if (_.str.startsWith(c,'average')) {
     param = _.str.strRight(c,'average');
     if (!param) return true;
     if ((param) && (_.str.toNumber(param))) return true;
     return false;
   } 
+//decayingAverage33 means the latest score counts 33% and all the rest together count 66%
   if (_.str.startsWith(c,'decayingAverage')) {
     param = _.str.strRight(c,'decayingAverage');
     if ((param) && (_.str.toNumber(param))) return true;
     return false;
   } 
+//totalPoints10 means the scores will be summed and divided by 10 to find the average
+  if (_.str.startsWith(c,'totalPoints')) {
+    param = _.str.strRight(c,'totalPoints');
+    if ((param) && (_.str.toNumber(param))) return true;
+    return false;
+  }
   return false;
 })

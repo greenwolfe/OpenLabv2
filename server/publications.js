@@ -143,3 +143,7 @@ Meteor.publish('workPeriods',function(sectionID,unitID) {
   return WorkPeriods.find(selector);
 });
 
+Meteor.publish('gradingPeriods',function() {
+  return GradingPeriods.find();
+})
+

@@ -113,7 +113,7 @@
         {{>showHide collection='Standards' itemName='standard' item=this}}
         {{>plaintexteditor collection='Standards' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
-        <!-- LOM indicator goes here -->
+        <span class='badge badge-inverse LoMmedium'>DM</span>
         <!--<a  href="{{pathFor 'standardPage' _id=_id}}"> -->
         <a href="#">
         {{{title}}} 
@@ -124,6 +124,6 @@
 
 <template name='newStandard'>
   <p class='newItem'>
-    {{>plaintexteditor collection='Standards' field='title' editable='true' placeholder='To add new standard, just type the title here, then click outside the blue box to save.' clearOnSave=true fixedFields=fixedFields}}
+    {{>plaintexteditor collection='Standards' field='title' editable='true' placeholder='To add a new standard, type the title here, then click outside the blue box to save.' clearOnSave=true fixedFields=fixedFields}}
   </p>
 </template>

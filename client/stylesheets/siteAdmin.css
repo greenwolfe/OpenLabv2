@@ -1,0 +1,9 @@
+#editSiteAdmin {
+  width: 600px;
+}
+#editSiteAdmin p div[contenteditable="true"][class~='plaintexteditor'] {
+  width: 80%;
+  float: right;
+  cursor: text;
+  background: inherit;
+}

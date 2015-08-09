@@ -131,3 +131,7 @@ li.categorytitle.active2 > a {
 #standardList i.progressstripe.completed {
   background-color: #08C; 
 }
+
+.LoMhigh { background: green;}
+.LoMmedium { background: yellow; color: black;}
+.LoMlow { background: red; }

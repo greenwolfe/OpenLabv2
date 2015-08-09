@@ -15,7 +15,6 @@ Meteor.methods({
 
     if (!cU)  
       throw new Meteor.Error(401, "You must be logged in to alter the admin variables.");
-    
     if (!Roles.userIsInRole(cU,'teacher'))
       throw new Meteor.Error(409, 'You must be a teacher to alter the admin variables.')
     
@@ -34,6 +33,26 @@ Meteor.methods({
   },
 
   /**** UPDATE SITE ****/
+
+  updateSite: function(site) {
+    check(site,{
+      _id: Match.idString,
+      title: Match.Optional(Match.nonEmptyString)
+    });
+
+    var cU = Meteor.user();
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to alter the admin variables.");
+    if (!Roles.userIsInRole(cU,'teacher'))
+      throw new Meteor.Error('onlyTeacher', 'You must be a teacher to alter the admin variables.')
+
+    var originalSite = Site.findOne(site._id);
+    if (!originalSite)
+      throw new Meteor.Error('siteNotFound','Cannot update site.  Site object not found.');
+
+    if (site.title != originalSite.title)
+      Site.update(site._id,{$set:{title:site.title}});
+  },
 
   /**** SITE ADD ACTIVITY TYPE ****/
   siteAddActivityType: function(newAT) {
