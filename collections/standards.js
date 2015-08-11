@@ -9,22 +9,19 @@ Meteor.methods({
       categoryID: Match.idString,
 
       
-      //****Make some provision for trimesters or date ranges?
       /*set below, value not passed in
       description : Match.Optional(Match.String);
       scale: Match.OneOf([Match.nonEmptyString],Match.Integer), // default: ['NM','DM','M'],
+      scaleHelp: Match.nonEmptyString, // default: "NM (no mastery), DM (developing mastery), M (mastery)"
       calcMethod: Match.Optional(Match.calcMethodString) //latest, average, or average5 or decayingAverage 33 ... where the number can vary
-      calcMethodParam: Match.Integer, //if method == average, param is how many of the most recent LoMs to average (-1 means all)
-                                      //if method == decayingAverage, param is what percent to count the latest LoM
-                                      //if method == latest, no param is necessary
       visible:  Match.Optional(Boolean),
       order: Match.Optional(Match.Integer), //for now, new activity always placed at end of list
      */
     });
     standard.description = '';
     standard.scale = ['NM','DM','M'];
-    standard.calcMethod = 'latest';
-    standard.calcMethodParam = null;
+    standard.scaleHelp = "NM (no mastery), DM (developing mastery), M (mastery)";
+    standard.calcMethod = 'mostRecent';
     standard.visible = true;
     //don't want order passed in.  Always add new activity at end of list
     var category = Categories.findOne(standard.categoryID); //verify unit first
@@ -62,8 +59,9 @@ Meteor.methods({
     if (!standard)
       throw new Meteor.Error('invalidID', "Cannot delete standard.  Invalid ID.");
 
-    //check if standard has been used and post warning or suggest
-    //just hiding it???
+    var LoMcount = LevelsOfMastery.find({standardID:standardID}).count();
+    if (LoMcount)
+      throw new Meteor.Error('standardAlreadyUsed','This standard has already been used ' + LoMcount + ' times to assess students.  Deleting it would orphan those scores.  Try hiding it instead.');
 
     var ids = _.pluck(Standards.find({categoryID:standard.categoryID,order:{$gt: activity.order}},{fields: {_id: 1}}).fetch(), '_id');
     var numberRemoved = Standards.remove(standardID); 
@@ -73,7 +71,7 @@ Meteor.methods({
 
   /***** UPDATE STANDARD ****/
 
-  /* list of properties of activity object and where/how set
+  /* list of properties of standard object and where/how set
 
   *title: Match.Optional(Match.nonEmptyString), //see method below
   *description: Match.Optional(String), //see method below
@@ -81,8 +79,8 @@ Meteor.methods({
   visible:  Match.Optional(Boolean), //set by show/hide methods
   order: Match.Optional(Match.Integer), //set by sortable1c and drag/drop
   *scale: Match.OneOf([Match.nonEmptyString],Match.Integer), // see method below
+  *scaleHelp: Match.OneOf([Match.nonEmptyString],Match.nonEmptyString), //see method below
   *calcMethod: Match.Optional(Match.calcMethodString) //latest, average, or average5 or decayingAverage 33 ... where the number can vary
-  *calcMethodParam: Match.Integer,  //see method below 
   */
 
   updateStandard: function(newStandard) {
@@ -90,7 +88,8 @@ Meteor.methods({
       _id:Match.idString,
       title:Match.Optional(Match.nonEmptyString),
       description: Match.Optional(String),
-      scale: Match.Optional(Match.OneOf([Match.nonEmptyString],Match.Integer)),
+      scaleHelp: Match.Optional(Match.scaleString), // a single integer or the form of "NM(no mastery),DM(developing mastery),M(mastery)"
+      //scale: Match.Optional(Match.OneOf(Match.scaleString,Match.Integer)),
       calcMethod: Match.Optional(Match.calcMethodString)    
     })
 
@@ -106,16 +105,77 @@ Meteor.methods({
 
     if (('title' in newStandard) && (newStandard.title != standard.title))
       Standards.update(newStandard._id,{$set: {title:newStandard.title}});
+
     if (('description' in newStandard) && (newStandard.description != standard.description))
       Standards.update(newStandard._id,{$set: {description:newStandard.description}});
-    if (('scale' in newStandard) && (newStandard.scale != standard.scale)) {
-      //check to be sure no LoMs have used the current scale
-      //is there some way to convert???
-      Standards.update(newStandard._id,{$set: {scale:newStandard.scale}});
+
+    if (('scaleHelp' in newStandard) && (newStandard.scaleHelp != standard.scaleHelp)) {
+      newStandard.scale = getScale(newStandard.scaleHelp);
+      var LoMcount = LevelsOfMastery.find({standardID:newStandard._id}).count();
+      if (LoMcount) {
+        if (_.isArray(newStandard.scale) && !_.isArray(standard.scale))
+          throw new Meteor.Error('stringToNumericalNotAllowed', 'At the present time, there is no way to convert a symbolic scale to a numerical one once scores have already been entered.');
+        if (!_.isArray(newStandard.scale) && _.isArray(standard.scale))
+          throw new Meteor.Error('numericalToStringNotAllowed', 'At the present time, there is no way to convert a numerical scale into a symbolic one  once scores have already been entered.');
+        if (!_.isArray(newStandard.scale) && (newStandard.scale.length < standard.scale.length))
+          throw new Meteor.Error('cannotShrinkSymbolicScale','At the present time, it is not possible to shrink the size of a symbolic scale  once scores have already been entered.  The new scale must have at least as many scores as the old one.');
+      }
+      Standards.update(newStandard._id,{$set: {scaleHelp:newStandard.scaleHelp}});
+      var checkValue = (_.isArray(standard.scale)) ? standard.scale.join(',') : standard.scale;
+      var newCheckValue = (_.isArray(newStandard.scale)) ? newStandard.scale.join(',') : newStandard.scale;
+      if (newCheckValue != checkValue) {
+        Standards.update(newStandard._id,{$set: {scale:newStandard.scale}},function(error,num){
+          if (error) return;
+          if (_.isFinite(newStandard.scale)) return;
+          LevelsOfMastery.find({standardID:newStandard._id}).forEach(function(LoM) {
+            var index = standard.scale.indexOf(LoM.level);
+            var level = newStandard.scale[index];
+            LevelsOfMastery.update(LoM._id,{$set:{level:level}});
+          })
+        }); 
+      }       
     }
+
     if (('calcMethod' in newStandard) && (newStandard.calcMethod != standard.calcMethod)) {
-      Standards.update(newStandard._id,{$set: {scale:newStandard.scale}});
-      //find allLoMs and recalculate their current/average score
+      Standards.update(newStandard._id,{$set: {calcMethod:newStandard.calcMethod}},function(error,num) {
+        if (error) return;
+        var studentsSet = [];
+        LevelsOfMastery.find({standardID:newStandard._id}).forEach(function(LoM) {
+          if (_.contains(studentsSet,LoM.studentID)) {
+            return;
+          } else {
+            studentsSet.push(LoM.studentID);
+          } 
+          Meteor.updateLoMaverages(LoM); 
+        });
+      });
     }
+
+    return newStandard._id;
   }
 });
+
+  /*********************/
+ /****  UTILITIES  ****/
+/*********************/
+
+//assumes scaleHelp has the proper form as it was checked with Match.scaleString
+var getScale = function(scaleHelp) {
+  var scaleHelp = _.str.trim(scaleHelp);
+  var numericalScale = _.str.toNumber(scaleHelp);
+  if (_.isFinite(numericalScale)) return numericalScale;
+
+  var symbolicScale = scaleHelp.split(',');
+  return symbolicScale.map(function(step) {
+    if (step.match(/\(([^)]+)\)/))  //contains (anything)
+      step = _.str.strLeft(step,'('); //everything to left of first (
+    return step.replace(/ /g,''); //delete all spaces
+  })
+/* regexp matches (anything), explanation below
+    \( : match an opening parentheses
+    ( : begin capturing group
+    [^)]+: match one or more non ) characters
+    ) : end capturing group
+    \) : match closing parentheses
+*/
+}

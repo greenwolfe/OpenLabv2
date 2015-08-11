@@ -1,3 +1,9 @@
+//to-do:  add a confirmation button when save is accepted 
+//or add a notification area at the top that says this ... changed to ... that
+  /*********************/
+ /**** SITE ADMIN  ****/
+/*********************/
+
 Template.siteAdmin.helpers({
   Site: function() {
     return Site.findOne();
@@ -9,8 +15,10 @@ Template.siteAdmin.helpers({
     return Sections.find();
   }
 })
+  /***************************/
+ /**** EDIT SITE PARAMS  ****/
+/***************************/
 
-//must be a separate template to access the _id through tmpl._id
 Template.editSiteParams.events({
   'click button[type="submit"]': function(event,tmpl) {
     var title = getTrimmedValbyClass(tmpl,'sitetitle');
@@ -19,6 +27,7 @@ Template.editSiteParams.events({
         _id:tmpl.data._id,
         title:title
       })
+    return false;
   }
 });
 
@@ -40,10 +49,12 @@ Template.editSection.events({
         Meteor.call('insertSection',section);
       }
     }
+    return false;
   },
   'click button[type="delete"]': function(event,tmpl) {
     if (('_id' in tmpl.data) && Sections.findOne(tmpl.data._id))
       Meteor.call('deleteSection',tmpl.data._id,alertOnError);
+    return false;
   }
 })
 
@@ -126,10 +137,12 @@ Template.editGradingPeriod.events({
         Meteor.call('insertGradingPeriod',gradingPeriod);
       }
     }
+    return false;
   },
 'click button[type="delete"]': function(event,tmpl) {
   if (('_id' in tmpl.data) && GradingPeriods.findOne(tmpl.data._id))
     Meteor.call('deleteGradingPeriod',tmpl.data._id);
+  return false;
   },
   'dp.change .startDatePicker': function(event,tmpl) {
     //link the pickers to ensure startDate < endDate

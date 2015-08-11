@@ -18,6 +18,25 @@ Meteor.publish('standards',function() {  //change to user or section ID in order
   return Standards.find();
 });
 
+Meteor.publish('levelsOfMastery',function(standardID,studentID,activityID) {
+  check(standardID,Match.OneOf(Match.idString,null));
+  check(studentID,Match.OneOf(Match.idString,null));
+  check(activityID,Match.OneOf(Match.idString,null));
+  if (!standardID && !studentID && !activityID)
+    return this.ready();
+
+  var selector = {}
+  if (standardID)
+    selector.standardID = standardID;
+  if (studentID)
+    selector.studentID = studentID;
+  if (activityID)
+    selector.activityID = activityID;
+  if (!Roles.userIsInRole(this.userId,'teacher'))
+    selector.visible = true; //return only visible items
+  return LevelsOfMastery.find(selector);
+});
+
 Meteor.publish('units',function(showHidden) {
   /*if (showHidden) {
     return Units.find();

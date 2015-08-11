@@ -50,6 +50,7 @@ VALID_KEYS.forEach(function(key) {
 //if impersonation is not allowed or if it is not happening at the moment
 //intended to be a drop-in for Meteor.userId() and Meteor.user()
 //just use Meteor.openlab.userId() or Meteor.openlab.user()
+//are these redundant with helpers from loginButtonsSession?
 Meteor.openlab.userId = function() {
   //privide security
   return Session.get(KEY_PREFIX + 'impersonatedID') || Meteor.userId();
@@ -101,6 +102,12 @@ openlabSession = {
           profile: profile
         });
       }
+    }
+    if (key == 'editingMainPage') {
+      cU = Meteor.user(); 
+      if (Roles.userIsInRole(cU,'teacher')) 
+        this._set(key,value);
+      return;
     }
 
     this._set(key, value);

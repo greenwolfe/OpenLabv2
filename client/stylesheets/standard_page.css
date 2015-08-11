@@ -1,0 +1,43 @@
+#LoMlist > div.LoMitem:nth-child(odd) {
+  background-color: #DFF0D8;
+}
+#LoMlist > div.LoMitem:nth-child(even) {
+  background-color: #F9F9F9;
+}
+#LoMlist div.LoMitem .LoMitemInfo {
+  font-size: 10pt;
+  margin-left: 50px;
+}
+#LoMlist div.LoMitem div.plaintexteditor {
+  width: 48px;
+  display: inline-block;
+  min-height: 32px;
+  vertical-align: top;
+}
+#LoMlist div.LoMitem div.summernote {
+  width: 500px;
+  display: inline-block;
+  min-height: 32px;
+  vertical-align: top;
+}
+#LoMlist div.LoMitem span.LoMcomment {
+  width: 500px;
+  display: inline-block;
+  vertical-align: top;
+}
+#LoMlist form.form-inline {
+  margin-bottom: 10px;
+  background-color: #DFF0D8;
+}
+#LoMlist form.form-inline div.summernote.comment {
+  width: 500px;
+  display: inline-block;
+  min-height: 32px;
+  vertical-align: top;
+}
+#LoMlist form.form-inline div.form-group input.form-control.level {
+  width: 48px;
+}
+.LoMhigh { background: green;}
+.LoMmedium { background: yellow; color: black;}
+.LoMlow { background: red; }

@@ -37,7 +37,7 @@ Meteor.methods({
       throw new Meteor.Error('collection-not-found','Error creating wall.  Collection ' + collectionName + ' not found.');
     var item = Collection.findOne(wall.createdFor);
     if (!item) 
-      throw new Meteor.Error('item-not-found','Error creating wall.  Could not find item in ' + collectionNames + 'with id ' + wall.createdFor);
+      throw new Meteor.Error('item-not-found','Error creating wall.  Could not find item in ' + collectionName + ' with id ' + wall.createdFor);
     if ((wall.type == 'student') && (!Roles.userIsInRole(item,'student')))
       throw new Meteor.Error('notStudent','Could not create student wall.  Assigned user is not a student.');
     

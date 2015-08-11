@@ -54,29 +54,44 @@ $                            # end-of-string
 //cannot contain the username embedded in it
 //very difficult to implement in regexp
 
-Match.calcMethodString = Match.Where(function(c) {
-  if (!Match.test(Match.nonEmptyString)) return false;
-//latest means average (or total) is just the latest score
-  if (c == 'latest') return true;
-  var param;
-//average means average all scores, average 5 means average the five latest scores
-  if (_.str.startsWith(c,'average')) {
-    param = _.str.strRight(c,'average');
-    if (!param) return true;
-    if ((param) && (_.str.toNumber(param))) return true;
+Match.calcMethodString = Match.Where(function(method) {
+  var calcMethod = method.split(/[0-9]/)[0]; 
+  var calcParam = _.str.toNumber(_.str.strRight(method,calcMethod)); 
+  var validMethods = ['mostRecent','average','decayingAverage'];
+  if (!_.contains(validMethods,calcMethod))
     return false;
-  } 
-//decayingAverage33 means the latest score counts 33% and all the rest together count 66%
-  if (_.str.startsWith(c,'decayingAverage')) {
-    param = _.str.strRight(c,'decayingAverage');
-    if ((param) && (_.str.toNumber(param))) return true;
+  //decaying average must have a valid parameter (meaning = percent assigned to most recent score)
+  if ((calcMethod == 'decayingAverage') && (!calcParam)) 
     return false;
-  } 
-//totalPoints10 means the scores will be summed and divided by 10 to find the average
-  if (_.str.startsWith(c,'totalPoints')) {
-    param = _.str.strRight(c,'totalPoints');
-    if ((param) && (_.str.toNumber(param))) return true;
+  //mostRecent must not have a parameter
+  if ((calcMethod == 'mostRecent') && (calcParam))
     return false;
-  }
-  return false;
+  //average can take a parameter (meaning = average most recent p scores) 
+  //or not (meaning = average all scores)
+  return true;
 })
+
+//string must be a number or
+//have the form "NM (no mastery), DM (developing mastery), M (mastery)"
+Match.scaleString = Match.Where(function(scaleHelp) {
+  var scaleHelp = _.str.trim(scaleHelp);
+  var numericalScale = _.str.toNumber(scaleHelp);
+  if (_.isFinite(numericalScale)) return true;
+  var symbolicScale = scaleHelp.split(',');
+  if (symbolicScale.length == 0) return false;
+  var goodValues = true;
+  symbolicScale.forEach(function(step) {
+    if (step.match(/\(([^)]+)\)/))  //contains (anything)
+      step = _.str.strLeft(step,'('); //everything to left of first (
+    step = step.replace(/ /g,''); //delete all spaces
+    if (!step) goodValues = false; //if nothing left
+  })
+  return goodValues;
+/* regexp matches (anything), explanation below
+    \( : match an opening parentheses
+    ( : begin capturing group
+    [^)]+: match one or more non ) characters
+    ) : end capturing group
+    \) : match closing parentheses
+*/
+});

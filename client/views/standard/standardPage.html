@@ -1,0 +1,87 @@
+<template name="standardPage">
+  {{#with standard}}
+    {{#if editingMainPage}}
+      <p>Title: 
+      {{>plaintexteditor collection='Standards' field='title' _id=_id editable=editingMainPageTFtext}}</p>
+    {{/if}}
+
+    <p>
+      {{#unless description}}
+        {{#if isInRole 'teacher'}}
+          Click 'Edit' to type a description.
+        {{else}}
+          The teacher has not yet provided a description for this standard. 
+        {{/if}}
+      {{/unless}}
+      {{#if editingMainPage}}
+        Description:
+      {{/if}}
+      {{>summernote collection='Standards' field='description' _id=_id enabled=editingMainPage options=summernoteOptions}}
+    </p>Current Score:
+    <span class='badge badge-inverse {{LoMAveragecolorcode}}'>{{LoMAveragetext}}</span>
+    <p>
+
+    </p>
+
+    <p>Calculation method: {{humanizedCalcMethod}} </p>
+    {{#if editingMainPage}}
+       <p>
+       {{>helpBannerNavPills messages=calcHelpMessages}}
+       {{>plaintexteditor collection='Standards' field='calcMethod' _id=_id editable=editingMainPageTFtext}} </p>
+    {{/if}}  
+
+    <p>Scale: 
+      {{#if editingMainPage}}
+        {{symbolicScale}}
+        {{>helpBannerNavPills messages=scaleHelpMessages}}
+        {{>plaintexteditor collection='Standards' field='scaleHelp' _id=_id editable=editingMainPageTFtext}}
+      {{else}}
+        {{humanizedScaleHelp}}
+      {{/if}}
+    </p>
+
+    <div id="LoMlist">
+      {{#if isTeacherViewingAsStudent}}
+        {{> newLoM}}
+      {{/if}}
+      {{#each LoMs}}
+        {{> LoMitem}}
+      {{/each}}
+    </div>
+  {{/with}}
+</template>
+
+<template name="LoMitem">
+  <div class="LoMitem"><p>
+      {{#if editingMainPage}}
+        {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
+        <!-- need delete button -->
+        {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingMainPageTFtext}}
+        {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingMainPage options=summernoteOptions}} 
+        <!-- version ?? -->
+      {{else}}
+        <span class='badge badge-inverse {{LoMcolorcode}}'>{{LoMtext}}</span>
+        <span class=LoMcomment>{{{commentOrNote}}}</span>
+        <div class='LoMitemInfo'>
+          {{#with activity}}
+            <a href="{{pathFor 'activityPage'}}">{{title}}</a>
+          {{/with}}           
+          graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}} 
+          <!-- show version to teacher -->   
+        </div>
+      {{/if}}
+  </p></div>
+</template>
+
+<template name="newLoM">
+  <span>New level and comment</span>
+  <form class="form-inline" role="form">
+    <div class="form-group">
+      <input type="text" class="form-control level"/>
+    </div>
+    <div class="summernote comment">
+      &nbsp;
+    </div>
+    <button type="submit" class="btn btn-default">Save</button>
+  </form>
+</template>
