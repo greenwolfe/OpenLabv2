@@ -27,6 +27,7 @@ Template.plaintexteditor.events({
 
     var method = _.rtrim(tmpl.data.collection,'s'); //if collection = Posts, method=Post
     method = method.replace(/ie$/,'y'); //if collection = Activities, method  = Activity
+    method = method.replace('sOf','Of'); //if collection = LevelsOfMastery, method = LevelOfMastery
     var item = tmpl.data.fixedFields || {};
     if (id == 'new') {
       method = 'insert' + method;

@@ -72,6 +72,7 @@ Template.summernote.onRendered(function() {
   var optionsonBlur = options.onBlur || null;  //callback passed in from user
   var method = 'update' + _.rtrim(data.collection,'s'); //if collection = Posts, method=updatePost
   method = method.replace(/ie$/,'y'); //if collection = Activities, method  = updateActivity
+  method = method.replace('sOf','Of'); //if collection = LevelsOfMastery, method = LevelOfMastery
   var saveText = function(event) { //called on popover blur event
     //in uploadsTest it needs event[0].target.id
     //and console.log(event) shows Arguments {0:Object,1:callee, 2: prototype}
