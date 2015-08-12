@@ -15,6 +15,7 @@ Meteor.methods({
       scaleHelp: Match.nonEmptyString, // default: "NM (no mastery), DM (developing mastery), M (mastery)"
       calcMethod: Match.Optional(Match.calcMethodString) //latest, average, or average5 or decayingAverage 33 ... where the number can vary
       visible:  Match.Optional(Boolean),
+      masteryExpected: Match.Optional(Date),
       order: Match.Optional(Match.Integer), //for now, new activity always placed at end of list
      */
     });
@@ -23,6 +24,7 @@ Meteor.methods({
     standard.scaleHelp = "NM (no mastery), DM (developing mastery), M (mastery)";
     standard.calcMethod = 'mostRecent';
     standard.visible = true;
+    standard.masteryExpected = wayWayInTheFuture();
     //don't want order passed in.  Always add new activity at end of list
     var category = Categories.findOne(standard.categoryID); //verify unit first
     if (!category)
@@ -81,6 +83,7 @@ Meteor.methods({
   *scale: Match.OneOf([Match.nonEmptyString],Match.Integer), // see method below
   *scaleHelp: Match.OneOf([Match.nonEmptyString],Match.nonEmptyString), //see method below
   *calcMethod: Match.Optional(Match.calcMethodString) //latest, average, or average5 or decayingAverage 33 ... where the number can vary
+  *masteryExpected: Match.Optional(Date) //see method below
   */
 
   updateStandard: function(newStandard) {
@@ -90,7 +93,8 @@ Meteor.methods({
       description: Match.Optional(String),
       scaleHelp: Match.Optional(Match.scaleString), // a single integer or the form of "NM(no mastery),DM(developing mastery),M(mastery)"
       //scale: Match.Optional(Match.OneOf(Match.scaleString,Match.Integer)),
-      calcMethod: Match.Optional(Match.calcMethodString)    
+      calcMethod: Match.Optional(Match.calcMethodString),    
+      masteryExpected: Match.Optional(Date)
     })
 
     var cU = Meteor.user(); //currentUser
@@ -108,6 +112,9 @@ Meteor.methods({
 
     if (('description' in newStandard) && (newStandard.description != standard.description))
       Standards.update(newStandard._id,{$set: {description:newStandard.description}});
+
+    if (('masteryExpected' in newStandard) && (newStandard.masteryExpected != standard.masteryExpected))
+      Standards.update(newStandard._id,{$set: {msateryExpected:newStandard.masteryExpected}});
 
     if (('scaleHelp' in newStandard) && (newStandard.scaleHelp != standard.scaleHelp)) {
       newStandard.scale = getScale(newStandard.scaleHelp);

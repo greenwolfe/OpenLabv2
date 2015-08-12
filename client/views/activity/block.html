@@ -210,6 +210,7 @@
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
       {{else}}
         {{> workPeriodButton workPeriod}}
+        <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="#">{{{title}}}</a>

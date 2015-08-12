@@ -43,10 +43,10 @@ Template.categoryTitle.helpers({
     return ((this._id == activeCategory) || (this._id == activeCategory2)) ? '' : 'hidden';
   },
   percentExpected: function() { //percentExpected,
-    return 70;
+    return 0; //replace this by checking standard.masteryExpected
   },
   percentCompleted: function() { //percentCompleted 
-    return 30;
+    return 0; //replace this by checking levelOfMastery.level
   }
 });
 

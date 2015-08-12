@@ -22,7 +22,7 @@ Meteor.methods({
     if (cUisStudent && (cU._id != student._id))
       throw new Meteor.Error('onlyChangeOwnStatus',"Only a teacher can change someone else's activity status.")
 
-    var statuses = ['notStarted','oneBar','twoBars','threeBars','fourBars','fiveBars','submitted','returned','donewithcomments','done']
+    var statuses = ['nostatus','submitted','returned','donewithcomments','done']
     var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
     var oneMinuteAgo = moment().subtract(1,'minute').toDate();
     var rightNow = new Date();

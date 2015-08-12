@@ -27,6 +27,11 @@ i.icon-fourBars {
 i.icon-fiveBars {
   background-image: url('fiveBars.png');
 }
+
+i.icon-nostatus {
+  background-image: url('noStatus.png');
+  background-color: Lavender;
+} 
 i.icon-submitted {
   background-image: url('submitted.png');
   background-color: green; 
@@ -46,10 +51,11 @@ i.icon-late {
   background-image: url('late.png');
 }
 
-#activityList a {
+#activityList a, #subactivityList a {
   padding-right: 1px;
 }
-#activityList i.activityStatus {
+#activityList i.activityStatus, #activityList i.activityProgress,
+#subactivityList i.activityStatus, #subactivityList i.activityProgress {
   margin-left: 4px;
 }
 #activityList i.progressstripe {

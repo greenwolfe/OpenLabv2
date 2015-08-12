@@ -162,12 +162,18 @@ Template.activityList.onCreated(function() {
     var unitID = instance.data._id;
     //first get the info that will be immediately shown
     var activitiesThisUnit = Meteor.subscribe('activityStatuses',userID,unitID);
+    var progressThisUnit = Meteor.subscribe('activityProgress',userID,unitID);
     var workPeriodsThisUnit = Meteor.subscribe('workPeriods',sectionID,unitID);
 
     if (activitiesThisUnit.ready()) { //then load the rest in the background
       var activityStatuses = Meteor.subscribe('activityStatuses',userID); 
       if (activityStatuses.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
         Meteor.subscribe('activityStatuses');
+    }
+    if (progressThisUnit.ready()) { //then load the rest in the background
+      var activityProgress = Meteor.subscribe('activityProgress',userID); 
+      if (activityProgress.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
+        Meteor.subscribe('activityProgress');
     }
     if (workPeriodsThisUnit.ready()) {
       var workPeriods = Meteor.subscribe('workPeriods',sectionID);
@@ -277,6 +283,13 @@ var currentStatus = function(activityID) {
     return undefined;
   return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
 }
+/* currentProgress */
+var currentProgress = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityProgress.findOne({studentID:studentID,activityID:activityID});
+}
 
 Template.activityItem.helpers({
   pointsToOrID: function() {
@@ -285,12 +298,30 @@ Template.activityItem.helpers({
   status: function() {
     var status = currentStatus(this._id);
     if (!status)
-      return 'icon-notStarted'
+      return 'icon-nostatus';
     return 'icon-' + status.level;
+  },
+  progress: function() {
+    var progress = currentProgress(this._id);
+    if (!progress)
+      return 'icon-notStarted';
+    return 'icon-' + progress.level;
   },
   statusTitle: function() {
     var status = currentStatus(this._id);
     if (!status)
+      return 'not started';
+    var titleDict = {
+      'nostatus':'empty inbox: not started',
+      'submitted':'full inbox: work submitted, waiting for teacher response',
+      'returned':'full outbox:  Returned with comments by your teacher.  Please revise and resubmit.',
+      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
+      'done':'Done.'};
+    return titleDict[status.level];
+  },
+  progressTitle: function() {
+    var progress = currentProgress(this._id);
+    if (!progress)
       return 'not started';
     var titleDict = {
       'notStarted':'not started',
@@ -298,12 +329,8 @@ Template.activityItem.helpers({
       'twoBars':'almost half-way done',
       'threeBars':'more than half-way done',
       'fourBars':'80% there',
-      'fiveBars':'just about done',
-      'submitted':'work submitted, waiting for teacher response',
-      'returned':'Please revise and resubmit according to comments by your teacher',
-      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
-      'done':'Done.'};
-    return titleDict[status.level];
+      'fiveBars':'just about done'};
+    return titleDict[progress.level];
   },
   late: function() {
     var status = currentStatus(this._id);
@@ -364,6 +391,12 @@ Template.activityItem.helpers({
 })
 
 Template.activityItem.events({
+  'click .activityProgress': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('incrementProgress',studentID,tmpl.data._id,alertOnError);  
+  },
   'click .activityStatus': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
     if (!Roles.userIsInRole(studentID,'student'))
