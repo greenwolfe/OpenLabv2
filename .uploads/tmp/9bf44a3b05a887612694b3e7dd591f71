@@ -1,0 +1,348 @@
+Template.activityPage.rendered = ->
+  $(@find("#TodoList")).sortable SortOpt()
+  $("#newNote").hallo hallosettings()
+  
+  #  .bind( "hallodeactivated", function(event) { //hallomodified
+  #      console.log(event.target.id + ' modified');
+  #      console.log(event.target.innerHTML);
+  #   }); 
+  
+  #will have to be moved, as here it isn't reactive if group changes
+  $("#newNote").data "defaultText", $("#newNote").html()
+  return
+
+Template.activityPage.helpers
+  Notes: ->
+    userID = Meteor.userId()
+    userToShow = userID
+    if Roles.userIsInRole(userID, "teacher")
+      userToShow = Session.get("TeacherViewAs")
+      if userID is userToShow
+        return Notes.find(
+          activityID: @_id
+          $or: [
+            {
+              author: userID
+            }
+            {
+              group:
+                $in: [
+                  userToShow
+                  "_ALL_"
+                ]
+            }
+          ]
+        ,
+          sort:
+            submitted: -1
+        )
+    Notes.find
+      group:
+        $in: [
+          userToShow
+          "_ALL_"
+        ]
+
+      activityID: @_id
+    ,
+      sort:
+        submitted: -1
+
+
+  group: ->
+    Session.get("currentGroup") or []
+
+  Links: ->
+    userToShow = Meteor.userId()
+    userToShow = Session.get("TeacherViewAs")  if Roles.userIsInRole(userToShow, "teacher")
+    Links.find
+      group:
+        $in: [
+          userToShow
+          "_ALL_"
+        ]
+
+      activityID: @_id
+
+
+  Todos: ->
+    userToShow = Meteor.userId()
+    userToShow = Session.get("TeacherViewAs")  if Roles.userIsInRole(userToShow, "teacher")
+    Todos.find
+      group:
+        $in: [
+          userToShow
+          "_ALL_"
+        ]
+
+      activityID: @_id
+
+
+Template.activityPage.events
+  
+  ###
+  ###
+  
+  ###
+  Link Section **
+  ###
+  
+  ###
+  ###
+  "click #addLink": (event) ->
+    title = $("#LinkTitle").val()
+    URL = $("#LinkURL").val()
+    group = Session.get("currentGroup") or []
+    hoverText = UI._globalHelper("groupies")("belongs to just ", "belongs to ", group, "", "")
+    link =
+      author: Meteor.userId()
+      group: group
+      submitted: new Date().getTime()
+      activityID: @_id
+      title: title
+      URL: URL
+      hoverText: hoverText
+
+    event.preventDefault()
+    Meteor.call "postLink", link, (error, id) ->
+      alert error.reason  if error
+
+    $("#LinkTitle").addClass("defaultTextActive").val "Title"
+    $("#LinkURL").addClass("defaultTextActive").val "URL"
+    return
+
+  "focus #LinkTitle": (event) ->
+    if $("#LinkTitle").val() is "Title"
+      $("#LinkTitle").removeClass "defaultTextActive"
+      $("#LinkTitle").val ""
+    return
+
+  "blur #LinkTitle": (event) ->
+    if $("#LinkTitle").val() is ""
+      $("#LinkTitle").addClass "defaultTextActive"
+      $("#LinkTitle").val "Title"
+    return
+
+  "focus #LinkURL": (event) ->
+    $("#LinkURL").removeClass("defaultTextActive").addClass("defaultTextInactive").val ""  if $("#LinkURL").val() is "URL"
+    return
+
+  "blur #LinkURL": (event) ->
+    $("#LinkURL").removeClass("defaultTextInactive").addClass("defaultTextActive").val "URL"  if $("#LinkURL").val() is ""
+    return
+
+  "click .removeLink": (event) ->
+    linkID = $(event.target).data("linkid")
+    Meteor.call "deleteLink", linkID, (error, id) ->
+      alert error.reason  if error
+
+    return
+
+  
+  ###
+  ###
+  
+  ###
+  Todo Section **
+  ###
+  
+  ###
+  ###
+  "click #addTodoItem": (event) ->
+    text = $("#newTodoItem").val()
+    todo =
+      author: Meteor.userId()
+      group: Session.get("currentGroup") or []
+      submitted: new Date().getTime()
+      activityID: @_id
+      text: text
+      checked: false
+
+    event.preventDefault()
+    Meteor.call "postTodo", todo, (error, id) ->
+      alert error.reason  if error
+
+    $("#newTodoItem").addClass("defaultTextActive").val "New Todo Item"
+    return
+
+  "focus #newTodoItem": (event) ->
+    if $("#newTodoItem").val() is "New Todo Item"
+      $("#newTodoItem").removeClass "defaultTextActive"
+      $("#newTodoItem").val ""
+    return
+
+  "blur #newTodoItem": (event) ->
+    if $("#newTodoItem").val() is ""
+      $("#newTodoItem").addClass "defaultTextActive"
+      $("#newTodoItem").val "New Todo Item"
+    return
+
+  "click #TodoList p input": (event) ->
+    todoID = $(event.target).val()
+    Meteor.call "toggleTodo", todoID, (error, id) ->
+      alert error.reason  if error
+
+    return
+
+  "click .removeTodo": (event) ->
+    TodoID = $(event.target).data("todoid")
+    Meteor.call "deleteTodo", TodoID, (error, id) ->
+      alert error.reason  if error
+
+    return
+
+  
+  ###
+  ###
+  
+  ###
+  Note Section **
+  ###
+  
+  ###
+  ###
+  "click #addNote": (event) ->
+    text = $("#newNote").html()
+    note =
+      author: Meteor.userId()
+      group: Session.get("currentGroup") or []
+      submitted: new Date().getTime()
+      activityID: @_id
+      text: text
+
+    event.preventDefault()
+    Meteor.call "postNote", note, $("#newNote").data("defaultText"), (error, id) ->
+      alert error.reason  if error
+
+    $("#newNote").addClass "defaultTextActive"
+    $("#newNote").text $("#newNote").data("defaultText")
+    return
+
+  "focus #newNote": (event) ->
+    if $("#newNote").html() is $("#newNote").data("defaultText")
+      $("#newNote").removeClass "defaultTextActive"
+      $("#newNote").text ""
+    return
+
+  "blur #newNote": (event) ->
+    if $("#newNote").html() is ""
+      $("#newNote").addClass "defaultTextActive"
+      $("#newNote").text $("#newNote").data("defaultText")
+    return
+
+  "click .removeNote": (event) ->
+    NoteID = $(event.target).data("noteid")
+    Meteor.call "deleteNote", NoteID, (error, id) ->
+      alert error.reason  if error
+
+    return
+
+  "click .editNote": (event, tmpl) ->
+    $noteText = $(event.target).parent().parent().find(".noteText")
+    $updateButton = $(event.target).parent().parent().find(".updateNoteContainer")
+    $noteText.addClass "editing"
+    $noteText.hallo(hallosettings()).bind "hallodeactivated", (event) -> #hallomodified
+      $noteText = $(event.target)
+      $updateButton = $(event.target).parent().find(".updateNoteContainer")
+      noteID = $(event.target).data("noteid")
+      currentText = Notes.findOne(noteID).text
+      currentText = currentText.slice(0, -4)  if _.endsWith(currentText, "<br>")
+      $noteText.removeClass "editing"
+      $noteText.hallo editable: false
+      $noteText.text currentText
+      $updateButton.addClass "hidden"
+      return
+
+    $noteText.focus()
+    $updateButton.removeClass "hidden"
+    return
+
+  "mousedown .updateNote": (event, tmpl) ->
+    newText = $(event.target).parent().parent().find(".noteText").html()
+    noteID = $(event.target).data("noteid")
+    Meteor.call "updateNote", noteID, newText, (error, id) ->
+      alert error.reason  if error
+
+    return
+
+
+###
+###
+
+###
+Template.todo **
+###
+
+###
+###
+Template.todo.helpers
+  isDone: ->
+    (if @checked then "done" else "")
+
+  isChecked: ->
+    (if @checked then "checked" else "")
+
+
+###
+###
+
+###
+Template.note **
+###
+
+###
+###
+Template.note.helpers
+  allowDelete: ->
+    userID = Meteor.userId()
+    now = undefined
+    editDeadline = undefined
+    return false  unless userID
+    return true  if Roles.userIsInRole(userID, "teacher")
+    return false  unless Roles.userIsInRole(userID, "student")
+    return false  if not @author or (userID isnt @author)
+    now = moment()
+    editDeadline = moment(@submitted).add("minutes", 30)
+    editDeadline.isAfter now
+
+  allowEdit: ->
+    userID = Meteor.userId()
+    now = undefined
+    editDeadline = undefined
+    return false  unless userID
+    return false  unless Roles.userIsInRole(userID, [
+      "student"
+      "teacher"
+    ])
+    return false  if not @author or (userID isnt @author)
+    now = moment()
+    editDeadline = moment(@submitted).add("minutes", 30)
+    Roles.userIsInRole(userID, "teacher") or editDeadline.isAfter(now)
+
+SortOpt = ->
+  that =
+    revert: false #smooth slide onto target
+    tolerance: "pointer"
+    axis: "y"
+
+  that
+
+hallosettings = ->
+  that =
+    plugins:
+      halloformat:
+        formattings:
+          bold: true
+          italic: true
+          strikethrough: true
+          underline: true
+
+      hallojustify: {}
+      hallolists: {}
+      halloreundo: {}
+      hallolink: {}
+
+    editable: true
+    toolbar: "halloToolbarFixed"
+
+  that

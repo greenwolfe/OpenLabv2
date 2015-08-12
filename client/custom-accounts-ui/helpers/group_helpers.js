@@ -75,6 +75,19 @@ Meteor.groupies = function(groupID) {
 }
 Template.registerHelper('groupies',Meteor.groupies);
 
+Meteor.groupFirstNames = function(groupID) { 
+  var groupies = '';
+  var groupMembers = Meteor.groupMembers(groupID);
+  var groupSize = groupMembers.count();
+  groupMembers.forEach(function(user,i,gMs) {
+    groupies +=  user.profile.firstName;
+    if (i == groupSize - 2) {
+      groupies += 'and';
+    };
+  })
+  return groupies;
+}
+
    /******************************************/
   /*********** OTHER GROUP HELPERS **********/
  /**** DEFINED IN LOGIN BUTTONS SESSION ****/

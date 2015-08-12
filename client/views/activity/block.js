@@ -24,9 +24,9 @@ editingBlock = function(blockID) {
   return false;
 }
 
-  /**********************/
- /******* BLOCK** ******/
-/**********************/
+  /********************/
+ /******* BLOCK ******/
+/********************/
 
 Template.block.onCreated(function() {
   var instance = this;
@@ -209,12 +209,51 @@ Template.fileBlock.helpers({
       validate: validateFiles
     }
   },
-  formData: function() { //passed to uploads to create file path
-    //is this actually used?  If so, for what?
-    var formData = this;
-    formData.createdBy = Meteor.userId();
-    //formData.purpose = 'fileBlock'; //deprecated?
-    return formData;
+  //path = /username/unit/activity/walltype[/userorgroup]/date 
+  formData: function() { //passed to tomi:uploadserver to create file path
+    var path = '';
+    var name;
+    /* username */
+    var cU = Meteor.user(); 
+    if (cU) name = _.str.slugify(Meteor.user().username);
+    if (name) path += '/' + name;
+    var activity = Activities.findOne(this.activityID);
+    if (activity) {
+      /* unit */
+      var unit = Units.findOne(activity.unitID);
+      name = (unit) ? _.str.slugify(unit.title) : '';
+      if (name) path += '/' + name;
+      /* activity */
+      name = _.str.slugify(activity.title);
+      if (name) path += '/' + name;
+    }
+    var wall = Walls.findOne(this.wallID);
+    if (wall) {
+      /* wall type */
+      path += '/' + wall.type + 'Wall';
+      if (Roles.userIsInRole(cU,'teacher')) {
+        /* student */
+        if (wall.type == 'student') {
+          var student = Meteor.users.findOne(wall.createdFor);
+          name = (student && Roles.userIsInRole(student,'student')) ? student.username : '';
+          if (name) path += '/' + name;
+        }
+        /* group */
+        if (wall.type == 'group') {
+          name = Meteor.groupFirstNames(wall.createdFor);
+          if (name) path += '/' + name;
+        }
+        /* section */
+        if (wall.type == 'section') {
+          var section = Sections.findOne(wall.createdFor);
+          name =  (section) ? _.str.slugify(section.name) : '';
+          if (name) path += '/' + name;
+        }
+      }
+    }
+    /* date */
+    path += '/' + moment().format('DDMMMYYYY');
+    return {path:path};
   },
   sortableOpts: function() {
     return {
