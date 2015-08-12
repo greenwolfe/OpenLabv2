@@ -7,15 +7,6 @@ Meteor.startup(function () {
     });
   };
 
-  UploadServer.init({
-    tmpDir: process.env.PWD + '/.uploads/tmp',
-    uploadDir: process.env.PWD + '/.uploads/',
-    checkCreateDirectories: true //create the directories for you
-    /*finished: function(fileInfo) {
-      console.log(fileInfo);
-    }*/
-  })
-
   /*  define the teacher account and assign role*/
   if (Roles.getUsersInRole('teacher').count() == 0) {
     var profile = {

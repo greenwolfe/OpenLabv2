@@ -8,9 +8,7 @@ Meteor.startup(function () {
     //uploadDir: process.env.HOME + '/Uploads/uploadsTest/',
     checkCreateDirectories: true, //create the directories for you
     getDirectory: function(fileInfo,formData) {
-      return '/' + formData.activityID + '/' + formData.user + '/' + formData.purpose;
-    },
+      return formData.path;
+    }
   });
-  //nice file structure from wordPress ... within activityName
-  //have last/first/month/day/file
 });  
