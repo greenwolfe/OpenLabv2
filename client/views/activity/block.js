@@ -429,8 +429,10 @@ Template.subactivitiesBlock.onCreated(function() {
     var userID = Meteor.impersonatedOrUserId();
     var activity = Activities.findOne(instance.data.activityID);
 
-    if (activity)
+    if (activity) {
       var thisUnitSubscription = Meteor.subscribe('subActivityStatuses',userID,activity.pointsTo);
+      var thisUnitProgress = Meteor.subscribe('subActivityProgress',userID,activity.pointsTo);
+    }
   })
 })
 
@@ -478,6 +480,13 @@ var currentStatus = function(activityID) {
     return undefined;
   return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
 }
+/* currentProgress */
+var currentProgress = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityProgress.findOne({studentID:studentID,activityID:activityID});
+}
 
 Template.subactivityItem.helpers({
   workPeriod: function () {
@@ -488,11 +497,42 @@ Template.subactivityItem.helpers({
       endDate: moment().add(6,'days').toDate()
     };
   },
+  progress: function() {
+    var progress = currentProgress(this._id);
+    if (!progress)
+      return 'icon-notStarted'
+    return 'icon-' + progress.level;
+  },
   status: function() {
     var status = currentStatus(this._id);
     if (!status)
-      return 'icon-notStarted'
+      return 'icon-nostatus'
     return 'icon-' + status.level;
+  },
+  statusTitle: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return 'not started';
+    var titleDict = {
+      'nostatus':'empty inbox: not started',
+      'submitted':'full inbox: work submitted, waiting for teacher response',
+      'returned':'full outbox:  Returned with comments by your teacher.  Please revise and resubmit.',
+      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
+      'done':'Done.'};
+    return titleDict[status.level];
+  },
+  progressTitle: function() {
+    var progress = currentProgress(this._id);
+    if (!progress)
+      return 'not started';
+    var titleDict = {
+      'notStarted':'not started',
+      'oneBar':'barely started',
+      'twoBars':'almost half-way done',
+      'threeBars':'more than half-way done',
+      'fourBars':'80% there',
+      'fiveBars':'just about done'};
+    return titleDict[progress.level];
   },
   late: function() {
     var status = currentStatus(this._id);
@@ -503,6 +543,12 @@ Template.subactivityItem.helpers({
 });
 
 Template.subactivityItem.events({
+  'click .activityProgress': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('incrementProgress',studentID,tmpl.data._id,alertOnError);  
+  },
   'click .activityStatus': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
     if (!Roles.userIsInRole(studentID,'student'))

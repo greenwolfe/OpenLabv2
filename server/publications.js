@@ -132,6 +132,20 @@ Meteor.publish('activityStatuses',function(studentID,unitID) {
   return ActivityStatuses.find(selector);
 });
 
+Meteor.publish('activityProgress',function(studentID,unitID) { 
+  check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  studentID = studentID || this.userId;  
+  var selector = {}
+  if (Roles.userIsInRole(studentID,'student'))
+    selector.studentID = studentID;
+
+  check(unitID,Match.Optional(Match.OneOf(Match.idString,null)));
+  if (unitID)
+    selector.unitID = unitID;
+
+  return ActivityProgress.find(selector);
+});
+
 Meteor.publish('subActivityStatuses',function(studentID,pointsTo){
   check(studentID,Match.Optional(Match.idString)); 
   studentID = studentID || this.userId;  //setting default here because flow router cannot pass in user id
@@ -144,6 +158,20 @@ Meteor.publish('subActivityStatuses',function(studentID,pointsTo){
     selector.pointsTo = pointsTo;
 
   return ActivityStatuses.find(selector);  
+})
+
+Meteor.publish('subActivityProgress',function(studentID,pointsTo){
+  check(studentID,Match.Optional(Match.idString)); 
+  studentID = studentID || this.userId;  //setting default here because flow router cannot pass in user id
+  var selector = {}
+  if (Roles.userIsInRole(studentID,'student'))
+    selector.studentID = studentID;
+
+  check(pointsTo,Match.Optional(Match.idString));
+  if (pointsTo)
+    selector.pointsTo = pointsTo;
+
+  return ActivityProgress.find(selector);  
 })
 
 //passing in sectionID and unitID allows initial loading of just enough data to render the visible unit
