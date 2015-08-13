@@ -122,6 +122,10 @@
         <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder or move to another model (in side-by-side view).">
         </a>
         {{>showHide collection='Activities' itemName='activity' item=this}}
+        <!--two issues, formatting, and don't have access to blocks to truly check if empty
+        {{#if canDelete}}
+          <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
+        {{/if}}-->
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
         {{> workPeriodButton workPeriod}}

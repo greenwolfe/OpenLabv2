@@ -489,6 +489,13 @@ var currentProgress = function(activityID) {
 }
 
 Template.subactivityItem.helpers({
+  canDelete: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher')) return false;
+    var numBlocks = Blocks.find({activityID:this._id,type:{$ne:'subactivities'}}).count();
+    var numSubActivities = Activities.find({pointsTo:this._id}).count();
+    return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
+  },
   workPeriod: function () {
     return {
       unitStartDate: moment().subtract(2, 'weeks').toDate(),
@@ -543,6 +550,20 @@ Template.subactivityItem.helpers({
 });
 
 Template.subactivityItem.events({
+  'click .deleteActivity':function(event,tmpl) {
+    var isNotSubActivity = (tmpl.data._id == tmpl.data.pointsTo);
+    if (confirm('Are you sure you want to delete this activity?')) {
+      Meteor.call('deleteActivity', tmpl.data._id,function(error,num){
+        if (error) {
+          alert(error.reason);
+        } else {
+          alert('Activity deleted');
+          if (isNotSubActivity)
+            FlowRouter.go('/');
+        }
+      });
+    }
+  },
   'click .activityProgress': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
     if (!Roles.userIsInRole(studentID,'student'))

@@ -6,6 +6,9 @@
   font-size: small;
   border-radius: 5px;
 }
+p.aItem a.deleteActivity {
+  font-size: small;
+}
 
 #units { /* makes bootstrap nav-pills equal height so they wrap in distinct rows */
   display: flex;

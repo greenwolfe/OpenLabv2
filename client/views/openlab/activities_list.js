@@ -292,6 +292,12 @@ var currentProgress = function(activityID) {
 }
 
 Template.activityItem.helpers({
+  canDelete: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher')) return false;
+    var numBlocks = Blocks.find({activityID:this._id,type:{$ne:'subactivities'}}).count();
+    return ((this._id != this.pointsTo) || (numBlocks == 0));
+  },
   pointsToOrID: function() {
     return this.pointsTo || this._id;
   },
@@ -391,6 +397,11 @@ Template.activityItem.helpers({
 })
 
 Template.activityItem.events({
+  'click .deleteActivity':function() {
+    if (confirm('Are you sure you want to delete this activity?')) {
+      Meteor.call('deleteActivity', this._id,alertOnError);
+    }
+  },
   'click .activityProgress': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
     if (!Roles.userIsInRole(studentID,'student'))

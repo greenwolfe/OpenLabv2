@@ -109,6 +109,9 @@ Meteor.methods({
   },  
 
   /***** DELETE ACTIVITY ****/
+  //denormalize canDelete and stick on activity object
+  //so that check on client has full server information
+  //about whether the activity is empty
   deleteActivity: function(activityID) { 
     check(activityID,Match.idString);
     var cU = Meteor.user(); //currentUser
@@ -125,8 +128,10 @@ Meteor.methods({
     if (!Roles.userIsInRole(cU,'teacher') && (cU._id != activity.studentID))
       throw new Meteor.Error(409, 'You must be a teacher to delete a whole class activity.')
       
-    //check if activity has been used and post warning or suggest
-    //just hiding it???
+    var numBlocks = Blocks.find({activityID:activityID,type:{$ne:'subactivities'}}).count();
+    var numSubActivities = Activities.find({pointsTo:this._id}).count();
+    if ((activity.pointsTo == activity._id) && ((numBlocks > 0) || (numSubActivities > 1)))
+      throw new Meteor.Error('notEmpty','This activity cannot be deleted because it is not empty.  Your options are to just hide it (and move it to a hidden unit to get it out of the way), or clear all of the blocks anyone has posted to the activity and then delete it.');
 
     var ids = _.pluck(Activities.find({unitID:activity.unitID,order:{$gt: activity.order}},{fields: {_id: 1}}).fetch(), '_id');
     var numberRemoved = Activities.remove(activityID); 

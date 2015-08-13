@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"cop",
+				"copiedAndPasted"
+			],
+			[
 				"Leve",
 				"LevelsOfMastery"
 			],
@@ -24,64 +28,26 @@
 	"buffers":
 	[
 		{
-			"file": "client/views/standard/standardHeader.html",
+			"file": "client/main.html",
 			"settings":
 			{
-				"buffer_size": 1040,
+				"buffer_size": 88,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "<template name=\"standardPage\">\n  {{#with standard}}\n    {{#if editingMainPage}}\n      <p>Title: \n      {{>plaintexteditor collection='Standards' field='title' _id=_id editable=editingMainPageTFtext}}</p>\n    {{/if}}\n\n    <p>\n      {{#unless description}}\n        {{#if isInRole 'teacher'}}\n          Click 'Edit' to type a description.\n        {{else}}\n          The teacher has not yet provided a description for this standard. \n        {{/if}}\n      {{/unless}}\n      {{#if editingMainPage}}\n        Description:\n      {{/if}}\n      {{>summernote collection='Standards' field='description' _id=_id enabled=editingMainPage options=summernoteOptions}}\n    </p>\n\n    <p>Calculation method: {{humanizedCalcMethod}} </p>\n    {{#if editingMainPage}}\n       <p>\n       {{>helpBannerNavPills messages=calcHelpMessages}}\n       {{>plaintexteditor collection='Standards' field='calcMethod' _id=_id editable=editingMainPageTFtext}} </p>\n    {{/if}}  \n\n    <p>Scale: \n      {{#if editingMainPage}}\n        {{symbolicScale}}\n        {{>helpBannerNavPills messages=scaleHelpMessages}}\n        {{>plaintexteditor collection='Standards' field='scaleHelp' _id=_id editable=editingMainPageTFtext}}\n      {{else}}\n        {{humanizedScaleHelp}}\n      {{/if}}\n    </p>\n\n    <div id=\"LoMlist\">\n      <!-- newLoM block -->\n      {{#each LoMs}}\n        {{> LoMitem}}\n      {{/each}}\n    </div>\n  {{/with}}\n</template>\n\n<template name=\"LoMitem\">\n  <div class=\"LoMitem\"><p>\n      {{#if editingMainPage}}\n        {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}\n        {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingMainPageTFtext}}\n        {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingMainPage options=summernoteOptions}} \n      {{else}}\n        <span class='badge badge-inverse LoMmedium'>{{level}}</span>\n        <a  href=\"{{pathFor 'standardPage' _id=_id}}\">\n        {{{title}}} \n        </a>        \n      {{/if}}\n  </p></div>\n</template>",
-			"file": "client/views/standard/standardPage.html",
-			"file_size": 2023,
-			"file_write_time": 130837450419255489,
+			"file": "client/layout.html",
 			"settings":
 			{
-				"buffer_size": 2030,
+				"buffer_size": 218,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/standards_list.html",
+			"file": "client/main.js",
 			"settings":
 			{
-				"buffer_size": 4764,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "      <p>\n        <span class=\"badge badge-inverse {{LoMcolorcode ..}}\">{{LoMtext ..}}</span> \n        <span>{{{CleanComment}}}</span>\n        <div style='font-size: 10pt;margin-left: 50px'>\n          {{#with activity}}\n            <a href=\"{{pathFor 'activityPage'}}\">{{title}}</a>\n          {{/with}}\n          graded by {{nameFormat teacherID 'full'}} on  {{dateFormat submitted 'datetime'}}\n        </div>\n      </p>",
-			"settings":
-			{
-				"buffer_size": 420,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "Template.standardPage.helpers({\n  standard: function() {\n    return Standards.findOne(FlowRouter.getParam('_id'));\n  },\n  humanizedCalcMethod: function() {\n    var calcMethod = this.calcMethod.split(/[0-9]/)[0]; \n    var calcParam = _.str.toNumber(_.str.strRight(this.calcMethod,calcMethod)); \n    if (calcMethod == 'mostRecent') {\n      return 'Your current level of mastery is the most recent score, which replaces all previous scores.';\n    } else if (calcMethod == 'average') {\n      if (calcParam)\n        return 'The most recent ' + calcParam + ' scores are averaged to determine your current level of mastery.';\n      return 'All scores are averaged to determine your current level of mastery.'\n    } else if (calcMethod == 'decayingAverage') {\n      return 'Your current score is ' + calcParam + '% of your most recent score plus ' + (100 - calcParam) + '% of the average of all previous scores.';\n    }\n  },\n  calcHelpMessages: function() {\n    return [\n      'Enter <i>mostRecent</i> to keep only the most recent score as the current level of mastery.',\n      'Enter <i>average</i> to determine the current level of mastery by averaging all scores.',\n      'You can add a number after average.  For example, <i>average5</i> means average only the five latest scores.',\n      'If you enter <i>decayingAverage33</i> the current level of mastery will be calculated as 33% of the most recent score plus 67% of the average of all previous scores.',\n      'You must enter the exact spelling, including the capital letters.'\n    ];\n  },\n  symbolicScale: function() {\n    if (_.isArray(this.scale))\n      return ' ' + this.scale.join(', ');\n    return '0 to ' + this.scale;\n  },\n  humanizedScaleHelp: function() {\n    if (_.isFinite(this.scale))\n      return '0 to ' + this.scale;\n    return this.scaleHelp;\n  },\n  scaleHelpMessages: function() {\n    return [\n      'Enter a positive integer to specify a numerical scale starting at zero.',\n      'Enter comma-separated values with explanatory text in parentheses to create a symbolic scale.',\n      'Example: NM (no mastery), DM (developing mastery), M (mastery) creates the scale NM,DM,M.',\n      'The text you enter will be the help message displayed wherever grades are displayed.'\n    ]\n  }\n});\n\nTemplate.LoMitem.helpers({\n  LoMcolorCode: function() {\n    var standard = Standards.findOne(this.standardID);\n    \n  }\n})",
-			"file": "client/views/standard/standardPage.js",
-			"file_size": 2251,
-			"file_write_time": 130837413030510089,
-			"settings":
-			{
-				"buffer_size": 2375,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/levelsOfMastery.js",
-			"settings":
-			{
-				"buffer_size": 11035,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/stylesheets/standard_page.css",
-			"settings":
-			{
-				"buffer_size": 250,
+				"buffer_size": 87,
 				"line_ending": "Unix"
 			}
 		}
@@ -125,13 +91,12 @@
 	[
 		"/home/solargreen/meteor/OpenLabv2",
 		"/home/solargreen/meteor/OpenLabv2/client",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets",
-		"/home/solargreen/meteor/OpenLabv2/client/summernote",
 		"/home/solargreen/meteor/OpenLabv2/client/views",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers",
-		"/home/solargreen/meteor/OpenLabv2/client/views/standard",
 		"/home/solargreen/meteor/OpenLabv2/collections",
 		"/home/solargreen/meteor/OpenLabv2/lib",
 		"/home/solargreen/meteor/OpenLabv2/methods",
@@ -139,20 +104,47 @@
 	],
 	"file_history":
 	[
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/standards_list.css",
+		"/home/solargreen/meteor/OpenLabv2/client/main.js",
+		"/home/solargreen/meteor/OpenLabv2/client/main.html",
+		"/home/solargreen/meteor/OpenLabv2/server/init.js",
+		"/home/solargreen/meteor/meteor.nginx.conf",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
+		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activityProgress.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
+		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
 		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/standards.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/standards_list.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/standards_list.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/levelsOfMastery.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/files.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/groupMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/standard_page.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardPage.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardHeader.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardPage.html",
+		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
+		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.js",
+		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdmin.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdmin.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
+		"/home/solargreen/meteor/OpenLabv2/client/helpers/roleHelpers.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/standards_list.css",
+		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardHeader.js",
-		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/standards_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.html.bak",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.html",
 		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
@@ -160,43 +152,28 @@
 		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/memberships.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/workPeriods.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/sortable1cMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdmin.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdmin.html",
-		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/siteAdmin.css",
-		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/sections.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/levelsOfMastery.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.html",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/views/validateAccounts/validateAccounts.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
 		"/home/solargreen/meteor/OpenLabv2/collections/gradingPeriods.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
-		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriod.css",
-		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/site.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/headers.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdminHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdminHeader.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/standards_list.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/categories.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
 		"/home/solargreen/meteor/OpenLabv2/server/users.js",
 		"/home/solargreen/meteor/OpenLabv2/server/schoolAccountsPublications.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/units.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/files.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/groupMethods.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.html",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/methods/showHideMethods.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/columns.js",
@@ -206,10 +183,8 @@
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.html",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.js",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodGauge/workPeriodGauge.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/sectionMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/groups.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.js",
@@ -225,12 +200,10 @@
 		"/home/solargreen/meteor/OpenLabv2/collections/users.js",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/client/layout.html",
-		"/home/solargreen/meteor/OpenLabv2/client/main.html",
 		"/home/solargreen/meteor/OpenLabv2/lib/router.js",
 		"/home/solargreen/meteor/OpenLabv2/client/bootstrap-popover-x/bootstrap-popover-x.min.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriodGauge.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/application.css",
-		"/home/solargreen/meteor/OpenLabv2/server/init.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/group_modals.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/progressPlan.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/progressandplan/helpers/openlabSession.js",
@@ -255,18 +228,10 @@
 		"/home/solargreen/.config/sublime-text-3/Packages/User/Package Control.sublime-settings",
 		"/home/solargreen/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
 		"/home/solargreen/meteor/OpenLabv2/client/sortable1c/sortable1c.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/roleHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/activityPage.html",
 		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/wall.html",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/help.css",
-		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/column.html",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/help.html",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/help.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/progressPlan.css",
-		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/helpers/inEditedWall.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/activityPageHelpers.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/inEditedWall.js",
-		"/home/solargreen/meteor/OpenLabv2/client/helpers/showHide.js"
+		"/home/solargreen/meteor/OpenLabv2/client/pages/activity/column.html"
 	],
 	"find":
 	{
@@ -284,6 +249,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"status",
+			"block",
+			"_id",
+			"date",
 			"      \n",
 			"defaultText",
 			"newu",
@@ -407,11 +376,7 @@
 			"sortable",
 			"sort",
 			"max-height",
-			"assessmentAct",
-			"#activityStan",
-			"background",
-			"#activityS",
-			"removePga"
+			"assessmentAct"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -435,215 +400,92 @@
 			[
 				{
 					"buffer": 0,
-					"file": "client/views/standard/standardHeader.html",
+					"file": "client/main.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1040,
+						"buffer_size": 88,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								24,
-								24
+								56,
+								56
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/HTML/HTML.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "client/views/standard/standardPage.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2030,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1877,
-								1877
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 826.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "client/views/openlab/standards_list.html",
+					"buffer": 1,
+					"file": "client/layout.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4764,
+						"buffer_size": 218,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3908,
-								3908
+								27,
+								27
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/HTML/HTML.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 2244.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 1,
+			"selected": 0,
 			"sheets":
 			[
 				{
-					"buffer": 3,
+					"buffer": 2,
+					"file": "client/main.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 420,
+						"buffer_size": 87,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								18,
-								18
+								15,
+								15
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "client/views/standard/standardPage.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2375,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2368,
-								2368
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 357.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "collections/levelsOfMastery.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 11035,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								9062,
-								9062
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 663.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "client/stylesheets/standard_page.css",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 250,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								250,
-								250
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/CSS/CSS.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
 					"type": "text"
 				}
 			]
@@ -677,7 +519,7 @@
 		"cols":
 		[
 			0.0,
-			0.480132450332,
+			0.493980492618,
 			1.0
 		],
 		"rows":
@@ -729,7 +571,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 1,
+	"selected_group": 0,
 	"settings":
 	{
 	},
@@ -737,7 +579,7 @@
 	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 223.0,
+	"side_bar_width": 235.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

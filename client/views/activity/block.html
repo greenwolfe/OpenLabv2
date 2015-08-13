@@ -207,6 +207,9 @@
       {{#if inEditedWall ../wallID}}
         <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
         {{>showHide collection='Activities' itemName='activity' item=this}}
+        {{#if canDelete}}
+          <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
+        {{/if}}
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
       {{else}}
         {{> workPeriodButton workPeriod}}

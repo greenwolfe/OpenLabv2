@@ -47,9 +47,9 @@ Meteor.startup(function () {
   }
 
   if (Sections.find().count() === 0) {
-    Meteor.call('insertSection',{name : 'Bblock'});
-    Meteor.call('insertSection',{name : 'Fblock'});
-    Meteor.call('insertSection',{name : 'Gblock'});
+    Sections.insert({name : 'Bblock'});
+    Sections.insert({name : 'Fblock'});
+    Sections.insert({name : 'Gblock'});
   }
 
  /* if (Activities.find().count() == 0) {
