@@ -428,10 +428,12 @@ Template.subactivitiesBlock.onCreated(function() {
   instance.autorun(function() {
     var userID = Meteor.impersonatedOrUserId();
     var activity = Activities.findOne(instance.data.activityID);
+    var sectionID = Meteor.selectedSectionId();
 
     if (activity) {
       var thisUnitSubscription = Meteor.subscribe('subActivityStatuses',userID,activity.pointsTo);
       var thisUnitProgress = Meteor.subscribe('subActivityProgress',userID,activity.pointsTo);
+      var thisUnitWorkPeriods = Meteor.subscribe('workPeriods',sectionID,activity.unitID);
     }
   })
 })
@@ -497,12 +499,45 @@ Template.subactivityItem.helpers({
     return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
   },
   workPeriod: function () {
-    return {
-      unitStartDate: moment().subtract(2, 'weeks').toDate(),
-      unitEndDate: moment().add(2,'weeks').toDate(),
-      startDate: moment().add(2,'days').toDate(),
-      endDate: moment().add(6,'days').toDate()
+    //find existing workPeriod
+    var workPeriod =  WorkPeriods.findOne({
+      activityID: this._id,
+      sectionID: Meteor.selectedSectionId()
+    });
+    if (workPeriod) 
+      return workPeriod;
+
+    //else get unit dates off a workPeriod for another activity from the same unit and section
+    //unitDatesWithoutSelf are by definition the unitDates for the other workPeriod
+    workPeriod = WorkPeriods.findOne({
+      unitID: this.unitID,
+      sectionID: Meteor.selectedSectionId()
+    });
+    if (workPeriod) {
+      //keep existing unitID, sectionID, unitDates 
+      workPeriod.activityID = this._id;
+      workPeriod.activityVisible = this.visible;
+      workPeriod.startDate = longLongAgo();
+      workPeriod.endDate = longLongAgo();
+      workPeriod.unitStartDateWithoutSelf = workPeriod.unitStartDate;
+      workPeriod.unitEndDateWithoutSelf = workPeriod.unitEndDate;
+      return workPeriod;
+    }
+
+    //else make up a stub with all null values
+    workPeriod = {
+      activityID: this._id, //passed in for later use
+      unitID: this.unitID, //passed in for completeness, probably not used to display data
+      activityVisible: this.visible, //passed in for completeness, probably not used to display data
+      sectionID: 'applyToAll', //default value
+      startDate: longLongAgo(),
+      endDate: longLongAgo(),
+      unitStartDate: longLongAgo(),
+      unitEndDate: notSoLongAgo(),
+      unitStartDateWithoutSelf: wayWayInTheFuture(),
+      unitEndDateWithoutSelf: notSoLongAgo()
     };
+    return workPeriod;
   },
   progress: function() {
     var progress = currentProgress(this._id);
