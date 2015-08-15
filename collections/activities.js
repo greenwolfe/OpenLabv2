@@ -186,6 +186,7 @@ Activities.after.update(function (userID, doc, fieldNames, modifier) {
   if (doc.unitID !== this.previous.unitID) {
     //denormalizing
     ActivityStatuses.update({activityID:this.previous._id},{$set: {unitID:doc.unitID}}, {multi: true});
+    ActivityProgress.update({activityID:this.previous._id},{$set: {unitId:doc.unitID}}, {multi: true});
     WorkPeriods.update({activityID:this.previous._id},{$set: {unitID:doc.unitID}}, {multi: true});
   }
   if (doc.visible != this.previous.visible) 

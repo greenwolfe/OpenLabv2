@@ -123,22 +123,13 @@ Walls.after.update(function (userID, doc, fieldNames, modifier) {
     }
   }
   if (doc.visible != this.previous.visible) {
+    var activity = Activities.findOne(doc.activityID);
+    var wallVisible = activity.wallVisible;
+    wallVisible[doc.type] = doc.visible;
+    Activities.update(doc.activityID,{$set:{wallVisible:wallVisible}});
     Walls.find({activityID:doc.activityID,type:doc.type}).forEach(function(wall){
-      if (wall.visible != doc.visible)
+      if (wall.visible != doc.visible) 
         Walls.direct.update(wall._id,{$set:{visible:doc.visible}});
     });    
   }
 });
-
-//collection hook if wall reordered, then reorder all walls of same type 
-// for this activity for all users 
-// ... what happens if two group walls get reordered?
-// ... it appears this is OK.  sortable1c would interpret
-//this as not reordering anything, so no change would be made
-//hook must also update activity.wallOrder
-//first update activity.wallOrders
-//then call updateOrder method for each wall in the activity
-//which updates its order based on the activity
-
-//similar collection hook for visibility - changes all other 
-//walls of same type for activity, and activity.wallVisible
