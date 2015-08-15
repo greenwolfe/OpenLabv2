@@ -1,8 +1,6 @@
 Template.wall.onCreated(function() {
   var instance = this;
   instance.autorun(function() {
-    console.log('Template.wall.onCreated');
-    console.log(instance.data._id);
     var columnSubscription = instance.subscribe('columns', instance.data._id);
   });
 })
