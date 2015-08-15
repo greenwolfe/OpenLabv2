@@ -1,6 +1,10 @@
 Template.siteAdminHeader.helpers({
   siteTitle: function() {
-    return Site.findOne().title;
+    var site = Site.findOne();
+    if (site) {
+      document.title = site.title;
+      return site.title;
+    }
   }
 });
 
