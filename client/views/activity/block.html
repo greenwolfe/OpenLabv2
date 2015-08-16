@@ -106,12 +106,12 @@
       <a class="glyphicon glyphicon-remove deleteFile" title="delete file"></a>
     {{/if}}
     {{#if inTeacherWall}}
-      <a href="/upload{{path}}">{{name}}</a> 
+      <a href="/upload{{path}}" target="_blank">{{name}}</a> 
     {{else}}
       {{#if isInRole 'parentOrAdvisor'}}
         <a href="#" data-toggle="tooltip" title = "uploaded by {{getname createdBy 'full'}} {{formatDateTime createdOn}}">{{name}}</a>
       {{else}}
-        <a href="/upload{{path}}" data-toggle="tooltip" title = "uploaded by {{getname createdBy 'full'}} {{formatDateTime createdOn}}">{{name}}</a> 
+        <a href="/upload{{path}}" target="_blank" data-toggle="tooltip" title = "uploaded by {{getname createdBy 'full'}} {{formatDateTime createdOn}}">{{name}}</a> 
       {{/if}}
     {{/if}}
   </p> 
