@@ -63,6 +63,13 @@ li.categorytitle.active2 > a {
   border: thin none;
   border-radius: 4px;
 }
+#categories li.categorytitle a.displayTitle {
+  word-break: break-word;
+  -webkit-hyphens: auto;
+     -moz-hyphens: auto;
+      -ms-hyphens: auto;
+          hyphens: auto;
+}
 #categories li.categorytitle.active > a {
   background-color: DarkMagenta;
 }
