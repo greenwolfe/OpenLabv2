@@ -13,7 +13,7 @@
           <ul class="nav navbar-nav">
             {{#if isInRole 'teacher'}}
               <li class="{{activeIfEditingMainPage}} {{hiddenIfNotTeacher}}">
-                <a href="#" id='editButton'>Edit</a>
+                <a href="#" id='editButton'>{{edit}}</a>
               </li>
             {{/if}}
             {{>viewAs}}

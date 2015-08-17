@@ -116,16 +116,15 @@ Template.standardList.onCreated(function() {
     var userID = Meteor.impersonatedOrUserId();
     if (!userID)
       return;
-    var sectionID = Meteor.selectedSectionId();
     var categoryID = instance.data._id;
     //first get the info that will be immediately shown
-    //var activitiesThisCategory = Meteor.subscribe('LoMs',userID,categoryID);
+    var LoMsThisCategory = Meteor.subscribe('levelsOfMastery',categoryID,userID,null);
 
-    /*if (activitiesThisCategory.ready()) { //then load the rest in the background
-      var LoMs = Meteor.subscribe('LoMs',userID); 
-      if (LoMs.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('LoMs');
-    }*/
+    if (LoMsThisCategory.ready()) { //then load the rest in the background
+      var LoMsThisUser = Meteor.subscribe('levelsOfMastery',null,userID,null); 
+      if (LoMsThisUser.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
+        Meteor.subscribe('levelsOfMastery',categoryID,null,null);
+    }
   })
 })
 
@@ -189,18 +188,51 @@ Template.standardList.helpers({
  /** STANDARD ITEM  *******/
 /*************************/
 
-/* currentStatus */
-/* need current LoM? ... or maybe just provided by denormailzation
-var currentStatus = function(activityID) {
-  var studentID = Meteor.impersonatedOrUserId();
-  if (!Roles.userIsInRole(studentID,'student'))
-    return undefined;
-  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
-}
-*/
+
 
 Template.standardItem.helpers({
-  //helpers for displaying LoM badge here
+  LoMAveragecolorcode: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standard = this;
+    if (!studentID || !standard)
+      return '';
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standard._id,visible:true});
+    if (!LoM) return '';
+
+    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
+    var level;
+    var maxVal;
+    var index;
+    if (_.isArray(standard.scale)) {
+      level = standard.scale.indexOf(LoM.average['schoolyear']); //update for grading period when available
+      maxVal = standard.scale.length;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    if (_.isFinite(standard.scale)) {
+      level = LoM.average['schoolyear']; //update for grading period when available
+      maxVal = standard.scale;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    return colorcodes[index];
+  },
+  LoMAveragetext: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standard = this;
+    if (!studentID || !standard)
+      return '';
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standard._id,visible:true});
+    if (!LoM) return '';
+    if (_.isArray(standard.scale))
+      return LoM.average['schoolyear']; //update for grading period when available 
+    return +LoM.average['schoolyear'].toFixed(2) + ' out of ' + standard.scale;
+  },
+  humanizedScaleHelp: function() {
+    if (_.isFinite(this.scale))
+      return '0 to ' + this.scale;
+    return this.scaleHelp;
+  }
 })
 
   /*************************/

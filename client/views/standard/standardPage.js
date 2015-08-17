@@ -29,7 +29,7 @@ Template.standardPage.helpers({
     var standardID = FlowRouter.getParam('_id');
     if (!studentID || !standardID)
       return '';
-    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID});
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
     if (!LoM) return '';
     var standard = Standards.findOne(standardID);
 
@@ -40,7 +40,7 @@ Template.standardPage.helpers({
     if (_.isArray(standard.scale)) {
       level = standard.scale.indexOf(LoM.average['schoolyear']); //update for grading period when available
       maxVal = standard.scale.length;
-      index = Math.floor(level*2/maxVal);
+      index = Math.floor(level*3/maxVal);
       index = Math.min(index,2);
     }
     if (_.isFinite(standard.scale)) {
@@ -56,7 +56,7 @@ Template.standardPage.helpers({
     var standardID = FlowRouter.getParam('_id');
     if (!studentID || !standardID)
       return '';
-    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID});
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
     if (!LoM) return '';
     var standard = Standards.findOne(standardID);
     if (_.isArray(standard.scale))
@@ -113,7 +113,14 @@ Template.standardPage.helpers({
     var standardID = FlowRouter.getParam('_id');
     if (!studentID || !standardID)
       return '';
-    return LevelsOfMastery.find({studentID:studentID,standardID:standardID},{sort:{submitted:-1}});
+    var selector = {
+      studentID: studentID,
+      standardID: standardID
+    }
+    var editingPage = openlabSession.get('editingMainPage');
+    if (!editingPage)
+      selector.visible = true; //show only visible LoMs
+    return LevelsOfMastery.find(selector,{sort:{submitted:-1}});
   }
 });
 
@@ -134,7 +141,7 @@ Template.LoMitem.helpers({
     if (_.isArray(standard.scale)) {
       level = standard.scale.indexOf(this.level);
       maxVal = standard.scale.length;
-      index = Math.floor(level*2/maxVal);
+      index = Math.floor(level*3/maxVal);
       index = Math.min(index,2);
     }
     if (_.isFinite(standard.scale)) {
@@ -164,6 +171,14 @@ Template.LoMitem.helpers({
     return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateTimeFormat) : '_____';
   }
 })
+
+Template.LoMitem.events({
+  'click .deleteLoM':function() {
+    if (confirm('Are you sure you want to delete this grade and comment?')) {
+      Meteor.call('deleteLoM', this._id,alertOnError);
+    }
+  }
+});
 
   /**********************/
  /******* NEW LOM ******/

@@ -5,6 +5,11 @@ Template.openlabHeader.helpers({
       document.title = site.title;
       return site.title;
     }
+  },
+  edit: function() {
+    if (openlabSession.get('editingMainPage'))
+      return 'Done';
+    return 'Edit';
   }
 });
 

@@ -55,7 +55,7 @@
   <div class="LoMitem"><p>
       {{#if editingMainPage}}
         {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
-        <!-- need delete button -->
+        <a class="glyphicon glyphicon-remove deleteLoM" title="delete level of mastery"></a>
         {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingMainPageTFtext}}
         {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingMainPage options=summernoteOptions}} 
         <!-- version ?? -->

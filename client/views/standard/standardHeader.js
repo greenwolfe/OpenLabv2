@@ -7,6 +7,11 @@ Template.standardHeader.helpers({
     if (!standard) return '';
     var title = 'Standard: ' + standard.title;
     return title;
+  },
+  edit: function() {
+    if (openlabSession.get('editingMainPage'))
+      return 'Done';
+    return 'Edit';
   }
 });
 

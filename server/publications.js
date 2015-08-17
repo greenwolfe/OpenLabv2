@@ -18,16 +18,28 @@ Meteor.publish('standards',function() {  //change to user or section ID in order
   return Standards.find();
 });
 
-Meteor.publish('levelsOfMastery',function(standardID,studentID,activityID) {
-  check(standardID,Match.OneOf(Match.idString,null));
+Meteor.publish('levelsOfMastery',function(standardOrCategoryID,studentID,activityID) {
+  check(standardOrCategoryID,Match.OneOf(Match.idString,null));
   check(studentID,Match.OneOf(Match.idString,null));
   check(activityID,Match.OneOf(Match.idString,null));
-  if (!standardID && !studentID && !activityID)
+  if (!standardOrCategoryID && !studentID && !activityID)
     return this.ready();
 
   var selector = {}
-  if (standardID)
-    selector.standardID = standardID;
+  if (standardOrCategoryID) {
+    var standard = Standards.findOne(standardOrCategoryID);
+    if (standard) {
+      selector.standardID = standardOrCategoryID;
+    } else {
+      var category = Categories.findOne(standardOrCategoryID);
+      if (category) {
+        var standardIds = _.pluck(Standards.find({categoryID:standardOrCategoryID},{fields:{_id:1}}).fetch(),'_id');
+        if (standardIds.length > 0)
+          selector.standardID = {$in:standardIds};
+      }
+    }
+  }
+
   if (studentID)
     selector.studentID = studentID;
   if (activityID)

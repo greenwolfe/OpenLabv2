@@ -113,7 +113,7 @@
         {{>showHide collection='Standards' itemName='standard' item=this}}
         {{>plaintexteditor collection='Standards' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
-        <span class='badge badge-inverse LoMmedium'>DM</span>
+        <span class='badge badge-inverse {{LoMAveragecolorcode}}' title = '{{humanizedScaleHelp}}'>{{LoMAveragetext}}</span>
         <a  href="{{pathFor 'standardPage' _id=_id}}">
         {{{title}}} 
         </a>        
