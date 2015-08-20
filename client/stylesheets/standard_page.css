@@ -25,15 +25,32 @@
   display: inline-block;
   vertical-align: top;
 }
-#LoMlist form.form-inline {
+#LoMlist div.newLoM {
   margin-bottom: 10px;
   background-color: #DFF0D8;
 }
-#LoMlist form.form-inline div.summernote.comment {
+#LoMlist form.form-inline div.summernote.comment,
+#LoMlist div.newLoM span.LoMcomment {
   width: 500px;
   display: inline-block;
   min-height: 32px;
   vertical-align: top;
+}
+#LoMlist div.newLoM span.LoMcomment {
+  border-style: solid;
+  border-color: DeepSkyBlue;
+  border-width: thin;
+}
+#LoMlist div.newLoM div.previousLoMLevel {
+  width: 48px;
+  display: inline-block;
+  min-height:32px;
+  padding-top: 4px;
+  vertical-align: top;
+  text-align: center;
+  border-style: solid;
+  border-color: DeepSkyBlue;
+  border-width: thin;
 }
 #LoMlist form.form-inline div.form-group input.form-control.level {
   width: 48px;

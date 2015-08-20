@@ -8,7 +8,7 @@
     <p>
       {{#unless description}}
         {{#if isInRole 'teacher'}}
-          Click 'Edit' to type a description.
+          Click 'Edit' to provide a description.
         {{else}}
           The teacher has not yet provided a description for this standard. 
         {{/if}}
@@ -74,14 +74,30 @@
 </template>
 
 <template name="newLoM">
-  <span>New level and comment</span>
-  <form class="form-inline" role="form">
-    <div class="form-group">
-      <input type="text" class="form-control level"/>
-    </div>
-    <div class="summernote comment">
-      &nbsp;
-    </div>
-    <button type="submit" class="btn btn-default">Save</button>
-  </form>
+  <div class="newLoM">
+    <span>New level and comment</span>
+    <form class="form-inline" role="form">
+      <div class="form-group">
+        <input type="text" class="form-control level"/>
+      </div>
+      <div class="summernote comment">
+        &nbsp;
+      </div>
+      <button type="submit" class="btn btn-default">Save</button>
+      <button type="button" class="btn btn-default scrollPrevious">Show Previous</button>
+    <!-- {{#if showPrevious}} use template-level reactive var and helper?-->
+    </form>
+    <!-- put button at end? make sure all is on new line.  previous level as well -->
+    {{#with previousLoM}}
+      <div class="previousLoMLevel">
+        <span class='badge badge-inverse {{LoMcolorcode}}'>{{level}}</span>
+      </div>
+      <span class="LoMcomment">{{{commentOrNote}}}</span>
+      <div class="btn-group">
+        <button type="button" class="btn btn-default previousCommentStepBackward"><span class='glyphicon glyphicon-step-backward'></span></button>
+        <button type="button" class="btn btn-default previousCommentStepForward"><span class='glyphicon glyphicon-step-forward'></span></button>
+        <button type="button" class="btn btn-default pastePrevious"><span class='glyphicon glyphicon-arrow-up'></span></button>
+      </div>
+    {{/with}}
+  </div>
 </template>

@@ -157,11 +157,11 @@ Meteor.methods({
     }
 
     if (('version' in LoM) && (LoM.version != originalLoM.version)) {
-      LevelsOfmastery.update(LoM._id,{$set: {version:LoM.version}});      
+      LevelsOfMastery.update(LoM._id,{$set: {version:LoM.version}});      
     }
 
     if (('copiedAndPasted' in LoM) && (LoM.copiedAndPasted != originalLoM.copiedAndPasted)) {
-      LevelsOfmastery.update(LoM._id,{$set: {copiedAndPasted:LoM.copiedAndPasted}});      
+      LevelsOfMastery.update(LoM._id,{$set: {copiedAndPasted:LoM.copiedAndPasted}});      
     }
 
     return LoM._id;    

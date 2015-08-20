@@ -15,7 +15,7 @@ Template.standardPage.onCreated(function() {
 
     if (LoMsThisStudent.ready()) { //then load the rest in the background
       if (Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('levelsOfMastery',standardID);
+        Meteor.subscribe('levelsOfMastery',standardID,null,null);
     }
   })
 })
@@ -184,6 +184,21 @@ Template.LoMitem.events({
  /******* NEW LOM ******/
 /**********************/
 
+Template.newLoM.onCreated(function() {
+  var instance = this;
+  var standardID = this.data._id;
+  instance.previousLoMindex = new ReactiveVar(0);
+  instance.previousLoM = new ReactiveVar(
+    LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1}})
+  );
+
+  instance.autorun(function() {
+    var previousLoMindex = instance.previousLoMindex.get();
+    var previousLoM = LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1},skip:previousLoMindex});
+    instance.previousLoM.set(previousLoM);
+  })
+});
+
 Template.newLoM.onRendered(function() {
   var instance = this;
   instance.$('.summernote.comment').summernote({ //default/standard air popover toolbar
@@ -207,6 +222,41 @@ Template.newLoM.onRendered(function() {
   })
 });
 
+Template.newLoM.helpers({
+  previousLoM: function() {
+    return Template.instance().previousLoM.get();
+  },
+  LoMcolorcode: function() {
+    var standard = Standards.findOne(this.standardID);
+    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
+    var level;
+    var maxVal;
+    var index;
+    if (_.isArray(standard.scale)) {
+      level = standard.scale.indexOf(this.level);
+      maxVal = standard.scale.length;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    if (_.isFinite(standard.scale)) {
+      level = this.level;
+      maxVal = standard.scale;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    return colorcodes[index];
+  },
+  /*LoMtext: function() { //just number or level here
+    var standard = Standards.findOne(this.standardID);
+    if (_.isArray(standard.scale))
+      return this.level;
+    return this.level + ' out of ' + standard.scale;
+  },*/
+  commentOrNote: function() {
+    return this.comment || 'No teacher comment.';
+  }
+})
+
 Template.newLoM.events({
   'click button[type="submit"]': function(event,tmpl) {
     var level = getTrimmedValbyClass(tmpl,'level');
@@ -220,6 +270,33 @@ Template.newLoM.events({
     }
     Meteor.call('insertLoM',LoM,alertOnError);
     return false;
+  },
+  'click .previousCommentStepBackward': function(event,tmpl) {
+    var previousLoMindex = tmpl.previousLoMindex.get();
+    var maxIndex = LevelsOfMastery.find({standardID:tmpl.data._id}).count() - 1;
+    previousLoMindex = Math.min(previousLoMindex + 1,maxIndex);
+    tmpl.previousLoMindex.set(previousLoMindex);
+  },
+  'click .previousCommentStepForward': function(event,tmpl) {
+    var previousLoMindex = tmpl.previousLoMindex.get();
+    previousLoMindex = Math.max(previousLoMindex - 1,0);
+    tmpl.previousLoMindex.set(previousLoMindex);
+  },
+  'click .pastePrevious': function(event,tmpl) {
+    var $comment = tmpl.$('.summernote.comment');
+    var $level = tmpl.$('.form-control.level');
+    var currentComment = _.str.trim($comment.code());
+    var currentLevel = $level.val();
+    currentComment = (currentComment) ? _.str.trim(currentComment.replace('&nbsp;',' ')) : null;
+    var previousLoM = tmpl.previousLoM.get();
+    if (previousLoM) {
+      if ((currentComment) && !confirm('This will replace your current comment.  Proceed?'))
+        return;
+      $comment.code(previousLoM.comment);
+      $level.val(previousLoM.level);
+      var today = new Date();
+      Meteor.call('updateLevelOfMastery',{_id:previousLoM._id,copiedAndPasted:today});
+    }
   }
 })
 

@@ -11,8 +11,8 @@ Meteor.groupMemberIds = function(groupOrID) {
   var memberships = Memberships.find({
       collectionName:'Groups',
       itemID:groupID,
-      startDate: {$lt: today},
-      endDate: {$gt: today}
+//      startDate: {$lt: today}, //want to list this for all members, even if they have left
+//      endDate: {$gt: today}  //to do otherwise creates problems for the users past groups
     },
     {fields:{memberID:1}}).fetch();
   return _.pluck(memberships,'memberID');
