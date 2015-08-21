@@ -187,15 +187,17 @@ Template.LoMitem.events({
 Template.newLoM.onCreated(function() {
   var instance = this;
   var standardID = this.data._id;
-  instance.previousLoMindex = new ReactiveVar(0);
-  instance.previousLoM = new ReactiveVar(
-    LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1}})
-  );
+  instance.previousLoMindex = new ReactiveVar(-1);
+  instance.previousLoM = new ReactiveVar();
 
   instance.autorun(function() {
     var previousLoMindex = instance.previousLoMindex.get();
-    var previousLoM = LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1},skip:previousLoMindex});
-    instance.previousLoM.set(previousLoM);
+    if (previousLoMindex >= 0) {
+      var previousLoM = LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1},skip:previousLoMindex});
+      instance.previousLoM.set(previousLoM);
+    } else {
+      instance.previousLoM.set(null);
+    }
   })
 });
 
@@ -270,6 +272,12 @@ Template.newLoM.events({
     }
     Meteor.call('insertLoM',LoM,alertOnError);
     return false;
+  },
+  'click .showPrevious': function(event,tmpl) {
+    tmpl.previousLoMindex.set(0);
+  },
+    'click .hidePrevious': function(event,tmpl) {
+    tmpl.previousLoMindex.set(-1);
   },
   'click .previousCommentStepBackward': function(event,tmpl) {
     var previousLoMindex = tmpl.previousLoMindex.get();

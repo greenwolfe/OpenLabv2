@@ -83,8 +83,14 @@
       <div class="summernote comment">
         &nbsp;
       </div>
-      <button type="submit" class="btn btn-default">Save</button>
-      <button type="button" class="btn btn-default scrollPrevious">Show Previous</button>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-default">Save</button>
+        {{#if previousLoM}}
+          <button type="button" class="btn btn-default hidePrevious" title="Hide previous comments."><span class='glyphicon glyphicon-triangle-top'></span></button>     
+        {{else}}
+          <button type="button" class="btn btn-default showPrevious" title="Show previous comments for copy and paste."><i class="fa fa-history"></i></button>
+        {{/if}}
+      </div>
     <!-- {{#if showPrevious}} use template-level reactive var and helper?-->
     </form>
     <!-- put button at end? make sure all is on new line.  previous level as well -->
@@ -96,7 +102,7 @@
       <div class="btn-group">
         <button type="button" class="btn btn-default previousCommentStepBackward"><span class='glyphicon glyphicon-step-backward'></span></button>
         <button type="button" class="btn btn-default previousCommentStepForward"><span class='glyphicon glyphicon-step-forward'></span></button>
-        <button type="button" class="btn btn-default pastePrevious"><span class='glyphicon glyphicon-arrow-up'></span></button>
+        <button type="button" class="btn btn-default pastePrevious" title="Paste full comment."><span class='glyphicon glyphicon-arrow-up'></span></button>
       </div>
     {{/with}}
   </div>
