@@ -8,18 +8,12 @@ Meteor.publish('activities',function() {  //change to user or section ID in orde
   return Activities.find();
 });
 
-Meteor.publish('standards',function() {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  /*var userToShow = Meteor.users.findOne(userID);
-  var Acts = Activities.find({visible:true});
-  if (!userToShow) return Acts;
-  if (Roles.userIsInRole(userToShow,'teacher')) 
-    return Activities.find();  */
-  //check(userID,Match.oneOf(Match.idString,null));
+Meteor.publish('standards',function() {  
   return Standards.find();
 });
 
 Meteor.publish('levelsOfMastery',function(standardOrCategoryID,studentID,activityID) {
-  check(standardOrCategoryID,Match.OneOf(Match.idString,null));
+  check(standardOrCategoryID,Match.OneOf(Match.idString,[Match.idString],null));
   check(studentID,Match.OneOf(Match.idString,null));
   check(activityID,Match.OneOf(Match.idString,null));
   if (!standardOrCategoryID && !studentID && !activityID)
@@ -27,15 +21,19 @@ Meteor.publish('levelsOfMastery',function(standardOrCategoryID,studentID,activit
 
   var selector = {}
   if (standardOrCategoryID) {
-    var standard = Standards.findOne(standardOrCategoryID);
-    if (standard) {
-      selector.standardID = standardOrCategoryID;
+    if (_.isArray(standardOrCategoryID) && standardOrCategoryID.length > 0) {
+      selector.standardID = {$in: standardOrCategoryID};
     } else {
-      var category = Categories.findOne(standardOrCategoryID);
-      if (category) {
-        var standardIds = _.pluck(Standards.find({categoryID:standardOrCategoryID},{fields:{_id:1}}).fetch(),'_id');
-        if (standardIds.length > 0)
-          selector.standardID = {$in:standardIds};
+      var standard = Standards.findOne(standardOrCategoryID);
+      if (standard) {
+        selector.standardID = standardOrCategoryID;
+      } else {
+        var category = Categories.findOne(standardOrCategoryID);
+        if (category) {
+          var standardIds = _.pluck(Standards.find({categoryID:standardOrCategoryID},{fields:{_id:1}}).fetch(),'_id');
+          if (standardIds.length > 0)
+            selector.standardID = {$in:standardIds};
+        }
       }
     }
   }

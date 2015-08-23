@@ -1,7 +1,8 @@
 //Must be placed in a subfolder so that it is loaded before
 //the templates that use its global variables
 var VALID_KEYS = [
-  'editedWall'
+  'editedWall',
+  'assessmentID' //ID of assessment block passed to chooseStandardsModal
 ];
 
 var validateKey = function (key) {

@@ -38,15 +38,24 @@
               {{#if inTeacherWall}}
                 <li><a href="#" class="addSubactivitiesBlock">subactivities</a></li>
               {{/if}}
+              {{#if inTeacherOrStudentWall}}
+                {{#if isInRole 'teacher'}}
+                  <li><a href="#" class="addAssessmentBlock">assessment</a></li>
+                {{/if}}
+              {{/if}}
             </ul>
           </li>
         </ul>
       </nav>
     {{/if}}
     {{#if visibleOrEditing}}
-      {{#sortable1c items=blocks options=sortableOpts}}
-        {{> block}}
-      {{/sortable1c}}
+      {{#if Template.subscriptionsReady}}
+        {{#sortable1c items=blocks options=sortableOpts}}
+          {{> block}}
+        {{/sortable1c}}
+      {{else}}
+        Loading blocks ...
+      {{/if}}
     {{/if}}
   </div>
 </Template>

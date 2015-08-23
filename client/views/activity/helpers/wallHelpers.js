@@ -21,6 +21,13 @@ inWallofType = function(type) {
 
 }
 
+inTeacherOrStudentWall = function(wallID) {
+    wallID = wallID || this.wallID || this._id;
+    var wall = Walls.findOne(wallID);
+    if (!wall) return false;
+    return ((wall.type == 'teacher') || (wall.type == 'student'));
+}
+
 Template.registerHelper('inEditedWall',inEditedWall);
 
 Template.registerHelper('editingActivity',editingActivity);
@@ -29,3 +36,4 @@ Template.registerHelper('inTeacherWall',inWallofType('teacher'));
 Template.registerHelper('inStudentWall',inWallofType('student'));
 Template.registerHelper('inGroupWall',inWallofType('group'));
 Template.registerHelper('inSectionWall',inWallofType('section'));
+Template.registerHelper('inTeacherOrStudentWall',inTeacherOrStudentWall);

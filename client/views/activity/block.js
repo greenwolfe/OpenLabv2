@@ -28,13 +28,6 @@ editingBlock = function(blockID) {
  /******* BLOCK ******/
 /********************/
 
-Template.block.onCreated(function() {
-  var instance = this;
-  instance.autorun(function() {
-    var fileSubscription = instance.subscribe('files', instance.data._id);
-  });
-})
-
 var dateTimeFormat = "[at] h:mm a MM[/]DD[/]YY";
 var dateFormat = "ddd, MMM D YYYY";
 
@@ -43,11 +36,20 @@ Template.block.helpers({
   blockType: function() {
     return this.type + 'Block';
   },
+  isAssessmentBlock: function() {
+    return (this.type == 'assessment');
+  },
   fileCount: function() {
     var selector = {blockID:this._id};
     if (!inEditedWall(this.wallID)) //if not editing
       selector.visible = true //show only visible blocks
     return Files.find(selector).count();
+  },
+  LoMcount: function() {
+    return LevelsOfMastery.find({assessmentID:this._id}).count();
+  },
+  subactivity: function() {
+    return Activities.findOne(this.subActivityID);
   },
   virtualWorkStatus: function() {
     return 'icon-raise-virtual-hand';
@@ -159,7 +161,7 @@ Template.codemirror.onRendered(function() {
     lineNumbers: false,
     lineWrapping: true,
     theme: 'monokai',
-    mode: "htmlmixed", 
+    mode: "htmlmixed"
   });
   editor.on("blur", function(codemirror) {
     var embedCode = codemirror.getValue();
@@ -189,6 +191,15 @@ Template.codemirror.events({
   /**********************/
  /**** FILEBLOCK *******/
 /**********************/
+
+Template.fileBlock.onCreated(function() {
+  var instance = this;
+  instance.subscribe('files', instance.data._id);
+//edited Aug 21, 2015 ... delete if it causes no problems
+/*  instance.autorun(function() {
+    var fileSubscription = instance.subscribe('files', instance.data._id);
+  });*/
+})
 
 Template.fileBlock.helpers({
   files: function() {
@@ -294,6 +305,305 @@ Template.fileLink.helpers({
 Template.fileLink.events({
   'click .deleteFile': deleteFile 
 });
+
+
+
+
+  /******************************/
+ /**** SUBACTIVITIES BLOCK *****/
+/******************************/
+
+Template.subactivitiesBlock.onCreated(function() {
+  instance = this;
+
+  instance.autorun(function() {
+    var userID = Meteor.impersonatedOrUserId();
+    var activity = Activities.findOne(instance.data.activityID);
+    var sectionID = Meteor.selectedSectionId();
+
+    if (activity) {
+      var thisUnitSubscription = instance.subscribe('subActivityStatuses',userID,activity.pointsTo);
+      var thisUnitProgress = instance.subscribe('subActivityProgress',userID,activity.pointsTo);
+      var thisUnitWorkPeriods = instance.subscribe('workPeriods',sectionID,activity.unitID);
+    }
+  })
+})
+
+Template.subactivitiesBlock.helpers({
+  helpMessages: function () {
+    return [
+      'Activities created here will also appear in the main units and activities list, for example on the main page.',
+      "They will all link back to the same activity page - this one.",
+      "Reordering of the list in this block is independent of the main list.  In the main list, these activities can be sorted among the other activities or even moved to other units.",
+      "The title of this block, if it exists, will be used as the title of the page as well.  Otherwise, the title of the initial activity is used.",
+      "Create just one subactivities block per activity page.  It can be deleted and re-created without causing problems, but it is probably better just to hide it if you don't want it visible to students."
+    ]
+  },
+  subactivities: function() {
+    var activity = Activities.findOne(this.activityID);
+    return Activities.find({
+      pointsTo:activity._id
+    },{sort: {suborder: 1}});
+  },
+  sortableOpts: function() {
+    var activity = Activities.findOne(this.activityID);
+    return {
+      draggable:'.aItem',
+      handle: '.sortActivity',
+      collection: 'Activities',
+      selectField: 'pointsTo',
+      selectValue: activity._id,
+      sortField: 'suborder',
+      disabled: (!inEditedWall(this.wallID)) //!= this.wallID to apply to a single wall 
+      //onAdd: function(evt) {
+      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
+      //}
+    }
+  }
+})
+
+  /**************************/
+ /*** SUBACTIVITY ITEM  ****/
+/**************************/
+
+/* currentStatus */
+var currentStatus = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+}
+/* currentProgress */
+var currentProgress = function(activityID) {
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return undefined;
+  return ActivityProgress.findOne({studentID:studentID,activityID:activityID});
+}
+
+Template.subactivityItem.helpers({
+  canDelete: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher')) return false;
+    var numBlocks = Blocks.find({activityID:this._id,type:{$ne:'subactivities'}}).count();
+    var numSubActivities = Activities.find({pointsTo:this._id}).count();
+    return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
+  },
+  subactivityCount: function() {
+    return Activities.find({pointsTo:this.pointsTo}).count() - 1;
+  },
+  subactivities: function() {
+    return Activities.find({pointsTo:this.pointsTo});
+  },
+  isInAssessmentBlock: function() {
+    var parentData = Template.parentData();
+    return (parentData.type == 'assessment');
+  },
+  workPeriod: function () {
+    //find existing workPeriod
+    var workPeriod =  WorkPeriods.findOne({
+      activityID: this._id,
+      sectionID: Meteor.selectedSectionId()
+    });
+    if (workPeriod) 
+      return workPeriod;
+
+    //else get unit dates off a workPeriod for another activity from the same unit and section
+    //unitDatesWithoutSelf are by definition the unitDates for the other workPeriod
+    workPeriod = WorkPeriods.findOne({
+      unitID: this.unitID,
+      sectionID: Meteor.selectedSectionId()
+    });
+    if (workPeriod) {
+      //keep existing unitID, sectionID, unitDates 
+      workPeriod.activityID = this._id;
+      workPeriod.activityVisible = this.visible;
+      workPeriod.startDate = longLongAgo();
+      workPeriod.endDate = longLongAgo();
+      workPeriod.unitStartDateWithoutSelf = workPeriod.unitStartDate;
+      workPeriod.unitEndDateWithoutSelf = workPeriod.unitEndDate;
+      return workPeriod;
+    }
+
+    //else make up a stub with all null values
+    workPeriod = {
+      activityID: this._id, //passed in for later use
+      unitID: this.unitID, //passed in for completeness, probably not used to display data
+      activityVisible: this.visible, //passed in for completeness, probably not used to display data
+      sectionID: 'applyToAll', //default value
+      startDate: longLongAgo(),
+      endDate: longLongAgo(),
+      unitStartDate: longLongAgo(),
+      unitEndDate: notSoLongAgo(),
+      unitStartDateWithoutSelf: wayWayInTheFuture(),
+      unitEndDateWithoutSelf: notSoLongAgo()
+    };
+    return workPeriod;
+  },
+  progress: function() {
+    var progress = currentProgress(this._id);
+    if (!progress)
+      return 'icon-notStarted'
+    return 'icon-' + progress.level;
+  },
+  status: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return 'icon-nostatus'
+    return 'icon-' + status.level;
+  },
+  statusTitle: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return 'not started';
+    var titleDict = {
+      'nostatus':'empty inbox: not started',
+      'submitted':'full inbox: work submitted, waiting for teacher response',
+      'returned':'full outbox:  Returned with comments by your teacher.  Please revise and resubmit.',
+      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
+      'done':'Done.'};
+    return titleDict[status.level];
+  },
+  progressTitle: function() {
+    var progress = currentProgress(this._id);
+    if (!progress)
+      return 'not started';
+    var titleDict = {
+      'notStarted':'not started',
+      'oneBar':'barely started',
+      'twoBars':'almost half-way done',
+      'threeBars':'more than half-way done',
+      'fourBars':'80% there',
+      'fiveBars':'just about done'};
+    return titleDict[progress.level];
+  },
+  late: function() {
+    var status = currentStatus(this._id);
+    if (!status)
+      return '';
+    return (status.late) ? 'icon-late' : '';  
+  }
+});
+
+Template.subactivityItem.events({
+  'click .deleteActivity':function(event,tmpl) {
+    var isNotSubActivity = (tmpl.data._id == tmpl.data.pointsTo);
+    if (confirm('Are you sure you want to delete this activity?')) {
+      Meteor.call('deleteActivity', tmpl.data._id,function(error,num){
+        if (error) {
+          alert(error.reason);
+        } else {
+          alert('Activity deleted');
+          if (isNotSubActivity)
+            FlowRouter.go('/');
+        }
+      });
+    }
+  },
+  'click li.subactivityChoice': function(event,tmpl) {
+    var block = Template.parentData();
+    var subactivity = this;
+    if (subactivity._id != block.subActivityID) 
+      Meteor.call('updateBlock',{_id:block._id,subActivityID:subactivity._id},alertOnError);
+  },
+  'click .activityProgress': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('incrementProgress',studentID,tmpl.data._id,alertOnError);  
+  },
+  'click .activityStatus': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  
+  },
+  'click .activityPunctual': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return; 
+    Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
+  }
+})
+
+  /*************************/
+ /*** NEW SUBACTIVITY  ****/
+/*************************/
+
+Template.newSubactivity.helpers({
+  fixedFields: function() {
+    var activity = Activities.findOne(this.activityID);
+    return {
+      unitID:activity.unitID,
+      pointsTo:activity._id
+    }
+  }
+})
+
+  /***************************/
+ /**** ASSESSMENT BLOCK *****/
+/***************************/
+
+Template.assessmentBlock.onCreated(function() {
+  instance = this;
+  instance.subscribe('standards'); //need all of them in order to add them to assessment
+
+  instance.autorun(function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activity = Activities.findOne(instance.data.activityID);
+    var data = Template.currentData();
+    if ((!studentID) || !Roles.userIsInRole(studentID,'student'))
+      return;
+    if (!activity) 
+      return;
+
+    //first get the info that will be immediately shown
+    var LoMsThisStudentAndAssessment = Meteor.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
+
+    if (LoMsThisStudentAndAssessment.ready()) { //then load the rest in the background
+      var LoMsThisStudent = Meteor.subscribe('levelsOfMastery',data.standardIDs,studentID,null); //all levels and comments for these standards
+      
+      if (LoMsThisStudent.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
+        Meteor.subscribe('levelsOfMastery',data.standardIDs,null,null); //and for all students ... for copy and pasting of past comments
+    }
+  });
+});
+
+Template.assessmentBlock.onRendered(function() {
+  instance = this;
+  instance.$('[data-toggle="tooltip"]').tooltip();
+})
+
+Template.assessmentBlock.helpers({
+  standards: function() {
+    var selectedStandardIDs = this.standardIDs || [];
+    var selectedStandards = Standards.find({_id:{$in:selectedStandardIDs}}).fetch();
+    selectedStandards.sort(function(sa,sb) {
+      return selectedStandardIDs.indexOf(sa._id) - selectedStandardIDs.indexOf(sb._id);
+    });
+    return selectedStandards;
+  },
+  LoMs: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standardID = this._id;
+    var instance = Template.instance();
+    if (!studentID || !standardID)
+      return '';
+    var selector = {
+      studentID: studentID,
+      standardID: standardID,
+      assessmentID: instance.data._id,
+      visible: true
+    }
+    return LevelsOfMastery.find(selector,{sort:{submitted:-1}});
+  }
+});
+
+Template.assessmentBlock.events({
+  'click .assessmentAddStandards': function(event,tmpl) {
+    activityPageSession.set('assessmentID',tmpl.data._id);
+  }
+})
 
   /******************************/
  /**** WORK SUBMIT BLOCK *******/
@@ -416,219 +726,3 @@ Template.workSubmitBlock.helpers({
 /*Template.teacherResponseLink.events({
   'click .deleteFile': deleteFile 
 })*/
-
-
-  /******************************/
- /**** SUBACTIVITIES BLOCK *****/
-/******************************/
-
-Template.subactivitiesBlock.onCreated(function() {
-  instance = this;
-
-  instance.autorun(function() {
-    var userID = Meteor.impersonatedOrUserId();
-    var activity = Activities.findOne(instance.data.activityID);
-    var sectionID = Meteor.selectedSectionId();
-
-    if (activity) {
-      var thisUnitSubscription = Meteor.subscribe('subActivityStatuses',userID,activity.pointsTo);
-      var thisUnitProgress = Meteor.subscribe('subActivityProgress',userID,activity.pointsTo);
-      var thisUnitWorkPeriods = Meteor.subscribe('workPeriods',sectionID,activity.unitID);
-    }
-  })
-})
-
-Template.subactivitiesBlock.helpers({
-  helpMessages: function () {
-    return [
-      'Activities created here will also appear in the main units and activities list, for example on the main page.',
-      "They will all link back to the same activity page - this one.",
-      "Reordering of the list in this block is independent of the main list.  In the main list, these activities can be sorted among the other activities or even moved to other units.",
-      "The title of this block, if it exists, will be used as the title of the page as well.  Otherwise, the title of the initial activity is used.",
-      "Create just one subactivities block per activity page.  It can be deleted and re-created without causing problems, but it is probably better just to hide it if you don't want it visible to students."
-    ]
-  },
-  subactivities: function() {
-    var activity = Activities.findOne(this.activityID);
-    return Activities.find({
-      pointsTo:activity._id
-    },{sort: {suborder: 1}});
-  },
-  sortableOpts: function() {
-    var activity = Activities.findOne(this.activityID);
-    return {
-      draggable:'.aItem',
-      handle: '.sortActivity',
-      collection: 'Activities',
-      selectField: 'pointsTo',
-      selectValue: activity._id,
-      sortField: 'suborder',
-      disabled: (!inEditedWall(this.wallID)) //!= this.wallID to apply to a single wall 
-      //onAdd: function(evt) {
-      //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
-      //}
-    }
-  }
-})
-
-  /**************************/
- /*** SUBACTIVITY ITEM  ****/
-/**************************/
-
-/* currentStatus */
-var currentStatus = function(activityID) {
-  var studentID = Meteor.impersonatedOrUserId();
-  if (!Roles.userIsInRole(studentID,'student'))
-    return undefined;
-  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
-}
-/* currentProgress */
-var currentProgress = function(activityID) {
-  var studentID = Meteor.impersonatedOrUserId();
-  if (!Roles.userIsInRole(studentID,'student'))
-    return undefined;
-  return ActivityProgress.findOne({studentID:studentID,activityID:activityID});
-}
-
-Template.subactivityItem.helpers({
-  canDelete: function() {
-    var cU = Meteor.userId();
-    if (!Roles.userIsInRole(cU,'teacher')) return false;
-    var numBlocks = Blocks.find({activityID:this._id,type:{$ne:'subactivities'}}).count();
-    var numSubActivities = Activities.find({pointsTo:this._id}).count();
-    return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
-  },
-  workPeriod: function () {
-    //find existing workPeriod
-    var workPeriod =  WorkPeriods.findOne({
-      activityID: this._id,
-      sectionID: Meteor.selectedSectionId()
-    });
-    if (workPeriod) 
-      return workPeriod;
-
-    //else get unit dates off a workPeriod for another activity from the same unit and section
-    //unitDatesWithoutSelf are by definition the unitDates for the other workPeriod
-    workPeriod = WorkPeriods.findOne({
-      unitID: this.unitID,
-      sectionID: Meteor.selectedSectionId()
-    });
-    if (workPeriod) {
-      //keep existing unitID, sectionID, unitDates 
-      workPeriod.activityID = this._id;
-      workPeriod.activityVisible = this.visible;
-      workPeriod.startDate = longLongAgo();
-      workPeriod.endDate = longLongAgo();
-      workPeriod.unitStartDateWithoutSelf = workPeriod.unitStartDate;
-      workPeriod.unitEndDateWithoutSelf = workPeriod.unitEndDate;
-      return workPeriod;
-    }
-
-    //else make up a stub with all null values
-    workPeriod = {
-      activityID: this._id, //passed in for later use
-      unitID: this.unitID, //passed in for completeness, probably not used to display data
-      activityVisible: this.visible, //passed in for completeness, probably not used to display data
-      sectionID: 'applyToAll', //default value
-      startDate: longLongAgo(),
-      endDate: longLongAgo(),
-      unitStartDate: longLongAgo(),
-      unitEndDate: notSoLongAgo(),
-      unitStartDateWithoutSelf: wayWayInTheFuture(),
-      unitEndDateWithoutSelf: notSoLongAgo()
-    };
-    return workPeriod;
-  },
-  progress: function() {
-    var progress = currentProgress(this._id);
-    if (!progress)
-      return 'icon-notStarted'
-    return 'icon-' + progress.level;
-  },
-  status: function() {
-    var status = currentStatus(this._id);
-    if (!status)
-      return 'icon-nostatus'
-    return 'icon-' + status.level;
-  },
-  statusTitle: function() {
-    var status = currentStatus(this._id);
-    if (!status)
-      return 'not started';
-    var titleDict = {
-      'nostatus':'empty inbox: not started',
-      'submitted':'full inbox: work submitted, waiting for teacher response',
-      'returned':'full outbox:  Returned with comments by your teacher.  Please revise and resubmit.',
-      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
-      'done':'Done.'};
-    return titleDict[status.level];
-  },
-  progressTitle: function() {
-    var progress = currentProgress(this._id);
-    if (!progress)
-      return 'not started';
-    var titleDict = {
-      'notStarted':'not started',
-      'oneBar':'barely started',
-      'twoBars':'almost half-way done',
-      'threeBars':'more than half-way done',
-      'fourBars':'80% there',
-      'fiveBars':'just about done'};
-    return titleDict[progress.level];
-  },
-  late: function() {
-    var status = currentStatus(this._id);
-    if (!status)
-      return '';
-    return (status.late) ? 'icon-late' : '';  
-  }
-});
-
-Template.subactivityItem.events({
-  'click .deleteActivity':function(event,tmpl) {
-    var isNotSubActivity = (tmpl.data._id == tmpl.data.pointsTo);
-    if (confirm('Are you sure you want to delete this activity?')) {
-      Meteor.call('deleteActivity', tmpl.data._id,function(error,num){
-        if (error) {
-          alert(error.reason);
-        } else {
-          alert('Activity deleted');
-          if (isNotSubActivity)
-            FlowRouter.go('/');
-        }
-      });
-    }
-  },
-  'click .activityProgress': function(event,tmpl) {
-    var studentID = Meteor.impersonatedOrUserId();
-    if (!Roles.userIsInRole(studentID,'student'))
-      return; 
-    Meteor.call('incrementProgress',studentID,tmpl.data._id,alertOnError);  
-  },
-  'click .activityStatus': function(event,tmpl) {
-    var studentID = Meteor.impersonatedOrUserId();
-    if (!Roles.userIsInRole(studentID,'student'))
-      return; 
-    Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  
-  },
-  'click .activityPunctual': function(event,tmpl) {
-    var studentID = Meteor.impersonatedOrUserId();
-    if (!Roles.userIsInRole(studentID,'student'))
-      return; 
-    Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
-  }
-})
-
-  /*************************/
- /*** NEW SUBACTIVITY  ****/
-/*************************/
-
-Template.newSubactivity.helpers({
-  fixedFields: function() {
-    var activity = Activities.findOne(this.activityID);
-    return {
-      unitID:activity.unitID,
-      pointsTo:activity._id
-    }
-  }
-})

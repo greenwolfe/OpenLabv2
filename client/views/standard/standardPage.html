@@ -5,19 +5,22 @@
       {{>plaintexteditor collection='Standards' field='title' _id=_id editable=editingMainPageTFtext}}</p>
     {{/if}}
 
-    <p>
-      {{#unless description}}
-        {{#if isInRole 'teacher'}}
-          Click 'Edit' to provide a description.
-        {{else}}
-          The teacher has not yet provided a description for this standard. 
+    <div id="standardDescription">
+      <p>
+        {{#unless description}}
+          {{#if isInRole 'teacher'}}
+            Click 'Edit' to provide a description.
+          {{else}}
+            The teacher has not yet provided a description for this standard. 
+          {{/if}}
+        {{/unless}}
+        {{#if editingMainPage}}
+          Description:
         {{/if}}
-      {{/unless}}
-      {{#if editingMainPage}}
-        Description:
-      {{/if}}
-      {{>summernote collection='Standards' field='description' _id=_id enabled=editingMainPage options=summernoteOptions}}
-    </p>Current Score:
+        {{>summernote collection='Standards' field='description' _id=_id enabled=editingMainPage options=summernoteOptions}}
+      </p>
+    </div>
+    Current Score:
     <span class='badge badge-inverse {{LoMAveragecolorcode}}'>{{LoMAveragetext}}</span>
     <p>
 
@@ -61,14 +64,18 @@
         <!-- version ?? -->
       {{else}}
         <span class='badge badge-inverse {{LoMcolorcode}}'>{{LoMtext}}</span>
-        <span class=LoMcomment>{{{commentOrNote}}}</span>
-        <div class='LoMitemInfo'>
-          {{#with activity}}
-            <a href="{{pathFor 'activityPage'}}">{{title}}</a>
-          {{/with}}           
-          graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}} 
-          <!-- show version to teacher -->   
-        </div>
+        {{#if activity}} <!-- in standard page -->
+          <span class=LoMcomment>{{{commentOrNote}}}</span>
+          <div class='LoMitemInfo'>
+            {{#with activity}}
+              <a href="{{pathFor 'activityPage' _id=_id}}">{{title}}</a>
+            {{/with}} 
+            graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}     
+            <!-- show version to teacher -->   
+          </div>
+        {{else}} <!-- in assessment block on activity page -->
+          <span class=LoMcomment data-toggle="tooltip" data-html=true title="graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}">{{{commentOrNote}}}</span>
+        {{/if}}
       {{/if}}
   </p></div>
 </template>

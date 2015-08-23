@@ -1,8 +1,10 @@
 Template.wall.onCreated(function() {
   var instance = this;
-  instance.autorun(function() {
+  instance.subscribe('columns', instance.data._id);
+//edited Aug 21, 2015 ... delete if it causes no problems
+/*  instance.autorun(function() {
     var columnSubscription = instance.subscribe('columns', instance.data._id);
-  });
+  });*/
 })
 
 Template.wall.onDestroyed(function() {

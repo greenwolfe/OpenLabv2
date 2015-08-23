@@ -5,7 +5,7 @@ Meteor.methods({
     check(block,{
       //required fields to create the new block
       columnID: Match.idString,
-      type: Match.OneOf('workSubmit','text','file','embed','subactivities'), 
+      type: Match.OneOf('workSubmit','text','file','embed','subactivities','assessment'), 
         //workSubmit blocks probably deprecated
       /*fields that will be initially filled based on the information passed in
       createdBy: Match.idString,              //current user
@@ -30,6 +30,8 @@ Meteor.methods({
       teacherText: Match.Optional(String),  //workSubmit
       embedCode: Match.Optional(String),    //embed
       raiseHand: Match.Optional(Match.OneOf('visible','')) //only partially implemented (all?)
+      standardIDs: [Match.idString],           //assessment
+      block.subActivityID: Match.Optional(Match.idString) //assessment
       */
     });
     //validate user and set permissions
@@ -51,6 +53,10 @@ Meteor.methods({
         block.createdBy = teachers[0]._id;
       } else if (block.type == 'subactivities') {
         throw new Meteor.Error('onlyTeacher', "Only teachers may create a subactivities block.");
+      } else if (block.type == 'assessment') {
+        //for now ... until the process seems smooth enough and I have time
+        //to work out an easy work flow for students to create their own reassessment
+        throw new Meteor.Error('onlyTeacher', "Only teachers may create an assessment block.");
       }
     }
     var today = new Date();
@@ -79,6 +85,8 @@ Meteor.methods({
     block.studentText = ''; //probably deprecated
     block.teacherText = ''; //probably deprecated
     block.embedCode = '';
+    block.standardIDs = [];
+    block.subActivityID = (block.type == 'assessment') ? block.activityID : '';
 
     //move other blocks in column down to make room
     var ids = _.pluck(Blocks.find({columnID:block.columnID},{fields: {_id: 1}}).fetch(), '_id');
@@ -105,7 +113,12 @@ Meteor.methods({
       throw new Meteor.Error('column-not-found', "Cannot add block, not a valid column");
     block.columnID = columnID;
     block.wallID = column.wallID; //denormalize block
-    block.activityID = column.activityID;
+    if (block.activityID != column.activityID) {
+      var subActivity = Activities.findOne(block.activityID);
+      if (subActivity.pointsTo != column.activityID) //pasted onto a completely different activity page
+        block.subActivityID = column.activityID;
+      block.activityID = column.activityID;
+    }
 
     var wall = Walls.findOne(column.wallID);
     if (!wall)
@@ -152,6 +165,12 @@ Meteor.methods({
     var fileCount = Files.find({blockID:blockID}).count();
     if (fileCount > 0) return; 
       //throw error as well?
+
+    var LoMcount = LevelsOfMastery.find({assignmentID:blockID}).count();
+    if (LoMcount > 0)
+      throw new Meteor.Error('alreadyAssessed','This assessment block has already been used to grade students.  Deleting it will orphan those standards.  Try hiding the assignment block instead.');
+      //just remove assessmentID and activityID from each affected LoM instead?  Do so after confirming?
+
     if (Roles.userIsInRole(cU,'student')) {
       if (cU._id != block.createdBy)
         throw new Meteor.Error('noPermissions','You did not create this block, and do not have permissions to delete it.');
@@ -171,8 +190,11 @@ Meteor.methods({
       studentText: Match.Optional(String),  //workSubmit
       teacherText: Match.Optional(String),  //workSubmit
       embedCode: Match.Optional(String),    //embed
-      raiseHand: Match.Optional(Match.OneOf('visible','')) //only partially implemented (all?)
-
+      raiseHand: Match.Optional(Match.OneOf('visible','')), //only partially implemented (all?)
+      subActivityID: Match.Optional(Match.idString), //assessment
+      standardIDs: Match.Optional([Match.idString]) //assessment ... also set using assessmentAddStandard and assessmentRemoveStandard, or just deprecate those?
+          //careful with this method for standard IDS ... none of the checks to avoid deleting a standard that has already been assessed are in place!
+          
       /*fields set below, values passed in are ignored          
       modifiedBy: Match.Optional(Match.idString), //current user
       modifiedOn: Match.Optional(Date),           //current date
@@ -187,7 +209,7 @@ Meteor.methods({
       createdFor: Match.Optional(Match.idString),
       createdBy: Match.Optional(Match.idString),  
       createdOn: Match.Optional(Date), 
-      visible: Match.Optional(Boolean),  //set in showHideMethod.js
+      visible: Match.Optional(Boolean)  //set in showHideMethod.js
       */ 
     }));
     var originalBlock = Blocks.findOne(block._id);
@@ -206,7 +228,7 @@ Meteor.methods({
     block.modifiedBy = cU._id;
     block.modifiedOn = new Date();
 
-    var fields = ['title','text','studentText','teacherText','embedCode','raiseHand','modifiedBy','modifiedOn'];
+    var fields = ['title','text','studentText','teacherText','embedCode','raiseHand','subActivityID','standardIDs','modifiedBy','modifiedOn'];
     fields.forEach(function(field) {
       if ((field in block) && (block[field] != originalBlock[field])) {
         var set = {};
@@ -215,6 +237,69 @@ Meteor.methods({
       }
     });
     return block._id; 
+  },
+  assessmentAddStandard: function(assessmentID,standardID) {
+    check(assessmentID,Match.idString);
+    check(standardID,Match.idString);
+
+    var assessment = Blocks.findOne(assessmentID);
+    if (!assessment)
+      throw new Meteor.Error('invalidAssessment','Cannot add standard to assessment block.  Invalid assessment block ID.');
+
+    var standard = Standards.findOne(standardID);
+    if (!standard)
+      throw new Meteor.Error('invalidStandardID','Cannot add standard to assessment.  Standard not found.  Invalid standard ID');
+
+    var cU = Meteor.user();
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to add a standard to an assessment.");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    if (Roles.userIsInRole(cU,'student')) {
+      if (!Meteor.studentCanEditBlock(cU._id,originalBlock))
+        throw new Meteor.Error('noPermissions','You did not create this assessment, and do not have permissions to add a standard.');
+    }  
+
+    var today = new Date();
+    Blocks.update(assessmentID,{$addToSet: {standardIDs:standardID}});
+    Blocks.update(assessmentID,{$set:{modifiedBy:cU._id}});
+    Blocks.update(assessmentID,{$set:{modifiedOn: today}});
+
+    return assessmentID;
+  },
+  assessmentRemoveStandard: function(assessmentID,standardID) {
+    check(assessmentID,Match.idString);
+    check(standardID,Match.idString);
+
+    var assessment = Blocks.findOne(assessmentID);
+    if (!assessment)
+      throw new Meteor.Error('invalidAssessment','Cannot add standard to assessment block.  Invalid assessment block ID.');
+
+    var standard = Standards.findOne(standardID);
+    if (!standard)
+      throw new Meteor.Error('invalidStandardID','Cannot add standard to assessment.  Standard not found.  Invalid standard ID');
+
+    var cU = Meteor.user();
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to add a standard to an assessment.");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    if (Roles.userIsInRole(cU,'student')) {
+      if (!Meteor.studentCanEditBlock(cU._id,originalBlock))
+        throw new Meteor.Error('noPermissions','You did not create this assessment, and do not have permissions to add a standard.');
+    }  
+
+    var LoMcount = LevelsOfMastery.find({assessmentID:assessmentID,standardID:standardID}).count();
+    if (LoMcount > 0)
+      throw new Meteor.Error('alreadyAssessed','Cannot delete standard.  At least one student has already received a grade for this standard on this assessment. Deleting it will orphan those grades.');
+      //provide a way to hide the standard just within an assessment block?
+
+    var today = new Date();
+    Blocks.update(assessmentID,{$pull: {standardIDs:standardID}});
+    Blocks.update(assessmentID,{$set:{modifiedBy:cU._id}});
+    Blocks.update(assessmentId,{$set:{modifiedOn: today}}); 
+    
+    return assessmentID;   
   }
 });
 

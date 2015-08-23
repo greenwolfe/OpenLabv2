@@ -1,8 +1,10 @@
 Template.column.onCreated(function() {
   var instance = this;
-  instance.autorun(function() {
+  instance.subscribe('blocks', instance.data._id);
+//edited Aug 21, 2015 ... delete if it causes no problems
+/*  instance.autorun(function() {
     var blockSubscription = instance.subscribe('blocks', instance.data._id);
-  });
+  });*/
 })
 
   /**********************/
@@ -145,6 +147,13 @@ Template.column.events({
     var block = {
       columnID: tmpl.data._id,
       type: 'subactivities'
+    }
+    Meteor.call('insertBlock',block,alertOnError);
+  },
+  'click .addAssessmentBlock': function(event,tmpl) {
+    var block = {
+      columnID: tmpl.data._id,
+      type: 'assessment'
     }
     Meteor.call('insertBlock',block,alertOnError);
   },

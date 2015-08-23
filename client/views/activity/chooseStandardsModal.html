@@ -1,0 +1,67 @@
+<body>
+  {{> chooseStandardsModal}}
+</body>
+
+<template name="chooseStandardsModal">
+  <div class="modal" id="chooseStandardsModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Choose Standards</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row">
+              <div class='col-md-4'>
+                <h5>Selected Standards</h5>
+                {{#each selectedStandards}}
+                  <ul class="nav nav-pills nav-stacked">
+                    <li class="chosenStandard">
+                      <a href="#">
+                        <span class="glyphicon glyphicon-move chosenStandardHandle" title="sort standards"></span>
+                        {{title}}
+                      </a>
+                    </li>
+                  </ul>
+                {{/each}}
+              </div>
+              <div class='col-md-7 col-md-offset-1'>
+                  <ul id='categories' class="nav nav-pills">
+                    {{#each categories}}
+                      <li class="categoryTitle {{active}}">
+                        <a class='displayTitle' lang="en" href="#" title="{{longname}}"> 
+                          {{{title}}}
+                        </a>
+                      </li>
+                    {{/each}}
+                  </ul>
+                  <ul class="nav nav-pills">
+                    {{#with activeCategory}}
+                        {{#each activeCategoryStandards}}
+                          <li class="standardForChoosing {{activeStandard}}">
+                            <a href="#">{{title}}</a>
+                          </li>
+                        {{/each}}
+                    {{/with}}
+                  </ul>
+              </div> 
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="chooseStandardsCancel">
+            Cancel
+          </button>
+          <button class="btn btn-primary" id="chooseStandardsSave">
+            Save
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</template>

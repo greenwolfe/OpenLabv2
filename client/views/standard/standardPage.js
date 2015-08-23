@@ -128,6 +128,12 @@ Template.standardPage.helpers({
  /******* LOM ITEM ******/
 /***********************/
 
+Template.LoMitem.onRendered(function() {
+  instance = this;
+  instance.$('[data-toggle="tooltip"]').tooltip();
+
+})
+
 var dateTimeFormat = "[at] h:mm a [on] MM[/]DD[/]YY";
 var dateFormat = "ddd, MMM D YYYY";
 
@@ -162,6 +168,10 @@ Template.LoMitem.helpers({
     return this.comment || 'No teacher comment.';
   },
   activity: function() {
+    var activity = Activities.findOne(FlowRouter.getParam('_id'));
+    if (activity) // is on activity page already
+      return '';
+    //else return info to make link to activity page
     return Activities.findOne(this.activityID);
   },
   formatDate: function(date) {
@@ -303,7 +313,11 @@ Template.newLoM.events({
       $comment.code(previousLoM.comment);
       $level.val(previousLoM.level);
       var today = new Date();
-      Meteor.call('updateLevelOfMastery',{_id:previousLoM._id,copiedAndPasted:today});
+      Meteor.call('updateLevelOfMastery',{_id:previousLoM._id,copiedAndPasted:today},function(error) {
+        if (error)
+          return alert(error.reason);
+        tmpl.previousLoMindex.set(0);
+      });
     }
   }
 })

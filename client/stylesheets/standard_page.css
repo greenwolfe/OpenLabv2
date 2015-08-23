@@ -1,3 +1,10 @@
+#standardDescription {
+  background-color: #F5F5F5;
+  border-style: solid;
+  border-color: #CCC;
+  border-radius: 10px;
+  padding: 10px;
+}
 #LoMlist > div.LoMitem:nth-child(odd) {
   background-color: #DFF0D8;
 }

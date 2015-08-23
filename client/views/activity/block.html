@@ -3,20 +3,22 @@
       <i class="{{virtualWorkStatus}}"></i>
   </div>
   <div class="block block-{{type}} panel panel-default row">
-    <div class="panel-heading">
+    <div class="panel-heading" assessment={{isAssessmentBlock}}>
       <div>
-        {{#if editingBlock}}  
+        {{#if editingBlock}}  <!-- in edited wall AND have permissions to edit it -->
           <div class="pull-right">
             <a class="glyphicon glyphicon-copy copyBlock" title='Copy to clipboard.  Holding "Ctrl" adds to existing list.'></a>
             {{>showHide collection='Blocks' itemName='block' item=this}}
             {{#unless fileCount}}
-              <a class="glyphicon glyphicon-remove deleteBlock" title="Delete Block"></a>
+              {{#unless LoMcount}}
+                <a class="glyphicon glyphicon-remove deleteBlock" title="Delete Block"></a>
+              {{/unless}}
             {{/unless}}
             <!--<i class="icon-raise-virtual-hand-small buttonRaiseVirtualHand"></i>-->
           </div>
           <div>&nbsp;</div>
         {{/if}}
-        {{#if inEditedWall}}
+        {{#if inEditedWall}} <!-- have permissions to move block, even if you can't edit it -->
           <div>
             <a class="glyphicon glyphicon-move blockSortableHandle {{editingActivity}}" title="move block"></a>
           </div>
@@ -25,25 +27,31 @@
           <div class="pull-right">
             <!--<i class="transparentBox buttonRaiseVirtualHand"></i>-->
           </div>
-          <div class="blockTitle">{{{title}}}</div>
-          <!--is there a better way to get the raise hand and drag functions to work together, especially on those walls that aren't currently being edited themselves, but whose blocks are draggable because another wall is being edited
-
-          use a specific drag icon for the handle
-          -->
+          {{#unless isAssessmentBlock}}
+            <div class="blockTitle">{{{title}}}</div>
+          {{/unless}}
         {{/unless}}
       </div>
       <div>
-        {{#if editingBlock}}
-          {{>summernote collection='Blocks' field='title' _id=_id enabled=inEditedWall options=summernoteTitleOptions}}
+        {{#if isAssessmentBlock}}
+          {{#with subactivity}}
+            <div class="subactivityItemInHeader">
+              {{> subactivityItem}}
+            </div>
+          {{/with}}
+        {{else}}
+          {{#if editingBlock}}
+            {{>summernote collection='Blocks' field='title' _id=_id enabled=inEditedWall options=summernoteTitleOptions}}
+          {{/if}}
         {{/if}}
       </div>
     </div>
     {{#if canView}}
-    <div class="panel-body fullwidth"> <!-- fullwidth corrects mysterious bug that only seems to affect workSubmitBlock and not other -->
+      <div class="panel-body fullwidth"> <!-- fullwidth corrects mysterious bug that only seems to affect workSubmitBlock and not other -->
 
-        {{>Template.dynamic template=blockType }}
+          {{>Template.dynamic template=blockType }}
 
-    </div>
+      </div>
     {{/if}}
     <div class="panel-footer">
       {{#if inEditedWall}}
@@ -117,6 +125,88 @@
   </p> 
 </Template>
 
+<Template name='subactivitiesBlock'>
+  {{#if inEditedWall}}
+    {{>helpBannerNavPills messages=helpMessages}}
+  {{/if}}
+  <div id='subactivityList' class='row'>
+    <div class = 'activityColumn column col-md-12'>
+      {{#sortable1c items=subactivities options=sortableOpts}}
+        {{> subactivityItem}}
+      {{/sortable1c}}
+      {{#if inEditedWall}}
+        {{>newSubactivity}}
+      {{/if}}
+    </div>
+  </div>
+</Template>
+
+<template name = 'subactivityItem'>
+    <p class="aItem">
+      {{#if isInAssessmentBlock}}
+        {{#if isInRole 'teacher'}}
+          {{#if subactivityCount}}
+            <div class="dropdown">
+              <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
+              <ul class="dropdown-menu">
+                {{#each subactivities}}
+                  <li class="subactivityChoice"><a href="#">{{title}}</a></li>
+                {{/each}}
+              </ul>
+            </div>          
+          {{/if}}
+        {{/if}}
+        {{> workPeriodButton workPeriod}}
+        <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
+        <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
+        <i class="activityPunctual {{late}}" title="late"></i>
+        <a  href="#">{{{title}}}</a>        
+      {{else}}
+        {{#if inEditedWall ../wallID}}
+          <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
+          {{>showHide collection='Activities' itemName='activity' item=this}}
+          {{#if canDelete}}
+            <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
+          {{/if}}
+          {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
+        {{else}}
+          {{> workPeriodButton workPeriod}}
+          <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
+          <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
+          <i class="activityPunctual {{late}}" title="late"></i>
+          <a  href="#">{{{title}}}</a>        
+        {{/if}}
+      {{/if}}
+    </p>
+</template>
+
+<template name='newSubactivity'>
+  <p class='newItem'>
+    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new subactivity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
+  </p>
+</template>
+
+<template name='assessmentBlock'>
+  {{#if isInRole 'teacher'}}
+    <div class="assessmentBlockButtons text-center">
+      <div class="btn-group">
+        <button href="#chooseStandardsModal" class="assessmentAddStandards btn btn-default" data-toggle="modal">Add Standards</button>
+        <button class="gradeAssessment btn btn-default">Grade</button>
+      </div>
+    </div>
+  {{/if}}
+  {{#each standards}}
+    <p class='assessment standard'>
+      <a  href="{{pathFor 'standardPage' _id=_id}}" data-toggle="tooltip" title="{{description}}" data-html=true>{{title}}</a>
+      <div class="LoMlist">
+        {{#each LoMs}}
+          {{>LoMitem}}
+        {{/each}}
+      </div>
+    </p>
+  {{/each}}
+</template>
+
 <!--
 <Template name="workSubmitBlock">
   {{#if inEditedWall}}
@@ -184,45 +274,3 @@
   </p> 
 </Template>
 -->
-
-
-<Template name='subactivitiesBlock'>
-  {{#if inEditedWall}}
-    {{>helpBannerNavPills messages=helpMessages}}
-  {{/if}}
-  <div id='subactivityList' class='row'>
-    <div class = 'activityColumn column col-md-12'>
-      {{#sortable1c items=subactivities options=sortableOpts}}
-        {{> subactivityItem}}
-      {{/sortable1c}}
-      {{#if inEditedWall}}
-        {{>newSubactivity}}
-      {{/if}}
-    </div>
-  </div>
-</Template>
-
-<template name = 'subactivityItem'>
-    <p class="aItem">
-      {{#if inEditedWall ../wallID}}
-        <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
-        {{>showHide collection='Activities' itemName='activity' item=this}}
-        {{#if canDelete}}
-          <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
-        {{/if}}
-        {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
-      {{else}}
-        {{> workPeriodButton workPeriod}}
-        <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
-        <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
-        <i class="activityPunctual {{late}}" title="late"></i>
-        <a  href="#">{{{title}}}</a>
-      {{/if}}
-    </p>
-</template>
-
-<template name='newSubactivity'>
-  <p class='newItem'>
-    {{>plaintexteditor collection='Activities' field='title' editable='true' placeholder='Add new subactivity.  Type title here.' clearOnSave=true fixedFields=fixedFields}}
-  </p>
-</template>

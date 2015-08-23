@@ -9,7 +9,7 @@ Meteor.methods({
       standardID: Match.idString,
       level: Match.OneOf(Match.nonEmptyString,Number),
 
-      activityID: Match.Optional(Match.idString), // if provided, this LoM is associated with a particular activity and will appear on that page
+      assessmentID: Match.Optional(Match.idString), //blockID for an assessment block on which this standard appears
       comment: Match.Optional(String),
       version: Match.Optional(String),
 
@@ -20,10 +20,11 @@ Meteor.methods({
       },
       submitted: Date,
       copiedAndPasted: Match.OneOf(Date,null),
+      activityID: Match.Optional(Match.idString), // denormalized value filled in from a block on that activity page
       visible: true
       */
     })
-    LoM.activityID = LoM.activityID || null;
+    LoM.assessmentID = LoM.assessmentID || null;
     LoM.comment = LoM.comment || '';
     LoM.version = LoM.version || null;
     LoM.submitted = new Date();
@@ -54,10 +55,17 @@ Meteor.methods({
       throw new Meteor.Error('levelOutOfRange', "Cannot post level of mastery. Level must be a number between 0 and " + standard.scale + ".");
     }
 
-    var activity = Activities.findOne(LoM.activityID); //could be null if no activity passed  
-    if (LoM.activityID && !activity)
-      throw new Meteor.Error('invalidActivityID','Cannot post level of mastery.  Invalid activity ID.');
-
+    if (LoM.assessmentID) {
+      var assessmentBlock = Blocks.findOne(LoM.assessmentID);
+      if (!assessmentBlock)
+        throw new Meteor.Error('invalidAssessmentID','Cannot post level of mastery.  Invalid assessment (block) ID.');
+      LoM.activityID = assessmentBlock.activityID; 
+      var activity = Activities.findOne(LoM.activityID); //could be null if no activity passed  
+      if (!activity)
+        throw new Meteor.Error('invalidActivityID','Cannot post level of mastery.  Invalid activity ID.');
+    } else {
+      LoM.activityID = null;
+    }
     //review this and put in a check (maybe?) once a standards wall or block is created in the activity pages
     //if (!activity.hasOwnProperty('standardIDs') || !_.contains(activity.standardIDs,LoM.standardID))
     //  throw new Meteor.Error(466, "Cannot post level of mastery.  Indicated standard not assigned to indicated activity.");

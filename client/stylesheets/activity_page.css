@@ -129,6 +129,18 @@ body div.container {
     font-size: small;
     padding: 0;
 }
+.block div.panel-heading[assessment=true] {
+  background-color: #9f9f9f;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#efefef), color-stop(25%, #efefef), to(#9f9f9f));
+  background-image: -webkit-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -moz-linear-gradient(top, #efefef, #efefef 25%, #9f9f9f);
+  background-image: -ms-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -o-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  padding: 4px;
+  padding-bottom: 0;
+  line-height: 20px;
+}
 .block a.copyBlock, .column a.copyBlocks, 
 .column a.pasteBlock,
 .wall a.showHide { /*covers column and block*/
@@ -140,6 +152,21 @@ body div.container {
 }
 .block p.file a.showHide {
   font-size: large;
+}
+.block p.aItem a {
+    color: #555555;
+}
+.block p.aItem a.assessmentAssociateSubactivity {
+  cursor: default;
+}
+.block p.assessment.standard:nth-child(odd) {
+  background-color: #DFF0D8;
+}
+.block p.assessment.standard:nth-child(even) {
+  background-color: #FAFAD2;
+}
+.block div.assessmentBlockButtons {
+  margin-bottom: 10px;
 }
 
 /* virtual work */
