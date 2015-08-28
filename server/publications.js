@@ -111,6 +111,23 @@ Meteor.publish('columns',function(wallID) {  //change to user or section ID in o
   return Columns.find({wallID:wallID});
 });
 
+Meteor.publish('assessment',function(assessmentID){
+  check(assessmentID,Match.idString);
+  if (Roles.userIsInRole(this.userId,'teacher')) {
+    return Blocks.find({_id:assessmentID});
+  } //else if teacher or student ?
+  //this was intended to load the single assessment for the assessment page
+  //which currently is intended only for the teacher to grade the assessment is not
+  //supposed to be visible to parents or students.  
+});
+
+Meteor.publish('assessmentSubactivity',function(activityID) {
+  check(activityID,Match.idString);
+  if (Roles.userIsInRole(this.userId,'teacher')) {
+    return Activities.find({_id:activityID});
+  }  
+});
+
 Meteor.publish('blocks',function(columnID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
   check(columnID,Match.idString);
   //if parent, only publish titles (except for text blocks in student wall)

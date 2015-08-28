@@ -545,7 +545,7 @@ Template.newSubactivity.helpers({
 /***************************/
 
 Template.assessmentBlock.onCreated(function() {
-  instance = this;
+  var instance = this;
   instance.subscribe('standards'); //need all of them in order to add them to assessment
 
   instance.autorun(function() {
@@ -602,6 +602,9 @@ Template.assessmentBlock.helpers({
 Template.assessmentBlock.events({
   'click .assessmentAddStandards': function(event,tmpl) {
     activityPageSession.set('assessmentID',tmpl.data._id);
+  },
+  'click .gradeAssessment': function(event,tmpl) {
+    FlowRouter.go('assessmentPage',{_id:tmpl.data._id});
   }
 })
 

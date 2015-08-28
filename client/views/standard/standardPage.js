@@ -280,6 +280,10 @@ Template.newLoM.events({
       studentID: Meteor.impersonatedId(),
       standardID: tmpl.data._id
     }
+    //include the assessment ID if its being used on an assessment page rather than a standard page
+    var routeName = FlowRouter.getRouteName();
+    if (_.str.include(routeName,'assessment')) 
+      LoM.assessmentID = FlowRouter.getParam('_id') || null;
     Meteor.call('insertLoM',LoM,alertOnError);
     return false;
   },

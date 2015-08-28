@@ -160,7 +160,7 @@
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
-        <a  href="#">{{{title}}}</a>        
+        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}</a>        
       {{else}}
         {{#if inEditedWall ../wallID}}
           <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
@@ -174,7 +174,7 @@
           <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
           <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
           <i class="activityPunctual {{late}}" title="late"></i>
-          <a  href="#">{{{title}}}</a>        
+          <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}</a>        
         {{/if}}
       {{/if}}
     </p>

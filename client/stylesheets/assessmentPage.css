@@ -1,0 +1,25 @@
+#assessmentSubactivityItem {
+  background-color: #9f9f9f;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#efefef), color-stop(25%, #efefef), to(#9f9f9f));
+  background-image: -webkit-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -moz-linear-gradient(top, #efefef, #efefef 25%, #9f9f9f);
+  background-image: -ms-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -o-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  padding: 4px;
+  padding-bottom: 0;
+  line-height: 20px;
+  max-width: 350px;
+  margin: auto;
+}
+#assessmentSubactivityItem a {
+  color: black;
+}
+.assessmentStandardItem {
+  border-style: solid;
+  border-color: #CCC;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px;
+  width: 700px;
+}

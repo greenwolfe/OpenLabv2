@@ -1,0 +1,18 @@
+<template name="assessmentPage">
+  {{#with subactivity}}
+    <div id="assessmentSubactivityItem">
+      {{> subactivityItem}}
+    </div>
+  {{/with}}
+  {{#each standards}}
+    <div class="assessmentStandardItem">
+      <p><strong>{{{title}}}:</strong> {{{description}}}</p>
+      <div id="LoMlist">
+        {{>newLoM}}
+        {{#each LoMs}}
+          {{> LoMitem}}
+        {{/each}}
+      </div>
+    </div>
+  {{/each}}
+</template>
