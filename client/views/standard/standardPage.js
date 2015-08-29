@@ -165,7 +165,12 @@ Template.LoMitem.helpers({
     return this.level + ' out of ' + standard.scale;
   },
   commentOrNote: function() {
-    return this.comment || 'No teacher comment.';
+    var justTheText = _.str.clean(
+      _.str.stripTags(
+        _.unescapeHTML(
+          this.comment.replace(/&nbsp;/g,'')
+    )));
+    return (justTheText) ? this.comment : 'No teacher comment.';
   },
   activity: function() {
     var activity = Activities.findOne(FlowRouter.getParam('_id'));
