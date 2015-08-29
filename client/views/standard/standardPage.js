@@ -271,21 +271,16 @@ Template.newLoM.helpers({
 
 Template.newLoM.events({
   'click button[type="submit"]': function(event,tmpl) {
-    var level = getTrimmedValbyClass(tmpl,'level');
-    var comment = _.str.trim(tmpl.$('.summernote.comment').code());
-    comment = _.str.trim(comment,'&nbsp;');
-    var LoM = {
-      level:level,
-      comment: comment,
-      studentID: Meteor.impersonatedId(),
-      standardID: tmpl.data._id
-    }
-    //include the assessment ID if its being used on an assessment page rather than a standard page
-    var routeName = FlowRouter.getRouteName();
-    if (_.str.include(routeName,'assessment')) 
-      LoM.assessmentID = FlowRouter.getParam('_id') || null;
-    Meteor.call('insertLoM',LoM,alertOnError);
-    return false;
+    saveLoM(event,tmpl);
+  },
+  'keydown button[type="submit"]': function(event,tmpl) {
+    if (event.keyCode == 13)
+      saveLoM(event,tmpl);
+  },
+  'keydown div.summernote': function(event,tmpl) {
+    //overwrite tab key from editor to advance to next field instead
+    if (event.keyCode == 9)
+      tmpl.$('button[type="submit"]').focus();
   },
   'click .showPrevious': function(event,tmpl) {
     tmpl.previousLoMindex.set(0);
@@ -330,6 +325,32 @@ Template.newLoM.events({
  /****************** HELPERS *****************/
 /********************************************/
 
+var saveLoM = function(event,tmpl) {
+  var $level = tmpl.$('.level');
+  var level = getTrimmedValbyClass(tmpl,'level');
+  var $comment = tmpl.$('.summernote.comment');
+  var comment = _.str.trim($comment.code());
+  comment = _.str.trim(comment,'&nbsp;');
+  var LoM = {
+    level:level,
+    comment: comment,
+    studentID: Meteor.impersonatedId(),
+    standardID: tmpl.data._id
+  }
+  //include the assessment ID if its being used on an assessment page rather than a standard page
+  var routeName = FlowRouter.getRouteName();
+  if (_.str.include(routeName,'assessment')) 
+    LoM.assessmentID = FlowRouter.getParam('_id') || null;
+  Meteor.call('insertLoM',LoM,function(error,id) {
+    if (error) {
+      alert(error.reason);
+    } else { //success!  clear input fields
+      $comment.code('');
+      $level.val('');
+    }
+  });
+  return false;
+}
 
 var getVal = function(tmpl,id) {
   var $element = $(tmpl.find("#" + id));

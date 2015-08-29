@@ -3,10 +3,23 @@
     <div id="assessmentSubactivityItem">
       {{> subactivityItem}}
     </div>
+    <p>
+      Show:
+      <div class="btn-group"> 
+        <button class="btn btn-default">This Assessment</button>
+        <button class="btn btn-default">All Assessments</button>
+      </div>
+      <div class="btn-group"> 
+        <button class="btn btn-default">Most Recent</button>
+        <button class="btn btn-default">All Time</button>
+      </div>
+    </p>
   {{/with}}
   {{#each standards}}
     <div class="assessmentStandardItem">
-      <p><strong>{{{title}}}:</strong> {{{description}}}</p>
+      <p>
+        <a href="{{pathFor 'standardPage' _id=_id}}" tabindex=-1> <strong>{{{title}}}:</strong></a> {{{description}}}
+      </p>
       <div id="LoMlist">
         {{>newLoM}}
         {{#each LoMs}}
