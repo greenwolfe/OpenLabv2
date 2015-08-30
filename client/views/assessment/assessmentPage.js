@@ -115,7 +115,7 @@ Template.assessmentPage.helpers({
   },
   showAllTime: function() {
     var tmpl = Template.instance();
-    return (tmpl.showTimePeriod.get() == 'AllTime')? 'active' : '';
+    return (tmpl.showTimePeriod.get() == 'allTime')? 'active' : '';
   },
   LoMs: function() {
     var tmpl = Template.instance();

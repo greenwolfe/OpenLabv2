@@ -546,7 +546,7 @@ Template.newSubactivity.helpers({
 
 Template.assessmentBlock.onCreated(function() {
   var instance = this;
-  instance.subscribe('standards'); //need all of them in order to add them to assessment
+  instance.standardsSubscription = instance.subscribe('standards'); //need all of them in order to add them to assessment
 
   instance.autorun(function() {
     var studentID = Meteor.impersonatedOrUserId();
@@ -558,14 +558,14 @@ Template.assessmentBlock.onCreated(function() {
       return;
 
     //first get the info that will be immediately shown
-    var LoMsThisStudentAndAssessment = Meteor.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
+    var LoMsThisStudentAndAssessment = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
 
     if (LoMsThisStudentAndAssessment.ready()) { //then load the rest in the background
       instance.$('span.badge[data-toggle="tooltip"]').tooltip();
-      var LoMsThisStudent = Meteor.subscribe('levelsOfMastery',data.standardIDs,studentID,null); //all levels and comments for these standards
+      var LoMsThisStudent = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,null); //all levels and comments for these standards
       
       if (LoMsThisStudent.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('levelsOfMastery',data.standardIDs,null,null); //and for all students ... for copy and pasting of past comments
+        instance.subscribe('levelsOfMastery',data.standardIDs,null,null); //and for all students ... for copy and pasting of past comments
     }
   });
 });
@@ -576,6 +576,10 @@ Template.assessmentBlock.onRendered(function() {
 })
 
 Template.assessmentBlock.helpers({
+  standardsSubscriptionReady: function() {
+    var tmpl = Template.instance();
+    return tmpl.standardsSubscription.ready();
+  },
   standards: function() {
     var selectedStandardIDs = this.standardIDs || [];
     var selectedStandards = Standards.find({_id:{$in:selectedStandardIDs}}).fetch();

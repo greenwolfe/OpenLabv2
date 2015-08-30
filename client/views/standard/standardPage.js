@@ -305,7 +305,7 @@ Template.newLoM.events({
   'click .showPrevious': function(event,tmpl) {
     tmpl.previousLoMindex.set(0);
   },
-    'click .hidePrevious': function(event,tmpl) {
+  'click .hidePrevious': function(event,tmpl) {
     tmpl.previousLoMindex.set(-1);
   },
   'click .previousCommentStepBackward': function(event,tmpl) {
@@ -367,6 +367,7 @@ var saveLoM = function(event,tmpl) {
     } else { //success!  clear input fields
       $comment.code('');
       $level.val('');
+      tmpl.previousLoMindex.set(-1);
     }
   });
 }

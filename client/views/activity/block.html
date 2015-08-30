@@ -195,21 +195,25 @@
       </div>
     </div>
   {{/if}}
-  {{#each standards}}
-    <p class='assessment standard'>
-      <a  href="{{pathFor 'standardPage' _id=_id}}" data-toggle="tooltip" title="{{description}}" data-html=true>{{title}}</a>
-      {{#if LoMAveragetext}}
-        <span class='badge badge-inverse {{LoMAveragecolorcode}}' data-toggle="tooltip" title= "Current score from all assessments.">
-          {{LoMAveragetext}}
-        </span>
-      {{/if}}
-      <div class="LoMlist">
-        {{#each LoMs}}
-          {{>LoMitem}}
-        {{/each}}
-      </div>
-    </p>
-  {{/each}}
+  {{#if standardsSubscriptionReady}}
+    {{#each standards}}
+      <p class='assessment standard'>
+        <a  href="{{pathFor 'standardPage' _id=_id}}" data-toggle="tooltip" title="{{description}}" data-html=true>{{title}}</a>
+        {{#if LoMAveragetext}}
+          <span class='badge badge-inverse {{LoMAveragecolorcode}}' data-toggle="tooltip" title= "Current score from all assessments.">
+            {{LoMAveragetext}}
+          </span>
+        {{/if}}
+        <div class="LoMlist">
+          {{#each LoMs}}
+            {{>LoMitem}}
+          {{/each}}
+        </div>
+      </p>
+    {{/each}}
+  {{else}}
+    <p>Loading Standards ... </p>
+  {{/if}}
 </template>
 
 <!--
