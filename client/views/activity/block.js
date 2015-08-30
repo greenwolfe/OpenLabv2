@@ -561,6 +561,7 @@ Template.assessmentBlock.onCreated(function() {
     var LoMsThisStudentAndAssessment = Meteor.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
 
     if (LoMsThisStudentAndAssessment.ready()) { //then load the rest in the background
+      instance.$('span.badge[data-toggle="tooltip"]').tooltip();
       var LoMsThisStudent = Meteor.subscribe('levelsOfMastery',data.standardIDs,studentID,null); //all levels and comments for these standards
       
       if (LoMsThisStudent.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
@@ -596,7 +597,46 @@ Template.assessmentBlock.helpers({
       visible: true
     }
     return LevelsOfMastery.find(selector,{sort:{submitted:-1}});
-  }
+  },
+  LoMAveragecolorcode: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standardID = this._id;
+    if (!studentID || !standardID)
+      return '';
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
+    if (!LoM) return '';
+    var standard = Standards.findOne(standardID);
+
+    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
+    var level;
+    var maxVal;
+    var index;
+    if (_.isArray(standard.scale)) {
+      level = standard.scale.indexOf(LoM.average['schoolyear']); //update for grading period when available
+      maxVal = standard.scale.length;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    if (_.isFinite(standard.scale)) {
+      level = LoM.average['schoolyear']; //update for grading period when available
+      maxVal = standard.scale;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    return colorcodes[index];
+  },
+  LoMAveragetext: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standardID = this._id;
+    if (!studentID || !standardID)
+      return '';
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
+    if (!LoM) return '';
+    var standard = Standards.findOne(standardID);
+    if (_.isArray(standard.scale))
+      return LoM.average['schoolyear']; //update for grading period when available 
+    return +LoM.average['schoolyear'].toFixed(2) + ' out of ' + standard.scale;
+  },
 });
 
 Template.assessmentBlock.events({

@@ -4,6 +4,9 @@
 
 Template.assessmentPage.onCreated(function() {
   var instance = this;
+  instance.showAssessment = new ReactiveVar('this'); //or all
+  instance.showTimePeriod = new ReactiveVar('mostRecent'); //or all time
+
   var assessmentSubscription = Meteor.subscribe('assessment',FlowRouter.getParam('_id'));
 
   instance.autorun(function() {
@@ -59,7 +62,63 @@ Template.assessmentPage.helpers({
     });
     return selectedStandards;
   },
+  LoMAveragecolorcode: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standardID = this._id;
+    if (!studentID || !standardID)
+      return '';
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
+    if (!LoM) return '';
+    var standard = Standards.findOne(standardID);
+
+    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
+    var level;
+    var maxVal;
+    var index;
+    if (_.isArray(standard.scale)) {
+      level = standard.scale.indexOf(LoM.average['schoolyear']); //update for grading period when available
+      maxVal = standard.scale.length;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    if (_.isFinite(standard.scale)) {
+      level = LoM.average['schoolyear']; //update for grading period when available
+      maxVal = standard.scale;
+      index = Math.floor(level*3/maxVal);
+      index = Math.min(index,2);
+    }
+    return colorcodes[index];
+  },
+  LoMAveragetext: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var standardID = this._id;
+    if (!studentID || !standardID)
+      return '';
+    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
+    if (!LoM) return '';
+    var standard = Standards.findOne(standardID);
+    if (_.isArray(standard.scale))
+      return LoM.average['schoolyear']; //update for grading period when available 
+    return +LoM.average['schoolyear'].toFixed(2) + ' out of ' + standard.scale;
+  },
+  showThis: function() {
+    var tmpl = Template.instance();
+    return (tmpl.showAssessment.get() == 'this') ? 'active' : '';
+  },
+  showAll: function() {
+    var tmpl = Template.instance();
+    return (tmpl.showAssessment.get() == 'all') ? 'active' : '';
+  },
+  showMostRecent: function() {
+    var tmpl = Template.instance();
+    return (tmpl.showTimePeriod.get() == 'mostRecent') ? 'active' : '';
+  },
+  showAllTime: function() {
+    var tmpl = Template.instance();
+    return (tmpl.showTimePeriod.get() == 'AllTime')? 'active' : '';
+  },
   LoMs: function() {
+    var tmpl = Template.instance();
     var studentID = Meteor.impersonatedOrUserId();
     var standardID = this._id;
     if (!studentID || !standardID)
@@ -71,6 +130,27 @@ Template.assessmentPage.helpers({
     //var editingPage = openlabSession.get('editingMainPage');
     //if (!editingPage)
     //  selector.visible = true; //show only visible LoMs
-    return LevelsOfMastery.find(selector,{sort:{submitted:-1}});
+    if (tmpl.showAssessment.get() == 'this')
+      selector.assessmentID = FlowRouter.getParam('_id');
+    if (tmpl.showTimePeriod.get() == 'mostRecent') {
+      return LevelsOfMastery.find(selector,{sort:{submitted:-1},limit:1});
+    } else {
+      return LevelsOfMastery.find(selector,{sort:{submitted:-1}});
+    }
   }
-})
+});
+
+Template.assessmentPage.events({
+  'click .thisAssessment': function(event,tmpl) {
+    tmpl.showAssessment.set('this');
+  },
+  'click .allAssessments': function(event,tmpl) {
+    tmpl.showAssessment.set('all');
+  },
+  'click .mostRecent': function(event,tmpl) {
+    tmpl.showTimePeriod.set('mostRecent');
+  },
+  'click .allTime': function(event,tmpl) {
+    tmpl.showTimePeriod.set('allTime');
+  },  
+});

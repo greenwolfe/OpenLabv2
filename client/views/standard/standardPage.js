@@ -172,12 +172,24 @@ Template.LoMitem.helpers({
     )));
     return (justTheText) ? this.comment : 'No teacher comment.';
   },
+  onActivityPage: function() {
+    return _.str.include(FlowRouter.getRouteName(),'activity');
+  },
   activity: function() {
-    var activity = Activities.findOne(FlowRouter.getParam('_id'));
-    if (activity) // is on activity page already
+    var activityPage = Activities.findOne(FlowRouter.getParam('_id'));
+    var activity;
+    var assessment = Blocks.findOne(this.assessmentID);
+    if (assessment) {
+      activity = Activities.findOne(assessment.subActivityID);
+    } else {
+      activity = Activities.findOne(this.activityID);
+    }
+
+    //if would create link to the current page
+    if ((activityPage) && (activity) && (activityPage._id == activity._id))
       return '';
     //else return info to make link to activity page
-    return Activities.findOne(this.activityID);
+    return activity;
   },
   formatDate: function(date) {
     return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
@@ -277,10 +289,13 @@ Template.newLoM.helpers({
 Template.newLoM.events({
   'click button[type="submit"]': function(event,tmpl) {
     saveLoM(event,tmpl);
+    return false;
   },
   'keydown button[type="submit"]': function(event,tmpl) {
-    if (event.keyCode == 13)
+    if (event.keyCode == 13) {
       saveLoM(event,tmpl);
+      return false;
+    }
   },
   'keydown div.summernote': function(event,tmpl) {
     //overwrite tab key from editor to advance to next field instead
@@ -354,7 +369,6 @@ var saveLoM = function(event,tmpl) {
       $level.val('');
     }
   });
-  return false;
 }
 
 var getVal = function(tmpl,id) {

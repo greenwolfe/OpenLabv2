@@ -6,19 +6,32 @@
     <p>
       Show:
       <div class="btn-group"> 
-        <button class="btn btn-default">This Assessment</button>
-        <button class="btn btn-default">All Assessments</button>
+        <button class="btn btn-primary {{showThis}} thisAssessment">This Assessment</button>
+        <button class="btn btn-primary {{showAll}} allAssessments">All Assessments</button>
       </div>
       <div class="btn-group"> 
-        <button class="btn btn-default">Most Recent</button>
-        <button class="btn btn-default">All Time</button>
+        <button class="btn btn-primary {{showMostRecent}} mostRecent">Most Recent</button>
+        <button class="btn btn-primary {{showAllTime}} allTime">All Time</button>
       </div>
     </p>
   {{/with}}
   {{#each standards}}
     <div class="assessmentStandardItem">
       <p>
-        <a href="{{pathFor 'standardPage' _id=_id}}" tabindex=-1> <strong>{{{title}}}:</strong></a> {{{description}}}
+        <a href="{{pathFor 'standardPage' _id=_id}}" tabindex=-1> 
+          <strong>{{{title}}}:</strong>
+        </a> 
+        <span> (Current Score:</span>
+        {{#if LoMAveragetext}}
+          <span class='badge badge-inverse {{LoMAveragecolorcode}}'>
+          {{LoMAveragetext}}
+          </span>
+        {{else}}
+          <span> Not yet assessed. </span>
+        {{/if}}
+        <span>)</span>
+        <br/>
+        {{{description}}}
       </p>
       <div id="LoMlist">
         {{>newLoM}}
