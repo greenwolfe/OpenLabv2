@@ -106,6 +106,7 @@ Meteor.methods({
       throw new Meteor.Error('blockNotFound','Cannot past block.  Block not found.');
     if (block.type == 'subactivities') 
       throw new Meteor.Error('cannotCopyActivityBlock',"Error, cannot copy and paste an activity block.  Only one allowed per activity page.")
+    var originalWall = Walls.findOne(block.wallID);
     delete block._id;
 
     var column = Columns.findOne(columnID)
@@ -134,7 +135,12 @@ Meteor.methods({
       if (!Meteor.studentCanEditBlock(cU._id,block))
         throw new Meteor.Error('cannotCopyBlock',"You do not have permissions to copy this block.");
     }
-    //block.createdFor = wall.createdFor;
+
+    if (originalWall) { //handle case of teacher copying from one student wall to another, one group wall to another or one section wall to another
+      if (_.contains(['student','group','section'],originalWall.type) && (originalWall.type == wall.type) && Roles.userIsInRole(cU,'teacher')) {
+        block.createdFor = wall.createdFor
+      }
+    }
 
     block.order = 0;  //always insert at top of column
     //move other blocks in column down to make room

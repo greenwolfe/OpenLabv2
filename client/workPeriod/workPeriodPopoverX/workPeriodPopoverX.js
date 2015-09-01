@@ -251,6 +251,7 @@ Template.workPeriodPopoverX.onRendered(function() {
     showClear: true,
     keepOpen: false,
     format: dateTimeFormat,
+    toolbarPlacement: 'top',
     widgetPositioning: {vertical:'bottom',horizontal:'auto'},
     keyBinds: {enter: function(widget) {
       if (widget.find('.datepicker').is(':visible')) {
@@ -265,6 +266,7 @@ Template.workPeriodPopoverX.onRendered(function() {
     showClear: true,
     keepOpen: false,
     format: dateTimeFormat,  //bug in widgetPositioning: {vertial:'top'} so overriding default 'auto' and setting to 'bottom', which also means the picker does not cover the graphic
+    toolbarPlacement: 'top',
     widgetPositioning: {vertical:'bottom',horizontal:'auto'},
     keyBinds: {enter: function(widget) {
       if (widget.find('.datepicker').is(':visible')) {

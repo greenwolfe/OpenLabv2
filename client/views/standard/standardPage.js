@@ -241,7 +241,7 @@ Template.newLoM.onRendered(function() {
       ['font', ['bold', 'italic', 'strikethrough', 'underline', 'clear']],
       ['para', ['ul', 'ol', 'paragraph']],
       ['table', ['table']],
-      ['insert', ['link', 'picture'/*,'video'*/]],
+      ['insert', ['link', 'picture','hr'/*,'video'*/]],
       //['undoredo', ['undo','redo']], //leaving out for now ... not clear what is undone ... not a large queue of past changes, and ctrl-z, ctrl-shift-z reacts more like what you would expect
       ['other',[/*'codeview','fullscreen',*/'help','hide']]
       //ISSUE codeview, fullscreen, not working ... does it work from toolbar and just not from air mode?

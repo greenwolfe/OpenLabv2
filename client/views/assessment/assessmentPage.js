@@ -13,8 +13,9 @@ Template.assessmentPage.onCreated(function() {
     if (!assessmentSubscription.ready())
       return;
     var assessment = Blocks.findOne(FlowRouter.getParam('_id'));
-    if (assessment)
-      var subactivitySubscription = Meteor.subscribe('assessmentSubactivity',assessment.subActivityID);
+    if (!assessment)
+      return
+    var subactivitySubscription = Meteor.subscribe('assessmentSubactivity',assessment.subActivityID);
     if (!subactivitySubscription.ready())
       return;
     var activity = Activities.findOne(assessment.subActivityID);

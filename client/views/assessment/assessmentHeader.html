@@ -14,7 +14,13 @@
             <li class="{{activeIfEditingMainPage}} {{hiddenIfNotTeacher}}">
               <a href="#" id='editButton'>{{edit}}</a>
             </li>
-            {{>viewAs}}
+            {{#with justOneStudent}}
+              <p class="navbar-text">
+                <span title = "{{getname currentUser 'full'}}">{{getname currentUser 'first'}}</span>  grading individual assessment for <span title = "{{getname _id 'full'}}">{{getname _id 'first'}}</span>
+              </p>
+            {{else}}
+              {{>viewAs}}
+            {{/with}}
             <!--{{>groups}}-->
           </ul>
           <p class="navbar-text">{{{pageTitle}}}</p>

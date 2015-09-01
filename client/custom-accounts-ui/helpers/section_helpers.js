@@ -12,7 +12,7 @@ Template.registerHelper('currentSection',Meteor.currentSection);
 
 Meteor.sectionMembers = function(sectionOrID) {
   var memberIDs = Meteor.sectionMemberIds(sectionOrID);
-  return Meteor.users.find({_id: {$in: memberIDs}});
+  return Meteor.users.find({_id: {$in: memberIDs}},{sort:{'profile.lastName':1,'profile.firstName':1,username:1}});
 }
 Template.registerHelper('sectionMembers',Meteor.sectionMembers);
 
