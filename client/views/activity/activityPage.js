@@ -31,7 +31,9 @@ Template.activityPage.onCreated(function() {
   instance.autorun(function() {
     var studentID = Meteor.impersonatedOrUserId();
     var activityID = FlowRouter.getParam('_id');
+    var sectionID = Meteor.selectedSectionId();
     var wallSubscription = instance.subscribe('walls', studentID,activityID);
+    var sectionwallSubscription = instance.subscribe('walls',sectionID,activityID);
   });
 
   instance.autorun(function() {

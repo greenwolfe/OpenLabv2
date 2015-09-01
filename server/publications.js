@@ -84,10 +84,10 @@ Meteor.publish('files',function(blockID) {  //change to user or section ID in or
 //does not arise to the same degree with groups, because the
 //group will not tend to continue creating content for other activities
 //once it is disolved.  Still should be handled in a similar way
-Meteor.publish('walls',function(studentID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); 
+Meteor.publish('walls',function(studentOrSectionID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(studentOrSectionID,Match.Optional(Match.OneOf(Match.idString,null))); 
   check(activityID,Match.idString); 
-  studentID = studentID || this.userId; 
+  var studentID = studentOrSectionID || this.userId; 
 
   var selector = {};
   var createdFors = [Site.findOne()._id]
@@ -98,6 +98,10 @@ Meteor.publish('walls',function(studentID,activityID) {  //change to user or sec
       collectionName: {$in: ['Groups','Sections']},
     },{fields: {itemID: 1}}).fetch(), 'itemID');
     createdFors = _.union(createdFors,studentsGroupSectionIds);
+  } else { //check if section selected without selecting a student 
+    var section = Sections.findOne(studentOrSectionID);
+    if (section)
+      createdFors.push(studentOrSectionID);
   }
   selector.createdFor = {$in: createdFors};
   if (Activities.find({_id:activityID}).count() > 0)
