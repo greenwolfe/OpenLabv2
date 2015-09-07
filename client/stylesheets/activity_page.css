@@ -47,6 +47,12 @@ body div.container {
 .wall div.panel-body {
     min-height: 125px;
 }
+.wall div.panel-footer .groupStatus {
+  border-style: solid;
+  border-color: #CCC;
+  border-radius: 10px;
+  padding: 10px;
+}
 .wall .dropdown {
     margin-left: 20px;
 }

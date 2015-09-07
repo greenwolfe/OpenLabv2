@@ -65,6 +65,7 @@
       {{else}}
         <span class='badge badge-inverse {{LoMcolorcode}}'>{{LoMtext}}</span>
         {{#if onActivityPage}}
+          <!-- put LoMcomment in quotes// -->
           <span class=LoMcomment data-toggle="tooltip" data-html=true title="graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}">{{{commentOrNote}}}</span>
         {{else}}
           <span class=LoMcomment>{{{commentOrNote}}}</span>

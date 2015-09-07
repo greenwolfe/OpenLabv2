@@ -204,11 +204,17 @@
             {{LoMAveragetext}}
           </span>
         {{/if}}
-        <div class="LoMlist">
-          {{#each LoMs}}
-            {{>LoMitem}}
-          {{/each}}
-        </div>
+        {{#if LoMsubscriptionReady}}
+          <div class="LoMlist">
+            {{#each LoMs}}
+              {{>LoMitem}}
+            {{/each}}
+          </div>
+        {{else}}
+          {{#if impersonatedId}}
+            <p>Loading grades and comments ... </p>
+          {{/if}}
+        {{/if}}
       </p>
     {{/each}}
   {{else}}

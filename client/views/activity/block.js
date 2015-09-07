@@ -558,9 +558,9 @@ Template.assessmentBlock.onCreated(function() {
       return;
 
     //first get the info that will be immediately shown
-    var LoMsThisStudentAndAssessment = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
+    instance.LoMsThisStudentAndAssessment = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
 
-    if (LoMsThisStudentAndAssessment.ready()) { //then load the rest in the background
+    if (instance.LoMsThisStudentAndAssessment.ready()) { //then load the rest in the background
       instance.$('span.badge[data-toggle="tooltip"]').tooltip();
       var LoMsThisStudent = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,null); //all levels and comments for these standards
       
@@ -579,6 +579,12 @@ Template.assessmentBlock.helpers({
   standardsSubscriptionReady: function() {
     var tmpl = Template.instance();
     return tmpl.standardsSubscription.ready();
+  },
+  LoMsubscriptionReady: function() {
+    var tmpl = Template.instance();
+    if (!('ThisStudentAndAssessment' in tmpl))
+      return false;
+    return tmpl.LoMsThisStudentAndAssessment.ready();
   },
   standards: function() {
     var selectedStandardIDs = this.standardIDs || [];

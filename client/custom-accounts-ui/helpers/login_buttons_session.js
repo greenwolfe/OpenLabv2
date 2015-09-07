@@ -186,6 +186,9 @@ Meteor.impersonatedId = function() {
       }
     });  
 
+  //possible cause of Error: Permission denied to access property "toString"
+  //as it appears when I added this to the studentStatus template
+  //??? probably not, but just noting the clue here
   return (user) ? user._id: '';
                           //!user => viewAs is null or is a sectionId
 }
