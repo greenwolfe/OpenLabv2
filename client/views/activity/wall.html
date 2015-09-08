@@ -43,22 +43,27 @@
       <div class="panel-footer">
         <div class="container-fluid">
           <div class="row">
-            {{#each groups}}
-              <div class="col-md-4 groupStatus">
-                {{#each groupMembers _id}}
-                  {{>studentStatus}}
-                {{/each}}
-              </div>
-            {{/each}}
-            {{#if ungroupedCount}}
-              <div class="col-md-4 groupStatus">
-                <p class="text-centered">Students without a group</p>
-                {{#each ungrouped}}
-                  {{>studentStatus}}
-                {{/each}}
-              </div>
-            {{/if}}
+              <span class="showStatus glyphicon glyphicon-triangle-bottom" title="show/edit status for entire section"></span>
           </div>
+          {{#if showStatus}}
+            <div class="row">
+              {{#each groups}}
+                <div class="col-md-4 groupStatus">
+                  {{#each groupMembers _id}}
+                    {{>studentStatus}}
+                  {{/each}}
+                </div>
+              {{/each}}
+              {{#if ungroupedCount}}
+                <div class="col-md-4 groupStatus">
+                  <p class="text-centered">Students without a group</p>
+                  {{#each ungrouped}}
+                    {{>studentStatus}}
+                  {{/each}}
+                </div>
+              {{/if}}
+            </div>
+          {{/if}}
         </div>
       </div>
     {{/if}}
@@ -73,6 +78,7 @@
       {{getname _id 'full'}}
     {{/if}}
     {{#each subactivities}}
+      <span>&nbsp;&nbsp;</span>
       <span data-toggle="tooltip" title="{{title}}">
         <i class="activityProgress {{progress}}" title = "{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>

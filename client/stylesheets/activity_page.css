@@ -47,6 +47,10 @@ body div.container {
 .wall div.panel-body {
     min-height: 125px;
 }
+.wall div.panel-footer > .container-fluid > .row {
+  display: flex;
+  flex-wrap: wrap;
+}
 .wall div.panel-footer .groupStatus {
   border-style: solid;
   border-color: #CCC;

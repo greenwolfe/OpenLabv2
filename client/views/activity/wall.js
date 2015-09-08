@@ -1,10 +1,7 @@
 Template.wall.onCreated(function() {
   var instance = this;
   instance.subscribe('columns', instance.data._id);
-//edited Aug 21, 2015 ... delete if it causes no problems
-/*  instance.autorun(function() {
-    var columnSubscription = instance.subscribe('columns', instance.data._id);
-  });*/
+  instance.showStatus = new ReactiveVar(false);
 })
 
 Template.wall.onDestroyed(function() {
@@ -56,6 +53,13 @@ Template.wall.helpers({
   visibleOrEditing: function() {
     return (this.visible || inEditedWall(this._id));
   },
+  showStatus: function() {
+    var tmpl = Template.instance();
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      return false;
+    return tmpl.showStatus.get();
+  },
   groups: function() {
     var sectionID = Meteor.selectedSectionId();
     if (!sectionID)
@@ -102,6 +106,10 @@ Template.wall.events({
     } else {
       activityPageSession.set('editedWall',null);
     }
+  },
+  'click .showStatus': function(event,tmpl) {
+    var showStatus = tmpl.showStatus.get();
+    tmpl.showStatus.set(!showStatus);
   }
 })
 
