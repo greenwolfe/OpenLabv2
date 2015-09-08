@@ -582,7 +582,7 @@ Template.assessmentBlock.helpers({
   },
   LoMsubscriptionReady: function() {
     var tmpl = Template.instance();
-    if (!('ThisStudentAndAssessment' in tmpl))
+    if (!('LoMsThisStudentAndAssessment' in tmpl))
       return false;
     return tmpl.LoMsThisStudentAndAssessment.ready();
   },
