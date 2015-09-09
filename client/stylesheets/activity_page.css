@@ -57,6 +57,9 @@ body div.container {
   border-radius: 10px;
   padding: 10px;
 }
+.wall div.panel-footer span.showStatus:hover {
+  cursor: pointer;
+}
 .wall .dropdown {
     margin-left: 20px;
 }
