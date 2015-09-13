@@ -121,6 +121,7 @@ Template.column.events({
       type: 'text'
     }
     Meteor.call('insertBlock',block,alertOnError);
+    event.preventDefault();
   },
   'click .addEmbedBlock': function(event,tmpl) {
     var block = {
@@ -128,6 +129,7 @@ Template.column.events({
       type: 'embed'
     }
     Meteor.call('insertBlock',block,alertOnError);
+    event.preventDefault();
   },
   'click .addFileBlock': function(event,tmpl) {
     var block = {
@@ -135,6 +137,7 @@ Template.column.events({
       type: 'file'
     }
     Meteor.call('insertBlock',block,alertOnError);
+    event.preventDefault();
   },
   /*'click .addWorkSubmitBlock': function(event,tmpl) {
     var block = {
@@ -149,6 +152,7 @@ Template.column.events({
       type: 'subactivities'
     }
     Meteor.call('insertBlock',block,alertOnError);
+    event.preventDefault();
   },
   'click .addAssessmentBlock': function(event,tmpl) {
     var block = {
@@ -156,20 +160,26 @@ Template.column.events({
       type: 'assessment'
     }
     Meteor.call('insertBlock',block,alertOnError);
+    event.preventDefault();
   },
   'click .shrinkColumn': function(event,tmpl) {
     Meteor.call('shrinkColumn',tmpl.data._id,alertOnError);
+    return false;
   },
   'click .expandColumn': function(event,tmpl) {
     Meteor.call('expandColumn',tmpl.data._id,alertOnError);
+    return false;
   },
   'click .addLeft': function(event,tmpl) {
     Meteor.call('insertColumn',tmpl.data.wallID,tmpl.data.order,'left',alertOnError);
+    event.preventDefault();
   },
   'click .addRight': function(event,tmpl) {
     Meteor.call('insertColumn',tmpl.data.wallID,tmpl.data.order,'right',alertOnError); 
+    event.preventDefault();
   },
   'click .deleteColumn': function(event,tmpl) {
     Meteor.call('deleteColumn',tmpl.data._id,alertOnError);
+    event.preventDefault();
   }
 });
