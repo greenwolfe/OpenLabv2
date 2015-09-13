@@ -224,6 +224,7 @@ Template.studentStatus.helpers({
 Template.studentStatus.events({
   'click .studentName': function(event,tmpl) {
     loginButtonsSession.set('viewAs',tmpl.data._id);
+    event.preventDefault();
   },
   'click .activityProgress': function(event,tmpl) {
     var studentID = tmpl.data._id;

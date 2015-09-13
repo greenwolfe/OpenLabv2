@@ -28,13 +28,22 @@ Template.activityPage.onCreated(function() {
   activityPageSession.set('editedWall',null);
 
   var instance = this;
+  instance.initialWallSubscriptionReady = new ReactiveVar(false);
+  var wallSubscription, sectionwallSubscription;
   instance.autorun(function() {
     var studentID = Meteor.impersonatedOrUserId();
     var activityID = FlowRouter.getParam('_id');
     var sectionID = Meteor.selectedSectionId();
-    var wallSubscription = instance.subscribe('walls', studentID,activityID);
-    var sectionwallSubscription = instance.subscribe('walls',sectionID,activityID);
+    wallSubscription = instance.subscribe('walls', studentID,activityID);
+    sectionwallSubscription = instance.subscribe('walls',sectionID,activityID);
   });
+
+  instance.autorun(function() {
+    if ((typeof wallSubscription !== 'undefined') && wallSubscription.ready()) {
+      if ((typeof sectionwallSubscription !== 'undefined') && sectionwallSubscription.ready()) 
+        instance.initialWallSubscriptionReady.set(true);
+    }
+  })
 
   instance.autorun(function() {
     var cU = Meteor.userId();
@@ -48,6 +57,10 @@ Template.activityPage.onCreated(function() {
 })
 
 Template.activityPage.helpers({
+  initialWallSubscriptionReady: function() {
+    tmpl = Template.instance();
+    return tmpl.initialWallSubscriptionReady.get();
+  },
   walls: function() {
     //need to put studentID, groupID's, sectionID in this selector? or should I trust the template level subscription?
     var selector = {activityID:FlowRouter.getParam('_id')}

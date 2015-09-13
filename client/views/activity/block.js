@@ -194,14 +194,14 @@ Template.codemirror.events({
 
 Template.fileBlock.onCreated(function() {
   var instance = this;
-  instance.subscribe('files', instance.data._id);
-//edited Aug 21, 2015 ... delete if it causes no problems
-/*  instance.autorun(function() {
-    var fileSubscription = instance.subscribe('files', instance.data._id);
-  });*/
+  instance.fileSubscription = instance.subscribe('files', instance.data._id);
 })
 
 Template.fileBlock.helpers({
+  fileSubscriptionReady: function() {
+    var tmpl = Template.instance();
+    return tmpl.fileSubscription.ready();
+  },
   files: function() {
     var selector = {blockID:this._id};
     if (!inEditedWall(this.wallID)) //if not editing

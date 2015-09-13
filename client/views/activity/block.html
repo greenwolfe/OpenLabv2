@@ -96,9 +96,13 @@
   <p>
     {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
   </p>
-  {{#sortable1c items=files  options=sortableOpts}} 
-    {{>fileLink}}
-  {{/sortable1c}}
+  {{#if fileSubscriptionReady}}
+    {{#sortable1c items=files  options=sortableOpts}} 
+      {{>fileLink}}
+    {{/sortable1c}}
+  {{else}}
+    Loading files ...
+  {{/if}}
   {{#if editingBlock}}
     <p>
       {{>upload_bootstrap formData=formData callbacks=processUpload}}
