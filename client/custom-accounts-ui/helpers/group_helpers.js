@@ -64,7 +64,13 @@ Meteor.groupies = function(groupID) {
   var groupSize = groupMembers.count();
   groupMembers.forEach(function(user,i,gMs) {
     var fullname =  user.profile.firstName + " " + user.profile.lastName;
-    groupies += "<span title='" + fullname  + "'>" + user.profile.firstName + "</span>";
+    var expired = "";
+    var dateLeftGroup = Meteor.dateLeftGroup(user._id,groupID)
+    if (dateLeftGroup) {
+      fullname += " left on " + moment(dateLeftGroup).format("MMM D YYYY");
+      expired = " class='text-warning'";
+    }
+    groupies += "<span title='" + fullname  + "'" + expired + ">" + user.profile.firstName + "</span>";
     if (i == groupSize - 2) {
       groupies += ' and ';
     } else if (i < groupSize - 2) {

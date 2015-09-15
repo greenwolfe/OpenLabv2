@@ -110,6 +110,14 @@ Meteor.publish('walls',function(studentOrSectionID,activityID) {  //change to us
   return Walls.find(selector);
 });
 
+Meteor.publish('groupWalls',function(activityID) {
+  check(activityID,Match.idString);
+  var activity = Activities.findOne(activityID);
+  if (!activity) return this.ready();
+  if (!Roles.userIsInRole(this.userId,'teacher')) return this.ready();
+  return Walls.find({type:'group',activityID:activity.pointsTo});
+});
+
 Meteor.publish('columns',function(wallID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
   check(wallID,Match.idString);
   return Columns.find({wallID:wallID});

@@ -2,6 +2,7 @@ Template.wall.onCreated(function() {
   var instance = this;
   instance.subscribe('columns', instance.data._id);
   instance.showStatus = new ReactiveVar(false);
+  instance.whichGroups = new ReactiveVar("thisActivity");
 })
 
 Template.wall.onDestroyed(function() {
@@ -60,41 +61,91 @@ Template.wall.helpers({
       return false;
     return tmpl.showStatus.get();
   },
+  activityGroupsSelected: function() {
+    var tmpl = Template.instance();
+    return (tmpl.whichGroups.get() == "thisActivity") ? 'active' : '';
+  },
+  currentGroupsSelected: function() {
+    var tmpl = Template.instance();
+    return (tmpl.whichGroups.get() == "current") ? 'active' : '';
+  },  
   groups: function() {
+    var tmpl = Template.instance();
+    var whichGroups = tmpl.whichGroups.get();
     var sectionID = Meteor.selectedSectionId();
     if (!sectionID)
       return '';
-    var groupIDs = [];
     var sectionMemberIDs = Meteor.sectionMemberIds(sectionID);
-    sectionMemberIDs.forEach(function(studentID) {
-      var currentGroupID = Meteor.currentGroupId(studentID);
-      if (currentGroupID)
-        groupIDs.push(currentGroupID);
-    });
-    groupIDs = _.unique(groupIDs);
-    return Groups.find({_id:{$in:groupIDs}});
+
+    if (whichGroups == 'current') {
+      var groupIDs = [];
+      sectionMemberIDs.forEach(function(studentID) {
+        var currentGroupID = Meteor.currentGroupId(studentID);
+        if (currentGroupID)
+          groupIDs.push(currentGroupID);
+      });
+      groupIDs = _.unique(groupIDs);
+      return Groups.find({_id:{$in:groupIDs}});
+    } else if (whichGroups == 'thisActivity') {
+      var groupIDs = _.pluck(Walls.find({activityID:FlowRouter.getParam('_id'),type:'group'},{fields:{createdFor:1}}).fetch(),'createdFor');
+      groupIDs = _.unique(groupIDs);
+      groupIDs = groupIDs.filter(function(groupID) {
+        var memberIDs = Meteor.groupMemberIds(groupID);
+        return _.intersection(sectionMemberIDs,memberIDs).length;
+      })
+      return Groups.find({_id:{$in:groupIDs}});
+    }
+    return '';
   },
   ungroupedCount: function() {
     var sectionID = Meteor.selectedSectionId();
     if (!sectionID)
       return '';
     var sectionMemberIDs = Meteor.sectionMemberIds(sectionID);
-    sectionMemberIDs = sectionMemberIDs.filter(function(studentID) {
-      return  (!Meteor.currentGroupId(studentID));
-    }); 
-    return sectionMemberIDs.length;
+    var tmpl = Template.instance();
+    var whichGroups = tmpl.whichGroups.get();
+    if (whichGroups == 'current') {
+      sectionMemberIDs = sectionMemberIDs.filter(function(studentID) {
+        return  (!Meteor.currentGroupId(studentID));
+      }); 
+      return sectionMemberIDs.length;
+    } else if (whichGroups == 'thisActivity') {
+      var groupIDs = _.pluck(Walls.find({activityID:FlowRouter.getParam('_id'),type:'group'},{fields:{createdFor:1}}).fetch(),'createdFor');
+      groupIDs = _.unique(groupIDs);
+      groupIDs.forEach(function(groupID) {
+        var memberIDs = Meteor.groupMemberIds(groupID);
+        sectionMemberIDs = _.difference(sectionMemberIDs,memberIDs);
+      })
+      return sectionMemberIDs.length;
+    }
+    return '';
   },
   ungrouped: function() {
     var sectionID = Meteor.selectedSectionId();
     if (!sectionID)
       return '';
     var sectionMemberIDs = Meteor.sectionMemberIds(sectionID);
-    sectionMemberIDs = sectionMemberIDs.filter(function(studentID) {
-      return  (!Meteor.currentGroupId(studentID));
-    }); 
-    if (sectionMemberIDs.length == 0)
-      return '';
-    return Meteor.users.find({_id:{$in:sectionMemberIDs}});
+    var tmpl = Template.instance();
+    var whichGroups = tmpl.whichGroups.get();
+    if (whichGroups == 'current') {
+      sectionMemberIDs = sectionMemberIDs.filter(function(studentID) {
+        return  (!Meteor.currentGroupId(studentID));
+      }); 
+      if (sectionMemberIDs.length == 0)
+        return '';
+      return Meteor.users.find({_id:{$in:sectionMemberIDs}});
+    } else if (whichGroups == 'thisActivity') {
+      var groupIDs = _.pluck(Walls.find({activityID:FlowRouter.getParam('_id'),type:'group'},{fields:{createdFor:1}}).fetch(),'createdFor');
+      groupIDs = _.unique(groupIDs);
+      groupIDs.forEach(function(groupID) {
+        var memberIDs = Meteor.groupMemberIds(groupID);
+        sectionMemberIDs = _.difference(sectionMemberIDs,memberIDs);
+      })
+      if (sectionMemberIDs.length == 0)  
+        return '';
+      return Meteor.users.find({_id:{$in:sectionMemberIDs}});   
+    }
+    return '';
   }
 })
 
@@ -110,7 +161,13 @@ Template.wall.events({
   'click .showStatus': function(event,tmpl) {
     var showStatus = tmpl.showStatus.get();
     tmpl.showStatus.set(!showStatus);
-  }
+  },
+  'click .activityGroups': function(event,tmpl) {
+    tmpl.whichGroups.set('thisActivity');
+  },
+  'click .currentGroups': function(event,tmpl) {
+    tmpl.whichGroups.set('current');
+  },  
 })
 
   /************************/
@@ -218,6 +275,16 @@ Template.studentStatus.helpers({
   },
   theImpersonated: function() {
     return (this._id == Meteor.impersonatedId()) ? 'bg-primary' : '';
+  },
+  leftTheGroup: function(groupID) {
+    console.log('leftTheGroup');
+    console.log(groupID);
+    console.log(Meteor.dateLeftGroup(this._id,groupID));
+    return Meteor.dateLeftGroup(this._id,groupID) ? 'text-warning' : '';
+  },
+  leavingDate: function(groupID) {
+    var dateLeftGroup = Meteor.dateLeftGroup(this._id,groupID);
+    return (dateLeftGroup) ? " left on " + moment(dateLeftGroup).format("MMM D YYYY") : '';
   }
 });
 

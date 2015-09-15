@@ -44,6 +44,12 @@
         <div class="container-fluid">
           <div class="row">
             <span class="showStatus glyphicon glyphicon-triangle-bottom" title="show/edit status for entire section"></span>
+            {{#if showStatus}}
+              <div class="btn-group">
+                <button class="btn btn-primary activityGroups {{activityGroupsSelected}}">Activity Groups</button>
+                <button class="btn btn-primary currentGroups {{currentGroupsSelected}}">Current Groups</button>
+              </div>
+            {{/if}}
           </div>
           {{#if showStatus}}
             <div class="row">
@@ -73,7 +79,7 @@
 <template name="studentStatus">
   <p>
     {{#if isSectionMember}}
-      <a href="#" class="studentName {{theImpersonated}}">{{getname _id 'full'}}</a>
+      <a href="#" title = "{{leavingDate ../_id}}" class="studentName {{theImpersonated}} {{leftTheGroup ../_id}}">{{getname _id 'full'}}</a>
     {{else}}
       {{getname _id 'full'}}
     {{/if}}

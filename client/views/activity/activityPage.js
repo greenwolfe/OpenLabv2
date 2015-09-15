@@ -28,6 +28,8 @@ Template.activityPage.onCreated(function() {
   activityPageSession.set('editedWall',null);
 
   var instance = this;
+  if (Roles.userIsInRole(cU,'teacher'))
+    instance.subscribe('groupWalls',FlowRouter.getParam('_id'));
   instance.initialWallSubscriptionReady = new ReactiveVar(false);
   var wallSubscription, sectionwallSubscription;
   instance.autorun(function() {
