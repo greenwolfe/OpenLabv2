@@ -114,7 +114,7 @@ Meteor.methods({
       Standards.update(newStandard._id,{$set: {description:newStandard.description}});
 
     if (('masteryExpected' in newStandard) && (newStandard.masteryExpected != standard.masteryExpected))
-      Standards.update(newStandard._id,{$set: {msateryExpected:newStandard.masteryExpected}});
+      Standards.update(newStandard._id,{$set: {masteryExpected:newStandard.masteryExpected}});
 
     if (('scaleHelp' in newStandard) && (newStandard.scaleHelp != standard.scaleHelp)) {
       newStandard.scale = getScale(newStandard.scaleHelp);

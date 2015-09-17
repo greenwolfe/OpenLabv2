@@ -192,12 +192,17 @@
 
 <template name='assessmentBlock'>
   {{#if isInRole 'teacher'}}
+      <p>
+      {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+    </p>
     <div class="assessmentBlockButtons text-center">
       <div class="btn-group">
         <button href="#chooseStandardsModal" class="assessmentAddStandards btn btn-default" data-toggle="modal">Add Standards</button>
         <button class="gradeAssessment btn btn-default">Grade</button>
       </div>
     </div>
+  {{else}}
+    <p>{{{text}}}</p>
   {{/if}}
   {{#if standardsSubscriptionReady}}
     {{#each standards}}

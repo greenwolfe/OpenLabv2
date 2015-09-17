@@ -46,8 +46,12 @@ Template.standardPage.helpers({
     if (_.isFinite(standard.scale)) {
       level = LoM.average['schoolyear']; //update for grading period when available
       maxVal = standard.scale;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
+      var percent = level*100/maxVal;
+      index = 0;
+      if (percent >= 70) index = 1;
+      if (percent > 88) index = 2;
+      //index = Math.floor(level*3/maxVal);
+      //index = Math.min(index,2);
     }
     return colorcodes[index];
   },
@@ -153,8 +157,12 @@ Template.LoMitem.helpers({
     if (_.isFinite(standard.scale)) {
       level = this.level;
       maxVal = standard.scale;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
+      var percent = level*100/maxVal;
+      index = 0;
+      if (percent >= 70) index = 1;
+      if (percent > 88) index = 2;
+      //index = Math.floor(level*3/maxVal);
+      //index = Math.min(index,2);
     }
     return colorcodes[index];
   },
@@ -270,8 +278,12 @@ Template.newLoM.helpers({
     if (_.isFinite(standard.scale)) {
       level = this.level;
       maxVal = standard.scale;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
+      var percent = level*100/maxVal;
+      index = 0;
+      if (percent >= 70) index = 1;
+      if (percent > 88) index = 2;
+      //index = Math.floor(level*3/maxVal);
+      //index = Math.min(index,2);
     }
     return colorcodes[index];
   },

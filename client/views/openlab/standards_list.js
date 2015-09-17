@@ -42,11 +42,43 @@ Template.categoryTitle.helpers({
     var activeCategory2 = openlabSession.get('activeCategory2');
     return ((this._id == activeCategory) || (this._id == activeCategory2)) ? '' : 'hidden';
   },
-  percentExpected: function() { //percentExpected,
-    return 0; //replace this by checking standard.masteryExpected
+  percentExpected: function() { 
+    var selector = {
+      categoryID: this._id,
+      visible: true //only visible standards count
+    }
+    var total = Standards.find(selector).count(); 
+    if (total == 0)
+      return 0;
+    var today = new Date();
+    selector.masteryExpected = {$lt:today};
+    var expected = Standards.find(selector).count(); 
+    return expected*100/total;
   },
-  percentCompleted: function() { //percentCompleted 
-    return 0; //replace this by checking levelOfMastery.level
+  percentCompleted: function() { 
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return 0;
+    var selector = {
+      categoryID: this._id,
+      visible: true //only visible standards count
+    }
+    var standards = Standards.find(selector).fetch();
+    var total = standards.length;
+    if (total == 0)
+      return 0;
+    standards = standards.filter(function(standard) {
+      var LoM = LevelsOfMastery.findOne({standardID:standard._id,studentID:studentID});
+      if (!LoM) return false;
+      var level = LoM.average.schoolyear; //edit to select grading period when available
+      if (_.isArray(standard.scale)) {
+        var index = standard.scale.indexOf(level);
+        return (index == standard.scale.length - 1);
+      } else {
+        return (level*100/standard.scale > 88);
+      }
+    });
+    return standards.length*100/total;
   }
 });
 
@@ -96,11 +128,43 @@ Template.standardListHeader.helpers({
     //return 'bgprimary';
     return openlabSession.get('activeCategory2') ? 'bgprimary' : '';
   },
-  percentExpected: function() { //percentExpected,
-    return 70;
+  percentExpected: function() { 
+    var selector = {
+      categoryID: this._id,
+      visible: true //only visible standards count
+    }
+    var total = Standards.find(selector).count(); 
+    if (total == 0)
+      return 0;
+    var today = new Date();
+    selector.masteryExpected = {$lt:today};
+    var expected = Standards.find(selector).count(); 
+    return expected*100/total;
   },
-  percentCompleted: function() { //percentCompleted 
-    return 30;
+  percentCompleted: function() { 
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return 0;
+    var selector = {
+      categoryID: this._id,
+      visible: true //only visible standards count
+    }
+    var standards = Standards.find(selector).fetch();
+    var total = standards.length;
+    if (total == 0)
+      return 0;
+    standards = standards.filter(function(standard) {
+      var LoM = LevelsOfMastery.findOne({standardID:standard._id,studentID:studentID});
+      if (!LoM) return false;
+      var level = LoM.average.schoolyear; //edit to select grading period when available
+      if (_.isArray(standard.scale)) {
+        var index = standard.scale.indexOf(level);
+        return (index == standard.scale.length - 1);
+      } else {
+        return (level*100/standard.scale > 88);
+      }
+    });
+    return standards.length*100/total;
   }
 });
 
@@ -188,8 +252,6 @@ Template.standardList.helpers({
  /** STANDARD ITEM  *******/
 /*************************/
 
-
-
 Template.standardItem.helpers({
   LoMAveragecolorcode: function() {
     var studentID = Meteor.impersonatedOrUserId();
@@ -212,8 +274,12 @@ Template.standardItem.helpers({
     if (_.isFinite(standard.scale)) {
       level = LoM.average['schoolyear']; //update for grading period when available
       maxVal = standard.scale;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
+      var percent = level*100/maxVal;
+      index = 0;
+      if (percent >= 70) index = 1;
+      if (percent > 88) index = 2;
+      //index = Math.floor(level*3/maxVal);
+      //index = Math.min(index,2);
     }
     return colorcodes[index];
   },
@@ -232,6 +298,75 @@ Template.standardItem.helpers({
     if (_.isFinite(this.scale))
       return '0 to ' + this.scale;
     return this.scaleHelp;
+  },
+  dateset: function() {
+    var wayInTheFuture = moment(wayWayInTheFuture()).subtract(1,'days').toDate();
+    return (this.masteryExpected < wayInTheFuture) ? 'dateset' : '';
+  }
+});
+
+Template.standardItem.events({
+  'click .standardSetCompletionDate': function(event,tmpl) {
+    Session.set('completionDate', this);
+  }
+});
+
+  /********************************/
+ /*** SET COMPLETION DATE  *******/
+/********************************/
+
+var dateTimeFormat = "ddd, MMM D YYYY [at] h:mm a";
+var dateFormat = "ddd, MMM D YYYY";
+
+Template.setCompletionDate.onRendered(function() {
+  var instance = this;
+  instance.$('#completionDatePicker').datetimepicker({
+    inline: true,
+    format: "MM/DD/YYYY",
+    showClear: true
+  });
+})
+
+Template.setCompletionDate.helpers({
+  title: function() {
+    var standard = Session.get('completionDate');
+    var title = 'Set Completion Date';
+    if (standard)
+      title = standard.title;
+    return title;
+  }
+})
+
+Template.setCompletionDate.events({
+  'shown.bs.modal #setCompletionDate': function(event,tmpl) {
+    //position the modal as a popover and show the cartoon bubble arrow
+    var setCompletionDateButton = $(event.relatedTarget);
+    var setCompletionDatePopover = tmpl.$('#setCompletionDate');
+    setCompletionDatePopover.positionOn(setCompletionDateButton,'left');
+    $('body').css({overflow:'auto'}); //default modal behavior restricts scrolling
+   },
+   'show.bs.modal #setCompletionDate': function(event,tmpl) {
+     var standard = Session.get('completionDate');
+     var date = null;
+     if (standard) {
+      var wayInTheFuture = moment(wayWayInTheFuture()).subtract(1,'days').toDate();
+      if (standard.masteryExpected < wayInTheFuture) 
+        date = standard.masteryExpected;
+    }
+    tmpl.$('#completionDatePicker').data('DateTimePicker').date(date);
+   },
+  'dp.change #completionDatePicker': function(event,tmpl) {
+    var date = (event.date) ? event.date.startOf('day').toDate() : wayWayInTheFuture(); //the dateIsNull function treats longLongAgo as a null value
+    var standard = Session.get('completionDate');
+    if (!standard) return;
+    Meteor.call('updateStandard',{
+      _id:standard._id,
+      masteryExpected: date
+    },alertOnError);
+  },
+  'hide.bs.modal #setCompletionDate': function(event,tmpl) {
+    Session.set('completionDate',null);
+    tmpl.$('#completionDatePicker').data('DateTimePicker').date(null);
   }
 })
 
@@ -245,3 +380,46 @@ Template.newStandard.helpers({
   }
 })
 
+  /**********************/
+ /*** UTILITIES  *******/
+/**********************/
+
+var percentExpected = function() { 
+  var selector = {
+    categoryID: this._id,
+    visible: true //only visible standards count
+  }
+  var total = Standards.find(selector).count(); 
+  if (total == 0)
+    return 0;
+  var today = new Date();
+  selector.masteryExpected = {$lt:today};
+  var expected = Standards.find(selector).count(); 
+  return expected*100/total;
+};
+
+var percentCompleted = function() { 
+  var studentID = Meteor.impersonatedOrUserId();
+  if (!Roles.userIsInRole(studentID,'student'))
+    return 0;
+  var selector = {
+    categoryID: this._id,
+    visible: true //only visible standards count
+  }
+  var standards = Standards.find(selector).fetch();
+  var total = standards.length;
+  if (total == 0)
+    return 0;
+  standards = standards.filter(function(standard) {
+    var LoM = LevelsOfMastery.findOne({standardID:standard._id,studentID:studentID});
+    if (!LoM) return false;
+    var level = LoM.average.schoolyear; //edit to select grading period when available
+    if (_.isArray(standard.scale)) {
+      var index = standard.scale.indexOf(level);
+      return (index == standard.scale.length - 1);
+    } else {
+      return (level*100/standard.scale > 88);
+    }
+  });
+  return standards.length*100/total;
+}

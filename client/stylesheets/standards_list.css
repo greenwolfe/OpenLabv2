@@ -118,6 +118,15 @@ li.categorytitle.active2 > a {
 #standardList p a.glyphicon {
   font-size: medium;
 }
+#standardList p.sItem a.standardSetCompletionDate {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+#standardList p.sItem a.standardSetCompletionDate.dateset {
+  border-right-style: solid;
+  border-right-width: 4px;
+  border-right-color: #FAA732;
+}
 #standardList p div[contenteditable="true"][class~='plaintexteditor'] {
   width: 80%;
   float: right;
