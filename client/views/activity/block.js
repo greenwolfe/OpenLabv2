@@ -617,28 +617,8 @@ Template.assessmentBlock.helpers({
     var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
     if (!LoM) return '';
     var standard = Standards.findOne(standardID);
-
-    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
-    var level;
-    var maxVal;
-    var index;
-    if (_.isArray(standard.scale)) {
-      level = standard.scale.indexOf(LoM.average['schoolyear']); //update for grading period when available
-      maxVal = standard.scale.length;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
-    }
-    if (_.isFinite(standard.scale)) {
-      level = LoM.average['schoolyear']; //update for grading period when available
-      maxVal = standard.scale;
-      var percent = level*100/maxVal;
-      index = 0;
-      if (percent >= 70) index = 1;
-      if (percent > 88) index = 2;
-      //index = Math.floor(level*3/maxVal);
-      //index = Math.min(index,2);
-    }
-    return colorcodes[index];
+    return Meteor.LoMcolorcode(LoM.average['schoolyear'],standard.scale);
+    //update for grading period when available
   },
   LoMAveragetext: function() {
     var studentID = Meteor.impersonatedOrUserId();

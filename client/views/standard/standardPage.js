@@ -32,28 +32,8 @@ Template.standardPage.helpers({
     var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standardID,visible:true});
     if (!LoM) return '';
     var standard = Standards.findOne(standardID);
-
-    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
-    var level;
-    var maxVal;
-    var index;
-    if (_.isArray(standard.scale)) {
-      level = standard.scale.indexOf(LoM.average['schoolyear']); //update for grading period when available
-      maxVal = standard.scale.length;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
-    }
-    if (_.isFinite(standard.scale)) {
-      level = LoM.average['schoolyear']; //update for grading period when available
-      maxVal = standard.scale;
-      var percent = level*100/maxVal;
-      index = 0;
-      if (percent >= 70) index = 1;
-      if (percent > 88) index = 2;
-      //index = Math.floor(level*3/maxVal);
-      //index = Math.min(index,2);
-    }
-    return colorcodes[index];
+    return Meteor.LoMcolorcode(LoM.average['schoolyear'],standard.scale);
+    //update for grading period when available
   },
   LoMAveragetext: function() {
     var studentID = Meteor.impersonatedOrUserId();
@@ -144,27 +124,7 @@ var dateFormat = "ddd, MMM D YYYY";
 Template.LoMitem.helpers({
   LoMcolorcode: function() {
     var standard = Standards.findOne(this.standardID);
-    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
-    var level;
-    var maxVal;
-    var index;
-    if (_.isArray(standard.scale)) {
-      level = standard.scale.indexOf(this.level);
-      maxVal = standard.scale.length;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
-    }
-    if (_.isFinite(standard.scale)) {
-      level = this.level;
-      maxVal = standard.scale;
-      var percent = level*100/maxVal;
-      index = 0;
-      if (percent >= 70) index = 1;
-      if (percent > 88) index = 2;
-      //index = Math.floor(level*3/maxVal);
-      //index = Math.min(index,2);
-    }
-    return colorcodes[index];
+    return Meteor.LoMcolorcode(this.level,standard.scale);
   },
   LoMtext: function() {
     var standard = Standards.findOne(this.standardID);
@@ -222,18 +182,73 @@ Template.LoMitem.events({
 Template.newLoM.onCreated(function() {
   var instance = this;
   var standardID = this.data._id;
-  instance.previousLoMindex = new ReactiveVar(-1);
+  instance.currentLoMindex = -1;
   instance.previousLoM = new ReactiveVar();
-
-  instance.autorun(function() {
-    var previousLoMindex = instance.previousLoMindex.get();
-    if (previousLoMindex >= 0) {
-      var previousLoM = LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1},skip:previousLoMindex});
-      instance.previousLoM.set(previousLoM);
+  instance.previousLoMindex = new ReactiveVar(-1,function(oldIndex,newIndex){
+    if (newIndex === oldIndex) return true; //don't set value and invalidate
+    if (newIndex >= 0) {
+      var previousLoM = LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1},skip:newIndex});
+      if (!previousLoM) return true; //no comments yet, so don't set anything
+      var justTheText = _.str.clean(
+        _.str.stripTags(
+          _.unescapeHTML(
+            previousLoM.comment.replace(/&nbsp;/g,'')
+      )));   
+      if (justTheText) {
+        instance.previousLoM.set(previousLoM);
+        return false; //go ahead and set to newIndex
+      } else { //try the next one
+        var maxIndex = LevelsOfMastery.find({standardID:standardID}).count() - 1;
+        if ((newIndex > oldIndex) && (newIndex < maxIndex)) {
+          instance.previousLoMindex.set(newIndex + 1);
+          return true; //don't set it this time
+        } else if ((newIndex > oldIndex) && (newIndex == maxIndex)) {
+          //end of the line.  Don't attempt to set to maxIndex + 1, but
+          return true; //but don't set it this time, either
+        } else if ((newIndex < oldIndex) && (newIndex > 0)) {
+          instance.previousLoMindex.set(newIndex-1); 
+          return true; //don't set it this time         
+        } else if ((newIndex < oldIndex) && (newIndex == 0)) {
+          //end of the line.  Don't attempt to set to -1, but 
+          return true; //but don't set it this time, either
+        }        
+      }
     } else {
       instance.previousLoM.set(null);
+      return false; //go ahead and set to newIndex      
     }
-  })
+  });
+
+/*  instance.autorun(function() {
+    var previousLoMindex = instance.previousLoMindex.get();
+    console.log('Template.newLoM.onCreated autorun');
+    console.log(previousLoMindex);
+    console.log(instance.currentLoMindex);
+    if (previousLoMindex == instance.currentLoMindex) return;
+    if (previousLoMindex >= 0) {
+      var previousLoM = LevelsOfMastery.findOne({standardID:standardID},{sort:{copiedAndPasted:-1,submitted:-1},skip:previousLoMindex});
+      var justTheText = _.str.clean(
+        _.str.stripTags(
+          _.unescapeHTML(
+            previousLoM.comment.replace(/&nbsp;/g,'')
+      )));   
+      if (justTheText) {
+        instance.previousLoM.set(previousLoM);
+        instance.currentLoMindex = previousLoMindex;
+      } else { //try the next one
+        var maxIndex = LevelsOfMastery.find({standardID:standardID}).count() - 1;
+        if ((previousLoMindex > instance.currentLoMindex) && (previousLoMindex < maxIndex)) {
+          instance.previousLoMindex.set(previousLoMindex + 1);
+        } else if ((previousLoMindex < instance.currentLoMindex) && (previousLoMindex > 0)) {
+          instance.previousLoMindex.set(previousLoMindex-1);          
+        } 
+      }
+    } else {
+      instance.previousLoM.set(null);
+      instance.currentLoMindex = previousLoMindex;
+    }
+    
+  })*/
 });
 
 Template.newLoM.onRendered(function() {
@@ -265,27 +280,7 @@ Template.newLoM.helpers({
   },
   LoMcolorcode: function() {
     var standard = Standards.findOne(this.standardID);
-    var colorcodes = ['LoMlow','LoMmedium','LoMhigh']
-    var level;
-    var maxVal;
-    var index;
-    if (_.isArray(standard.scale)) {
-      level = standard.scale.indexOf(this.level);
-      maxVal = standard.scale.length;
-      index = Math.floor(level*3/maxVal);
-      index = Math.min(index,2);
-    }
-    if (_.isFinite(standard.scale)) {
-      level = this.level;
-      maxVal = standard.scale;
-      var percent = level*100/maxVal;
-      index = 0;
-      if (percent >= 70) index = 1;
-      if (percent > 88) index = 2;
-      //index = Math.floor(level*3/maxVal);
-      //index = Math.min(index,2);
-    }
-    return colorcodes[index];
+    return Meteor.LoMcolorcode(this.level,standard.scale);
   },
   /*LoMtext: function() { //just number or level here
     var standard = Standards.findOne(this.standardID);
