@@ -1,0 +1,18 @@
+table#calendar {
+  width: 98%;
+  margin-left: 1%;
+  margin-top: 10px;
+}
+table#calendar tr td {
+  border: thin black solid;
+  width:  20%;
+  vertical-align: top;
+  text-align: center;
+}
+table#calendar tr td h3 a {
+  color: black;
+}
+table#calendar tr td ul.dropdown-menu li.selected {
+  background-color: #EEDC94;
+  margin-bottom: 5px;
+}

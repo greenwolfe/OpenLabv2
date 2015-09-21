@@ -1,0 +1,67 @@
+<template name = 'calendar'>
+<!--  <p id='startEndDates' class='date-range text-center'>
+    Show from:
+    <div class="form-group">
+      <div class='input-group date' id='calendarStartDate'>
+        <input type='text' class="form-control"/>
+        <span class="input-group-addon">
+          <span class="glyphicon glyphicon-calendar"></span>
+        </span>
+      </div>
+    </div>
+    to 
+    <div class="form-group">
+      <div class='input-group date' id='calendarEndDate'>
+        <input type='text' class="form-control"/>
+        <span class="input-group-addon">
+          <span class="glyphicon glyphicon-calendar"></span>
+        </span>
+      </div>
+    </div>
+  </p>-->
+  <table id='calendar'>
+    {{#each calendarWeeks}}
+      {{> calendarWeek}}
+    {{/each}}
+  </table>  
+</template>
+
+<template name = 'calendarWeek'>
+  <tr>
+    {{#each weekDays}}
+      {{> calendarDay}}      
+    {{/each}}
+  </tr>
+</template>
+
+<template name = 'calendarDay'>
+  <td class='calendar-day'>
+    <!--<i class="{{frozen}}" data-day={{ID}}></i>-->
+    <h3> 
+<!--      {{#if isInRole 'teacher'}}
+        <a href="{{pathFor 'attendance2'}}">{{day}}</a> 
+      {{else}}-->
+        {{day}}
+<!--      {{/if}}-->
+    </h3>
+    <!-- ID ??? -->
+     <div class = 'daysEvents'>
+       <p> &nbsp; </p>
+       {{#each daysEvents}}
+          {{> calendarEvent}}        
+       {{/each}}
+     </div>
+  </td>
+</template>
+
+<template name = 'calendarEvent'>
+  <p class='calendarEvent'>
+    <!-- need pointsToOrID helper, copy from activity item and group members names-->
+    <a href="{{pathFor 'activityPage' _id=pointsToOrID}}" title="group members">
+      {{title}}
+    </a>
+    <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}
+    <a class="glyphicon glyphicon-remove deleteCalendarEvent" title="Delete Event"></a>-->
+    <a class="glyphicon glyphicon-edit editCalendarEvent" title="Edit Event"></a>
+  </p>
+</template>

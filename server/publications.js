@@ -12,6 +12,11 @@ Meteor.publish('standards',function() {
   return Standards.find();
 });
 
+Meteor.publish('calendarEvents',function(userID) {
+  check(userID,Match.idString);
+  return CalendarEvents.find({group: {$in: [userID]}});
+})
+
 Meteor.publish('levelsOfMastery',function(standardOrCategoryID,studentID,activityID) {
   check(standardOrCategoryID,Match.OneOf(Match.idString,[Match.idString],null));
   check(studentID,Match.OneOf(Match.idString,null));
