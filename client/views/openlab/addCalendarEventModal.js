@@ -25,6 +25,7 @@ Template.addCalendarEventModal.events({
       calendarEvent.nameOfTimePeriod = '';
     }
     tmpl.calendarEvent.set(calendarEvent);
+    tmpl.activeUnit.set(openlabSession.get('activeUnit'));
   }
 })
 

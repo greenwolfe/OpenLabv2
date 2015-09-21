@@ -16,3 +16,23 @@ table#calendar tr td ul.dropdown-menu li.selected {
   background-color: #EEDC94;
   margin-bottom: 5px;
 }
+table#calendar tr td p.calendarEvent {
+  background-color: #9f9f9f;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#efefef), color-stop(25%, #efefef), to(#9f9f9f));
+  background-image: -webkit-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -moz-linear-gradient(top, #efefef, #efefef 25%, #9f9f9f);
+  background-image: -ms-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: -o-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  background-image: linear-gradient(#efefef, #efefef 25%, #9f9f9f);
+  padding: 4px;
+  padding-bottom: 0;
+  margin-left: 6px;
+  margin-right: 6px;
+  line-height: 20px;
+}
+table#calendar tr td p.calendarEvent a {
+  color: black;
+}
+table#calendar tr td p.calendarEvent a.editCalenderEvent {
+  cursor: pointer;
+}
