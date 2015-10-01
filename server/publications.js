@@ -156,7 +156,7 @@ Meteor.publish('blocks',function(columnID) {  //change to user or section ID in 
     if ((wall.type == 'group') || (wall.type == 'section'))
       return this.ready();
     if (wall.type == 'student') 
-      return Blocks.find({columnID:columnID,type:'file'});
+      return Blocks.find({columnID:columnID,type:{$in:['file','assessment','text']}});
   }
   //below includes teacher wall for parent
   return Blocks.find({columnID:columnID});

@@ -159,7 +159,8 @@ Template.activityList.onCreated(function() {
     if (!userID)
       return;
     var sectionID = Meteor.selectedSectionId();
-    var unitID = instance.data._id;
+    //var unitID = instance.data._id; //not reactive?
+    var unitID = Template.currentData()._id;
     //first get the info that will be immediately shown
     var activitiesThisUnit = Meteor.subscribe('activityStatuses',userID,unitID);
     var progressThisUnit = Meteor.subscribe('activityProgress',userID,unitID);

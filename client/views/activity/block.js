@@ -64,8 +64,8 @@ Template.block.helpers({
       var wall = Walls.findOne(this.wallID);
       if ((wall.type == 'group') || (wall.type == 'section'))
         return false;
-      if ((wall.type == 'student') && (this.type != 'file'))
-        return false;
+      if (wall.type == 'student')
+        return (_.contains(['file','text','assessment'],this.type));
     }
     return true;
   },
