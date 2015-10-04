@@ -164,7 +164,8 @@ Template.activityList.onCreated(function() {
     //first get the info that will be immediately shown
     var activitiesThisUnit = Meteor.subscribe('activityStatuses',userID,unitID);
     var progressThisUnit = Meteor.subscribe('activityProgress',userID,unitID);
-    var workPeriodsThisUnit = Meteor.subscribe('workPeriods',sectionID,unitID);
+    //workPeriods subscriptions should now just be loaded once when app starts
+    //var workPeriodsThisUnit = Meteor.subscribe('workPeriods',sectionID,unitID);
 
     if (activitiesThisUnit.ready()) { //then load the rest in the background
       var activityStatuses = Meteor.subscribe('activityStatuses',userID); 
@@ -176,11 +177,11 @@ Template.activityList.onCreated(function() {
       if (activityProgress.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
         Meteor.subscribe('activityProgress');
     }
-    if (workPeriodsThisUnit.ready()) {
+/*    if (workPeriodsThisUnit.ready()) {
       var workPeriods = Meteor.subscribe('workPeriods',sectionID);
       if (workPeriods.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
         Meteor.subscribe('workPeriods');
-    }
+    } */
   })
 })
 

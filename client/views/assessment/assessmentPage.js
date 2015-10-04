@@ -31,7 +31,8 @@ Template.assessmentPage.onCreated(function() {
     //can always do that
     var subActivityStatuses = Meteor.subscribe('subActivityStatuses',studentID,activity.pointsTo);
     var subActivityProgress = Meteor.subscribe('subActivityProgress',studentID,activity.pointsTo);
-    var thisUnitWorkPeriods = instance.subscribe('workPeriods',sectionID,activity.unitID);
+//workPeriod subscription now at site/global level
+//    var thisUnitWorkPeriods = instance.subscribe('workPeriods',sectionID,activity.unitID);
 
     //first get the info that will be immediately shown
     var LoMsThisStudentAndAssessment = Meteor.subscribe('levelsOfMastery',assessment.standardIDs,studentID,activity._id);

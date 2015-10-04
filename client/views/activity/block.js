@@ -324,7 +324,8 @@ Template.subactivitiesBlock.onCreated(function() {
     if (activity) {
       var thisUnitSubscription = instance.subscribe('subActivityStatuses',userID,activity.pointsTo);
       var thisUnitProgress = instance.subscribe('subActivityProgress',userID,activity.pointsTo);
-      var thisUnitWorkPeriods = instance.subscribe('workPeriods',sectionID,activity.unitID);
+// allworkPeriods subscribed at site/global level now
+//      var thisUnitWorkPeriods = instance.subscribe('workPeriods',sectionID,activity.unitID);
     }
   })
 })

@@ -138,6 +138,7 @@ Meteor.publish('assessment',function(assessmentID){
   //supposed to be visible to parents or students.  
 });
 
+//deprecated if subscribing to all activities at site default level
 Meteor.publish('assessmentSubactivity',function(activityID) {
   check(activityID,Match.idString);
   if (Roles.userIsInRole(this.userId,'teacher')) {
@@ -227,7 +228,7 @@ Meteor.publish('workPeriods',function(sectionID,unitID) {
   if (sectionID)
     selector.sectionID = sectionID;
 
-  check(unitID,Match.Optional(Match.idString));
+  check(unitID,Match.Optional(Match.OneOf(Match.idString,'',null)));
   if (unitID)
     selector.unitID = unitID;
 
