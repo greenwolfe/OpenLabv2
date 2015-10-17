@@ -278,6 +278,19 @@ Template.fileBlock.helpers({
   editingBlock:editingBlock
 });
 
+Template.fileBlock.events({
+  'click .markIsExtraPractice': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = this.subActivityID;
+    Meteor.call('setStatus',studentID,activityID,'isExtraPractice',true);
+  },
+  'click .markIsNotExtraPractice': function(event,tmpl) {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = this.subActivityID;
+    Meteor.call('setStatus',studentID,activityID,'isExtraPractice',false);
+  }
+})
+
   /**********************/
  /**** FILELINK  *******/
 /**********************/
@@ -483,6 +496,14 @@ Template.subactivityItem.helpers({
     if (!status)
       return '';
     return (status.late) ? 'icon-late' : '';  
+  },
+  title: function() {
+    var title = this.title;
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = this._id;
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    if (!status) return title;
+    return (status.tag) ? title + ' <strong>(' + status.tag + ')</strong>' : title;
   }
 });
 
@@ -525,6 +546,10 @@ Template.subactivityItem.events({
     if (!Roles.userIsInRole(studentID,'student'))
       return; 
     Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
+  },
+  'click .tagActivity': function(event,tmpl) {
+    //add handler to tag activity ... modal?
+    console.log('add tag to activity');
   }
 })
 

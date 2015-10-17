@@ -126,6 +126,11 @@
         {{#if canDelete}}
           <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
         {{/if}}-->
+        {{#if isInRole 'teacher'}}
+          {{#if impersonatedId}}
+            <a class="glyphicon glyphicon-tag tagActivity" title="Click to add tag."></a>
+          {{/if}}
+        {{/if}}
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
         {{> workPeriodButton workPeriod}}

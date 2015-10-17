@@ -154,7 +154,7 @@
               <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
               <ul class="dropdown-menu">
                 {{#each subactivities}}
-                  <li class="subactivityChoice"><a href="#">{{title}}</a></li>
+                  <li class="subactivityChoice"><a href="#">{{{title}}}</a></li>
                 {{/each}}
               </ul>
             </div>          
@@ -171,6 +171,11 @@
           {{>showHide collection='Activities' itemName='activity' item=this}}
           {{#if canDelete}}
             <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
+          {{/if}}
+          {{#if isInRole 'teacher'}}
+            {{#if impersonatedId}}
+              <a class="glyphicon glyphicon-tag tagActivity" title="Click to add tag."></a>
+            {{/if}}
           {{/if}}
           {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
         {{else}}
@@ -192,7 +197,7 @@
 
 <template name='assessmentBlock'>
   {{#if isInRole 'teacher'}}
-      <p>
+    <p>
       {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
     </p>
     <div class="assessmentBlockButtons text-center">

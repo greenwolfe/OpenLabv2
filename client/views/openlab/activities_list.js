@@ -395,6 +395,14 @@ Template.activityItem.helpers({
       unitEndDateWithoutSelf: notSoLongAgo()
     };
     return workPeriod;
+  },
+  title: function() {
+    var title = this.title;
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = this._id;
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    if (!status) return title;
+    return (status.tag) ? title + ' <strong>(' + status.tag + ')</strong>' : title;
   }
 })
 
@@ -421,6 +429,10 @@ Template.activityItem.events({
     if (!Roles.userIsInRole(studentID,'student'))
       return; 
     Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
+  },
+  'click .tagActivity': function(event,tmpl) {
+    //add handler to tag activity ... modal?
+    console.log('add tag to activity');
   }
 })
 

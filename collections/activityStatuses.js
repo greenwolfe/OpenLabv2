@@ -46,10 +46,12 @@ Meteor.methods({
         if (i == doneIndex - 2) /*RETURNED*/ status.increment = -1; //teacher returned work, so student decrements to indicate they are working on revisions or have submitted them
         if (i == doneIndex - 3) /*SUBMITTED*/ status.increment = -1; //only teacher marks as returned or done
       }
+      var statusID = status._id;
+      status = {};
       status.level = statuses[i + status.increment];
       status.incrementedBy = cU._id;
       status.incrementedAt = new Date();
-      ActivityStatuses.update(status._id,status);
+      return ActivityStatuses.update(statusID,{$set:status});
     } else { //no status exists yet, level has been displayed as 0 by default  
       status = {
         studentID:studentID,
@@ -60,7 +62,8 @@ Meteor.methods({
         incrementedBy: cU._id,
         incrementedAt: rightNow,
         increment: 1, //+1 or -1 to show direction of latest travel
-        late: false
+        late: false,
+        tag: '',
       }
       return ActivityStatuses.insert(status);
     }
@@ -90,5 +93,42 @@ Meteor.methods({
       throw new Meteor.Error('statusNotFound','There should already be a status if you are trying to mark it as on time.'); 
     
     ActivityStatuses.update(status._id,{$set: {late:false}});
+  },
+  statusSetTag: function(studentID,activityID,tag) {
+    check(studentID,Match.idString);
+    check(activityID,Match.idString);
+    check(tag,String);
+    var student = Meteor.users.findOne(studentID);
+    if (!student)
+      throw new Meteor.Error('studentNotFound','Cannot designate activity as a reassessment.  Student not found.');
+    if (!Roles.userIsInRole(student,'student'))
+      throw new Meteor.Error('notStudent','Only students have activity status.');
+    var activity = Activities.findOne(activityID);
+    if (!activity)
+      throw new Meteor.Error('activityNotFound','Cannot designate activity as a reassessment.  Activity not found.');
+    var cU = Meteor.user();
+    if (!cU)
+      throw new Meteor.Error('notLoggedIn','You must be logged in to designate an activity as a reassessment.');
+    if (!Roles.userIsInRole(cU,'teacher'))
+      throw new Meteor.Error('notTeacher','You must be a teacher to designate an activity as a reassessment.');
+
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    if (!status) {
+       status = {
+        studentID:studentID,
+        activityID:activityID,
+        unitID: activity.unitID,
+        pointsTo: activity.pointsTo,
+        level: 'nostatus',  
+        incrementedBy: cU._id,
+        incrementedAt: rightNow,
+        increment: 1, //+1 or -1 to show direction of latest travel
+        late: false,
+        tag: tag
+      }
+      return ActivityStatuses.insert(status);
+    } else {
+      ActivityStatuses.update(status._id,{$set: {tag:tag}});
+    }
   }
 })

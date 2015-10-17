@@ -31,7 +31,7 @@ Meteor.methods({
       embedCode: Match.Optional(String),    //embed
       raiseHand: Match.Optional(Match.OneOf('visible','')) //only partially implemented (all?)
       standardIDs: [Match.idString],           //assessment
-      block.subActivityID: Match.Optional(Match.idString) //assessment
+      subActivityID: Match.Optional(Match.idString) //assessment
       */
     });
     //validate user and set permissions
@@ -117,6 +117,7 @@ Meteor.methods({
     if (block.activityID != column.activityID) {
       var subActivity = Activities.findOne(block.activityID);
       if (subActivity.pointsTo != column.activityID) //pasted onto a completely different activity page
+        //only if assessment block, otherwise set to null
         block.subActivityID = column.activityID;
       block.activityID = column.activityID;
     }
@@ -158,6 +159,9 @@ Meteor.methods({
   },
   deleteBlock: function(blockID) {
     check(blockID,Match.idString);
+    //check if it has a subactivity
+    //if so, check if other blocks share the same subactivity
+    //if not, set isReassessment, isExtraPractice, isMakeUp to null
     var cU = Meteor.user();
     if (!cU)  
       throw new Meteor.Error('notLoggedIn', "You must be logged in to delete a block.");
@@ -313,7 +317,8 @@ Meteor.methods({
 Blocks.after.update(function (userID, doc, fieldNames, modifier) {
   if (doc.columnID !== this.previous.columnID) {
     //denormalizing
-    ActivityStatuses.update({activityID:this.previous._id},{$set: {unitID:doc.unitID}}, {multi: true});
+    //I think the line below was accidentally copied from /collections/activities.js and fortunately would do nothing here because wrong id would not return any documents
+    //ActivityStatuses.update({activityID:this.previous._id},{$set: {unitID:doc.unitID}}, {multi: true});
     var column = Columns.findOne(doc.columnID);
     Blocks.update(doc._id,{$set:{wallID:column.wallID}});
     Blocks.update(doc._id,{$set:{activityID:column.activityID}});
