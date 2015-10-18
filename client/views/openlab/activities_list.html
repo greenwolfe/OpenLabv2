@@ -126,19 +126,16 @@
         {{#if canDelete}}
           <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
         {{/if}}-->
-        {{#if isInRole 'teacher'}}
-          {{#if impersonatedId}}
-            <a class="glyphicon glyphicon-tag tagActivity" title="Click to add tag."></a>
-          {{/if}}
-        {{/if}}
+        <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
+        <a>{{{tags}}}</a>
       {{else}}
         {{> workPeriodButton workPeriod}}
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
         <a  href="{{pathFor 'activityPage' _id=pointsToOrID}}"> 
-        {{{title}}} 
+          {{{title}}}{{{tags}}}
         </a>        
       {{/if}}
     </p>

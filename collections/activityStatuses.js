@@ -113,6 +113,7 @@ Meteor.methods({
       throw new Meteor.Error('notTeacher','You must be a teacher to designate an activity as a reassessment.');
 
     var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    var rightNow = new Date();
     if (!status) {
        status = {
         studentID:studentID,

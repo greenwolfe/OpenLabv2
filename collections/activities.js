@@ -1,5 +1,8 @@
 Activities = new Meteor.Collection('Activities');
 
+// TO DO:  tags for each activity, keep in activity object
+//  tags for individuals are kept in activity statuses
+
 Meteor.methods({
   /*removeAllActivities: function() {
     return Activities.remove({});
@@ -11,7 +14,7 @@ Meteor.methods({
       pointsTo: Match.Optional(Match.idString),
       title: Match.nonEmptyString,
       unitID: Match.idString,
-      studentID: Match.Optional(Match.idString), //in case is reassessment for an individual student      
+      studentID: Match.Optional(Match.idString), //deprecated??? in case is reassessment for an individual student      
         //automatically make a subactivity for any assessment?
 
       /*set below, value not passed in

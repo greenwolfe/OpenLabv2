@@ -70,8 +70,8 @@ Template.calendarWeek.helpers({
 Template.calendarDay.helpers({ 
   daysEvents : function() { 
     var userToShow = [Meteor.impersonatedOrUserId(),Meteor.selectedSection(),Site.findOne()._id];
-    var dateMin1h = moment(this.date).subtract(1,'hours').toDate();
-    var datePlus1h = moment(this.date).add(1,'hours').toDate();
+    var dateMin1h = moment(this.date,'MM/DD/YYYY').subtract(1,'hours').toDate();
+    var datePlus1h = moment(this.date,'MM/DD/YYYY').add(1,'hours').toDate();
     return CalendarEvents.find({
         group: {$in: userToShow}, 
         visible: true,
