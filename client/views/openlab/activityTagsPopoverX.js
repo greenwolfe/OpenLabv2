@@ -30,6 +30,8 @@ Template.activityTagsPopoverX.onCreated(function() {
   };
   instance.status = new ReactiveVar(this.nullStatus);
 
+  instance.subscribe('recentTags');
+
   instance.autorun(function() {
     var activity = Session.get('activityForTagModal') || instance.nullActivity;
     activity.tag = 'no activity tags yet'; // remove this once activities have tags!
@@ -57,19 +59,13 @@ Template.activityTagsPopoverX.helpers({
     if (Roles.userIsInRole(studentID,'student'))
       return studentID;
     return '';
+  },
+  recentTags: function() {
+    return RecentTags.find({},{sort:{date:1},limit:10});
   }
 })
 
 Template.activityTagsPopoverX.events({
-  /*'show.bs.modal #activityTagsPopoverX': function(event,tmpl) {
-    //data passed from triggering element
-    var activity = Session.get('activityForTagModal') || tmpl.nullActivity;
-    activity.tag = 'no activity tags yet'; // remove this once activities have tags!
-    tmpl.activity.set(activity);
-    var studentID = Meteor.impersonatedOrUserId();
-    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activity._id}) || tmpl.nullStatus;
-    tmpl.status.set(status);
-  },*/
   'shown.bs.modal #activityTagsPopoverX': function(event,tmpl) {
     //position the modal as a popover and show the cartoon bubble arrow
     var tagIcon = $(event.relatedTarget);
@@ -95,5 +91,22 @@ Template.activityTagsPopoverX.events({
         tmpl.status.set(status);
       }
     });
+  },
+  'click #saveForActivity' : function(event,tmpl) {
+    var newTag = tmpl.$('#newTag').val();
+    var activity = tmpl.activity.get();
+    Meteor.call('activitySetTag',activity._id,newTag,function(error,id) {
+      if (error) {
+        alert(error.reason);
+      } else {
+        activity.tag = newTag;
+        tmpl.activity.set(activity);
+      }
+    });
+  },
+  'click .recentTag': function(event,tmpl) {
+    event.preventDefault();
+    var recentTag = $(event.target).text();
+    tmpl.$('#newTag').val(recentTag);
   }
 })

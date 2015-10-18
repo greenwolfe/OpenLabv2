@@ -12,13 +12,16 @@
       </div>
     </div>
     <div class="popover-content">
-      <div class="container-fluid">
-        <div class="row text-center">
-          pills for previously used tags
+      <div class="input-group">
+        <div class="input-group-btn">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Recent <span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            {{#each recentTags}}
+              <li><a href="#" class='recentTag'>{{tag}}</a></li>
+            {{/each}}
+          </ul>
         </div>
-        <div class="row">
-          <input type='text' class="text-center" id="newTag"/>
-        </div>
+        <input type='text' class="text-center" id="newTag"/>
       </div>
     </div>
     <div class="popover-footer popover-default">

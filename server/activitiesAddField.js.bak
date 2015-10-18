@@ -1,0 +1,5 @@
+Meteor.startup(function () {
+  Activities.find().forEach(function(activity) {
+    Activities.update(activity._id,{$set: {tag: ''}});
+  });
+});

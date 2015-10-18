@@ -127,8 +127,10 @@ Meteor.methods({
         late: false,
         tag: tag
       }
+      Meteor.call('insertRecentTag',tag);
       return ActivityStatuses.insert(status);
     } else {
+      Meteor.call('insertRecentTag',tag);
       ActivityStatuses.update(status._id,{$set: {tag:tag}});
     }
   }

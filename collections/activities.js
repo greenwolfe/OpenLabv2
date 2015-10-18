@@ -1,8 +1,5 @@
 Activities = new Meteor.Collection('Activities');
 
-// TO DO:  tags for each activity, keep in activity object
-//  tags for individuals are kept in activity statuses
-
 Meteor.methods({
   /*removeAllActivities: function() {
     return Activities.remove({});
@@ -18,6 +15,7 @@ Meteor.methods({
         //automatically make a subactivity for any assessment?
 
       /*set below, value not passed in
+      tag: Match.Optional(String),
       visible:  Match.Optional(Boolean),
       order: Match.Optional(Match.Integer), //for now, new activity always placed at end of list
       suborder: Match.Optional(Match.Integer),
@@ -28,6 +26,7 @@ Meteor.methods({
     activity.wallOrder = ['teacher','student','group','section'];
     activity.wallVisible = {teacher:true,student:true,group:true,section:true};
     activity.studentID = activity.studentID || ''; //add default values for optional parameters
+    activity.tag = '';
     activity.visible = true;
     //don't want order passed in.  Always add new activity at end of list
     var unit = Units.findOne(activity.unitID); //verify unit first
@@ -150,6 +149,7 @@ Meteor.methods({
   title: Match.Optional(Match.nonEmptyString), //see method below
   unitID: Match.Optional(Match.idString), //set by sortable1c and drag/drop
   studentID: Match.Optional(String), //cannot be changed
+  tag: Match.Optional(String), //set in activitySetTag
   visible:  Match.Optional(Boolean), //set by show/hide methods
   order: Match.Optional(Match.Integer), //set by sortable1c and drag/drop
   suborder: Match.Optional(Match.Integer), //set by sortable1c and drag/drop
@@ -178,6 +178,26 @@ Meteor.methods({
     if (newActivity.title != activity.title)
       Activities.update(newActivity._id,{$set: {title:newActivity.title}});
 
+  },
+  activitySetTag: function(activityID,tag) {
+    check(activityID,Match.idString);
+    check(tag,String);
+
+    var cU = Meteor.user(); //currentUser
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to update an activity");
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
+    if (!Roles.userIsInRole(cU,'teacher') && (cU._id != activity.studentID))
+      throw new Meteor.Error('onlyTeacher', 'You must be a teacher to update a whole class activity.')
+
+    var activity = Activities.findOne(activityID);
+    if (!activity)
+      throw new Meteor.Error('activityNotFound','Cannot update activity tag.  Activity not found.');
+
+    if (tag != activity.tag)
+      Meteor.call('insertRecentTag',tag);
+      return Activities.update(activityID,{$set: {tag:tag}});
   }
 });
 

@@ -177,6 +177,10 @@ Meteor.publish('activityStatuses',function(studentID,unitID) {
   return ActivityStatuses.find(selector);
 });
 
+Meteor.publish('recentTags',function() {
+  return RecentTags.find()
+})
+
 Meteor.publish('activityProgress',function(studentID,unitID) { 
   check(studentID,Match.Optional(Match.OneOf(Match.idString,null))); 
   studentID = studentID || this.userId;  
