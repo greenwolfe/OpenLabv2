@@ -125,10 +125,12 @@
         <!--two issues, formatting, and don't have access to blocks to truly check if empty
         {{#if canDelete}}
           <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
-        {{/if}}-->
-        <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
+        {{/if}}--> 
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
-        <a>{{{tags}}}</a>
+        <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
+        <a>
+        {{{tags}}}
+        </a>
       {{else}}
         {{> workPeriodButton workPeriod}}
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>

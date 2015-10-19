@@ -131,17 +131,15 @@ li.unittitle.active2 > a {
 #activityList p a, #subactivityList p a {
     color: #555555;
     font-size: small;
-    white-space: nowrap;
 }
 #activityList p a.glyphicon, #subactivityList p a.glyphicon {
   font-size: medium;
 }
 #activityList p div[contenteditable="true"][class~='plaintexteditor'],
 #subactivityList p div[contenteditable="true"][class~='plaintexteditor'] {
-  width: 80%;
-  float: right;
+  width: 94%%;
   cursor: text;
-  background: inherit;
+  background: transparent;
 }
 #activityList p.newItem div[contenteditable="true"][class~='plaintexteditor'], 
 #subactivityList p.newItem div[contenteditable="true"][class~='plaintexteditor'] {

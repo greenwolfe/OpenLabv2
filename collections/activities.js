@@ -196,7 +196,7 @@ Meteor.methods({
       throw new Meteor.Error('activityNotFound','Cannot update activity tag.  Activity not found.');
 
     if (tag != activity.tag)
-      Meteor.call('insertRecentTag',tag);
+      Meteor.call('insertTag',tag);
       return Activities.update(activityID,{$set: {tag:tag}});
   }
 });

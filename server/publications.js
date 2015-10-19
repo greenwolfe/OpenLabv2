@@ -177,8 +177,8 @@ Meteor.publish('activityStatuses',function(studentID,unitID) {
   return ActivityStatuses.find(selector);
 });
 
-Meteor.publish('recentTags',function() {
-  return RecentTags.find()
+Meteor.publish('Tags',function() {
+  return Tags.find()
 })
 
 Meteor.publish('activityProgress',function(studentID,unitID) { 

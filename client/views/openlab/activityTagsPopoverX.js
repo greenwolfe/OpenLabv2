@@ -30,11 +30,10 @@ Template.activityTagsPopoverX.onCreated(function() {
   };
   instance.status = new ReactiveVar(this.nullStatus);
 
-  instance.subscribe('recentTags');
+  instance.subscribe('Tags');
 
   instance.autorun(function() {
     var activity = Session.get('activityForTagModal') || instance.nullActivity;
-    activity.tag = 'no activity tags yet'; // remove this once activities have tags!
     instance.activity.set(activity);
     var studentID = Meteor.impersonatedOrUserId();
     var status = ActivityStatuses.findOne({studentID:studentID,activityID:activity._id}) || instance.nullStatus;
@@ -61,7 +60,7 @@ Template.activityTagsPopoverX.helpers({
     return '';
   },
   recentTags: function() {
-    return RecentTags.find({},{sort:{date:1},limit:10});
+    return Tags.find({},{sort:{frequency: -1,date:-1},limit:10});
   }
 })
 

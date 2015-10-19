@@ -38,6 +38,12 @@ Template.activityPage.onCreated(function() {
     var sectionID = Meteor.selectedSectionId();
     wallSubscription = instance.subscribe('walls', studentID,activityID);
     sectionwallSubscription = instance.subscribe('walls',sectionID,activityID);
+ 
+    var activity = Activities.findOne(activityID);
+    if (activity) {
+      instance.subscribe('subActivityStatuses',studentID,activity.pointsTo);
+      instance.subscribe('subActivityProgress',studentID,activity.pointsTo);
+    } 
   });
 
   instance.autorun(function() {

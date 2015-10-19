@@ -154,7 +154,7 @@
               <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
               <ul class="dropdown-menu">
                 {{#each subactivities}}
-                  <li class="subactivityChoice"><a href="#">{{{title}}}</a></li>
+                  <li class="subactivityChoice"><a href="#">{{{title}}}{{{tags}}}</a></li>
                 {{/each}}
               </ul>
             </div>          
@@ -164,7 +164,10 @@
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
-        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}</a>        
+        {{#if isInRole 'teacher'}}
+          <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a> 
+        {{/if}}       
+        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}{{{tags}}}</a>        
       {{else}}
         {{#if inEditedWall ../wallID}}
           <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
@@ -172,18 +175,19 @@
           {{#if canDelete}}
             <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
           {{/if}}
-          {{#if isInRole 'teacher'}}
-            {{#if impersonatedId}}
-              <a class="glyphicon glyphicon-tag tagActivity" title="Click to add tag."></a>
-            {{/if}}
-          {{/if}}
           {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
+          {{#if isInRole 'teacher'}}
+            <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
+          {{/if}}
+          <a>{{{tags}}}</a>
         {{else}}
           {{> workPeriodButton workPeriod}}
           <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
           <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
           <i class="activityPunctual {{late}}" title="late"></i>
-          <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}</a>        
+          <a  href="{{pathFor 'activityPage' _id=pointsTo}}">
+            {{{title}}}{{{tags}}}
+          </a>        
         {{/if}}
       {{/if}}
     </p>

@@ -326,22 +326,7 @@ Template.fileLink.events({
  /**** SUBACTIVITIES BLOCK *****/
 /******************************/
 
-Template.subactivitiesBlock.onCreated(function() {
-  instance = this;
-
-  instance.autorun(function() {
-    var userID = Meteor.impersonatedOrUserId();
-    var activity = Activities.findOne(instance.data.activityID);
-    var sectionID = Meteor.selectedSectionId();
-
-    if (activity) {
-      var thisUnitSubscription = instance.subscribe('subActivityStatuses',userID,activity.pointsTo);
-      var thisUnitProgress = instance.subscribe('subActivityProgress',userID,activity.pointsTo);
-// allworkPeriods subscribed at site/global level now
-//      var thisUnitWorkPeriods = instance.subscribe('workPeriods',sectionID,activity.unitID);
-    }
-  })
-})
+//subscriptions to status and progress occur at activity page level
 
 Template.subactivitiesBlock.helpers({
   helpMessages: function () {
@@ -497,13 +482,16 @@ Template.subactivityItem.helpers({
       return '';
     return (status.late) ? 'icon-late' : '';  
   },
-  title: function() {
-    var title = this.title;
+  tags: function() {
     var studentID = Meteor.impersonatedOrUserId();
     var activityID = this._id;
     var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
-    if (!status) return title;
-    return (status.tag) ? title + ' <strong>(' + status.tag + ')</strong>' : title;
+    var tags = '';
+    if (this.tag) 
+      tags += ' (' + this.tag + ')';
+    if ((status) && (status.tag))
+      tags += '<strong> (' + status.tag + ')</strong>';
+    return tags;    
   }
 });
 
@@ -548,8 +536,7 @@ Template.subactivityItem.events({
     Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
   },
   'click .tagActivity': function(event,tmpl) {
-    //add handler to tag activity ... modal?
-    console.log('add tag to activity');
+    Session.set('activityForTagModal',this);
   }
 })
 
