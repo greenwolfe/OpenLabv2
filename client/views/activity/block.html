@@ -32,9 +32,9 @@
           </div>
         {{/if}}
         {{#unless editingBlock}}
-          <div class="pull-right">
-            <!--<i class="transparentBox buttonRaiseVirtualHand"></i>-->
-          </div>
+          <!--<div class="pull-right">
+            <i class="transparentBox buttonRaiseVirtualHand"></i>
+          </div>-->
           <!--{{#unless isAssessmentBlock}}-->
             <div class="blockTitle">{{{title}}}</div>
           <!--{{/unless}}-->
@@ -155,48 +155,37 @@
 
 <template name = 'subactivityItem'>
     <p class="aItem">
-      {{#if isInAssessmentBlock}}
-        {{#if isInRole 'teacher'}}
-          {{#if subactivityCount}}
-            <div class="dropdown">
-              <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
-              <ul class="dropdown-menu">
-                {{#each subactivities}}
-                  <li class="subactivityChoice"><a href="#">{{{title}}}{{{tags}}}</a></li>
-                {{/each}}
-              </ul>
-            </div>          
-          {{/if}}
+      {{#if isInRole 'teacher'}}
+        {{#if inBlockHeader}}
+          <div class="dropdown">
+            <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
+            <ul class="dropdown-menu">
+              {{#each subactivities}}
+                <li class="subactivityChoice"><a href="#">{{{title}}}{{{tags}}}</a></li>
+              {{/each}}
+            </ul>
+          </div>          
+        {{/if}}       
+      {{/if}}
+      {{#if inEditedWall ../wallID}}
+        <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
+        {{>showHide collection='Activities' itemName='activity' item=this}}
+        {{#if canDelete}}
+          <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
         {{/if}}
+        {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
+        {{#if isInRole 'teacher'}}
+          <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
+        {{/if}}
+        <a>{{{tags}}}</a>
+      {{else}}
         {{> workPeriodButton workPeriod}}
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
-        {{#if isInRole 'teacher'}}
-          <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a> 
-        {{/if}}       
-        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}{{{tags}}}</a>        
-      {{else}}
-        {{#if inEditedWall ../wallID}}
-          <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
-          {{>showHide collection='Activities' itemName='activity' item=this}}
-          {{#if canDelete}}
-            <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
-          {{/if}}
-          {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
-          {{#if isInRole 'teacher'}}
-            <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
-          {{/if}}
-          <a>{{{tags}}}</a>
-        {{else}}
-          {{> workPeriodButton workPeriod}}
-          <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
-          <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
-          <i class="activityPunctual {{late}}" title="late"></i>
-          <a  href="{{pathFor 'activityPage' _id=pointsTo}}">
-            {{{title}}}{{{tags}}}
-          </a>        
-        {{/if}}
+        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">
+          {{{title}}}{{{tags}}}
+        </a>        
       {{/if}}
     </p>
 </template>

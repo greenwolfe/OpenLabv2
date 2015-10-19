@@ -388,15 +388,14 @@ Template.subactivityItem.helpers({
     var numSubActivities = Activities.find({pointsTo:this._id}).count();
     return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
   },
-  subactivityCount: function() {
-    return Activities.find({pointsTo:this.pointsTo}).count() - 1;
-  },
   subactivities: function() {
     return Activities.find({pointsTo:this.pointsTo});
   },
-  isInAssessmentBlock: function() {
-    var parentData = Template.parentData();
-    return (parentData.type == 'assessment');
+  inBlockHeader: function() {
+    var tmpl = Template.instance();
+    console.log(tmpl);
+    var subactivityItem = tmpl.$('p.aItem');
+    return (subactivityItem.parent('.subactivityItemInHeader'));
   },
   workPeriod: function () {
     //find existing workPeriod
