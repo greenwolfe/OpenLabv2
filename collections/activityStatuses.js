@@ -23,13 +23,14 @@ Meteor.methods({
       throw new Meteor.Error('onlyChangeOwnStatus',"Only a teacher can change someone else's activity status.")
 
     var statuses = ['nostatus','submitted','returned','donewithcomments','done']
-    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    var oldStatus = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
     var oneMinuteAgo = moment().subtract(1,'minute').toDate();
     var rightNow = new Date();
-    if (status) {
-      var i = statuses.indexOf(status.level);
+    if (oldStatus) {
+      var status = {increment:oldStatus.increment};
+      var i = statuses.indexOf(oldStatus.level);
       doneIndex = statuses.length - 1;
-      if (status.incrementedAt < oneMinuteAgo) status.increment = 1; //going up by default
+      if (oldStatus.incrementedAt < oneMinuteAgo) status.increment = 1; //going up by default
       if (i == 0) status.increment = 1; //only way to go
       if (cUisTeacher) {
         if (i == doneIndex) { /*DONE*/
@@ -46,12 +47,10 @@ Meteor.methods({
         if (i == doneIndex - 2) /*RETURNED*/ status.increment = -1; //teacher returned work, so student decrements to indicate they are working on revisions or have submitted them
         if (i == doneIndex - 3) /*SUBMITTED*/ status.increment = -1; //only teacher marks as returned or done
       }
-      var statusID = status._id;
-      status = {};
       status.level = statuses[i + status.increment];
       status.incrementedBy = cU._id;
       status.incrementedAt = new Date();
-      return ActivityStatuses.update(statusID,{$set:status});
+      return ActivityStatuses.update(oldStatus._id,{$set:status});
     } else { //no status exists yet, level has been displayed as 0 by default  
       status = {
         studentID:studentID,

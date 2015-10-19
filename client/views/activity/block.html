@@ -1,9 +1,17 @@
 <Template name='block'>
-  <div class="raiseHands avoidwrap {{raiseHand}}">
+  <!--<div class="raiseHands avoidwrap {{raiseHand}}">
       <i class="{{virtualWorkStatus}}"></i>
-  </div>
+  </div>-->
+  {{#with subactivity}}
+    <div class="block">
+      <div class="subactivityItemInHeader">
+        {{> subactivityItem}}
+      </div>
+    </div>
+  {{/with}}  
   <div class="block block-{{type}} panel panel-default row">
-    <div class="panel-heading" assessment={{isAssessmentBlock}}>
+    <!--<div class="panel-heading" assessment={{isAssessmentBlock}}> -->
+    <div class="panel-heading">
       <div>
         {{#if editingBlock}}  <!-- in edited wall AND have permissions to edit it -->
           <div class="pull-right">
@@ -27,23 +35,23 @@
           <div class="pull-right">
             <!--<i class="transparentBox buttonRaiseVirtualHand"></i>-->
           </div>
-          {{#unless isAssessmentBlock}}
+          <!--{{#unless isAssessmentBlock}}-->
             <div class="blockTitle">{{{title}}}</div>
-          {{/unless}}
+          <!--{{/unless}}-->
         {{/unless}}
       </div>
       <div>
-        {{#if isAssessmentBlock}}
+       <!-- {{#if isAssessmentBlock}}
           {{#with subactivity}}
             <div class="subactivityItemInHeader">
               {{> subactivityItem}}
             </div>
           {{/with}}
-        {{else}}
+        {{else}} -->
           {{#if editingBlock}}
             {{>summernote collection='Blocks' field='title' _id=_id enabled=inEditedWall options=summernoteTitleOptions}}
           {{/if}}
-        {{/if}}
+       <!-- {{/if}} -->
       </div>
     </div>
     {{#if canView}}

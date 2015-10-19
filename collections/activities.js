@@ -182,6 +182,7 @@ Meteor.methods({
   activitySetTag: function(activityID,tag) {
     check(activityID,Match.idString);
     check(tag,String);
+    tag = _.str.trim(tag);
 
     var cU = Meteor.user(); //currentUser
     if (!cU)  
