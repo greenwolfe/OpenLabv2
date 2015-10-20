@@ -142,7 +142,7 @@ body div.container {
     font-size: small;
     padding: 0;
 }
-.block div.panel-heading[assessment=true] {
+.block div.panel-heading[assessment=true], div.block > div.subactivityItemInHeader {
   background-color: #9f9f9f;
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#efefef), color-stop(25%, #efefef), to(#9f9f9f));
   background-image: -webkit-linear-gradient(#efefef, #efefef 25%, #9f9f9f);
@@ -165,6 +165,9 @@ body div.container {
 }
 .block p.file a.showHide {
   font-size: large;
+}
+.block p.aItem {
+  margin-bottom: 0;
 }
 .block p.aItem a {
     color: #555555;

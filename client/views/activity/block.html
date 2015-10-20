@@ -1,9 +1,17 @@
 <Template name='block'>
-  <div class="raiseHands avoidwrap {{raiseHand}}">
+  <!--<div class="raiseHands avoidwrap {{raiseHand}}">
       <i class="{{virtualWorkStatus}}"></i>
-  </div>
+  </div>-->
+  {{#with subactivity}}
+    <div class="block">
+      <div class="subactivityItemInHeader">
+        {{> subactivityItem}}
+      </div>
+    </div>
+  {{/with}}  
   <div class="block block-{{type}} panel panel-default row">
-    <div class="panel-heading" assessment={{isAssessmentBlock}}>
+    <!--<div class="panel-heading" assessment={{isAssessmentBlock}}> -->
+    <div class="panel-heading">
       <div>
         {{#if editingBlock}}  <!-- in edited wall AND have permissions to edit it -->
           <div class="pull-right">
@@ -24,26 +32,26 @@
           </div>
         {{/if}}
         {{#unless editingBlock}}
-          <div class="pull-right">
-            <!--<i class="transparentBox buttonRaiseVirtualHand"></i>-->
-          </div>
-          {{#unless isAssessmentBlock}}
+          <!--<div class="pull-right">
+            <i class="transparentBox buttonRaiseVirtualHand"></i>
+          </div>-->
+          <!--{{#unless isAssessmentBlock}}-->
             <div class="blockTitle">{{{title}}}</div>
-          {{/unless}}
+          <!--{{/unless}}-->
         {{/unless}}
       </div>
       <div>
-        {{#if isAssessmentBlock}}
+       <!-- {{#if isAssessmentBlock}}
           {{#with subactivity}}
             <div class="subactivityItemInHeader">
               {{> subactivityItem}}
             </div>
           {{/with}}
-        {{else}}
+        {{else}} -->
           {{#if editingBlock}}
             {{>summernote collection='Blocks' field='title' _id=_id enabled=inEditedWall options=summernoteTitleOptions}}
           {{/if}}
-        {{/if}}
+       <!-- {{/if}} -->
       </div>
     </div>
     {{#if canView}}
@@ -147,27 +155,30 @@
 
 <template name = 'subactivityItem'>
     <p class="aItem">
-      {{#if isInAssessmentBlock}}
+      {{#if inBlockHeader}}
         {{#if isInRole 'teacher'}}
-          {{#if subactivityCount}}
-            <div class="dropdown">
-              <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
-              <ul class="dropdown-menu">
-                {{#each subactivities}}
-                  <li class="subactivityChoice"><a href="#">{{{title}}}{{{tags}}}</a></li>
-                {{/each}}
-              </ul>
-            </div>          
-          {{/if}}
-        {{/if}}
+          <div class="dropdown">
+            <a class="glyphicon glyphicon-triangle-bottom assessmentAssociateSubactivity pull-right dropdown-toggle" data-toggle="dropdown" title="Associate this assessment with a different subactivity."></a>
+            <ul class="dropdown-menu">
+              {{#each subactivities}}
+                <li class="subactivityChoice"><a href="#">{{{title}}}{{{tags}}}</a></li>
+              {{/each}}
+              <li class="chooseNoSubactivity"><a href="#">None</a></li>
+            </ul>
+          </div> 
+        {{/if}}    
         {{> workPeriodButton workPeriod}}
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="late"></i>
         {{#if isInRole 'teacher'}}
-          <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a> 
-        {{/if}}       
-        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">{{{title}}}{{{tags}}}</a>        
+          {{#if inEditedWall ../wallID}}
+            <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
+          {{/if}}
+        {{/if}}
+        <a  href="{{pathFor 'activityPage' _id=pointsTo}}">
+          {{{title}}}{{{tags}}}
+        </a>           
       {{else}}
         {{#if inEditedWall ../wallID}}
           <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
