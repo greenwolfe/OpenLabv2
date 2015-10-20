@@ -86,7 +86,7 @@ Meteor.methods({
     block.teacherText = ''; //probably deprecated
     block.embedCode = '';
     block.standardIDs = [];
-    block.subActivityID = (block.type == 'assessment') ? block.activityID : '';
+    block.subActivityID = '';
 
     //move other blocks in column down to make room
     var ids = _.pluck(Blocks.find({columnID:block.columnID},{fields: {_id: 1}}).fetch(), '_id');
@@ -201,7 +201,7 @@ Meteor.methods({
       teacherText: Match.Optional(String),  //workSubmit
       embedCode: Match.Optional(String),    //embed
       raiseHand: Match.Optional(Match.OneOf('visible','')), //only partially implemented (all?)
-      subActivityID: Match.Optional(Match.idString), //assessment
+      subActivityID: Match.Optional(Match.OneOf(Match.idString,'')), //assessment
       standardIDs: Match.Optional([Match.idString]) //assessment ... also set using assessmentAddStandard and assessmentRemoveStandard, or just deprecate those?
           //careful with this method for standard IDS ... none of the checks to avoid deleting a standard that has already been assessed are in place!
           

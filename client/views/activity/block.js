@@ -49,7 +49,24 @@ Template.block.helpers({
     return LevelsOfMastery.find({assessmentID:this._id}).count();
   },
   subactivity: function() {
-    return Activities.findOne(this.subActivityID);
+    var subactivity = Activities.findOne(this.subActivityID);
+    if (subactivity) {
+      subactivity.inBlockHeader = true;
+      return subactivity;
+    }
+    var cU = Meteor.userId();
+    if (inEditedWall(this.wallID) && Roles.userIsInRole(cU,'teacher')) {
+      subactivity = Activities.findOne(FlowRouter.getParam('_id'));
+      if (subactivity) {
+        subactivity.inBlockHeader = true;
+        subactivity.tag = '';
+        subactivity.title = "link activity to this block"
+        subactivity._id = '';
+        return subactivity;
+      }
+      return '';
+    }
+    return '';
   },
   virtualWorkStatus: function() {
     return 'icon-raise-virtual-hand';
@@ -391,12 +408,6 @@ Template.subactivityItem.helpers({
   subactivities: function() {
     return Activities.find({pointsTo:this.pointsTo});
   },
-  inBlockHeader: function() {
-    var tmpl = Template.instance();
-    console.log(tmpl);
-    var subactivityItem = tmpl.$('p.aItem');
-    return (subactivityItem.parent('.subactivityItemInHeader'));
-  },
   workPeriod: function () {
     //find existing workPeriod
     var workPeriod =  WorkPeriods.findOne({
@@ -515,6 +526,10 @@ Template.subactivityItem.events({
     if (subactivity._id != block.subActivityID) 
       Meteor.call('updateBlock',{_id:block._id,subActivityID:subactivity._id},alertOnError);
     event.preventDefault();
+  },
+  'click li.chooseNoSubactivity': function(event,tmpl) {
+    var block = Template.parentData();
+    Meteor.call('updateBlock',{_id:block._id,subActivityID:''},alertOnError);
   },
   'click .activityProgress': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
