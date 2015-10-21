@@ -537,6 +537,7 @@ Template.subactivityItem.events({
   'click li.chooseNoSubactivity': function(event,tmpl) {
     var block = Template.parentData();
     Meteor.call('updateBlock',{_id:block._id,subActivityID:''},alertOnError);
+    event.preventDefault();
   },
   'click .activityProgress': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
