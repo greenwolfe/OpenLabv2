@@ -49,6 +49,8 @@ Template.block.helpers({
     return LevelsOfMastery.find({assessmentID:this._id}).count();
   },
   subactivity: function() {
+    if (this.type == 'subactivities')
+      return ''; //don't put subactivity in header of subactivity block ... redundant and possibly confusing
     var subactivity = Activities.findOne(this.subActivityID);
     var wall = Walls.findOne(this.wallID);
     if (subactivity) {
