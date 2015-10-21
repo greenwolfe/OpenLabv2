@@ -126,11 +126,11 @@
         {{#if canDelete}}
           <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>
         {{/if}}--> 
-        {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
         <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
         <a>
         {{{tags}}}
         </a>
+        {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
         {{> workPeriodButton workPeriod}}
         <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>

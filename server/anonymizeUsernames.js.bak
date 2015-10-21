@@ -13,7 +13,7 @@ Meteor.startup(function () {
         Meteor.users.update(user._id,{$set: {emails:[]}});
         Accounts.setPassword(user._id,"Pa33word");
       } 
-      if (Roles.userIsInRole(user._id,'parent')) {
+      if (Roles.userIsInRole(user._id,'parentOrAdvisor')) {
         parentIndex += 1;
         username = 'parent' + parentIndex;
         Meteor.users.update(user._id,{$set: {'username': username }});

@@ -50,8 +50,10 @@ Template.block.helpers({
   },
   subactivity: function() {
     var subactivity = Activities.findOne(this.subActivityID);
+    var wall = Walls.findOne(this.wallID);
     if (subactivity) {
       subactivity.inBlockHeader = true;
+      subactivity.inTeacherWall = (wall.type == 'teacher');
       return subactivity;
     }
     var cU = Meteor.userId();
@@ -59,6 +61,7 @@ Template.block.helpers({
       subactivity = Activities.findOne(FlowRouter.getParam('_id'));
       if (subactivity) {
         subactivity.inBlockHeader = true;
+        subactivity.inTeacherWall = (wall.type == 'teacher');
         subactivity.tag = '';
         subactivity.title = "link activity to this block"
         subactivity._id = '';
@@ -406,7 +409,7 @@ Template.subactivityItem.helpers({
     return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
   },
   subactivities: function() {
-    return Activities.find({pointsTo:this.pointsTo});
+    return Activities.find({pointsTo:this.pointsTo}).fetch();
   },
   workPeriod: function () {
     //find existing workPeriod
@@ -499,6 +502,10 @@ Template.subactivityItem.helpers({
     var tags = '';
     if (this.tag) 
       tags += ' (' + this.tag + ')';
+    var block = Template.parentData();
+    var wall = Walls.findOne(block.wallID);
+    if ((wall.type == 'teacher') && (this.inBlockHeader))
+      return tags;
     if ((status) && (status.tag))
       tags += '<strong> (' + status.tag + ')</strong>';
     return tags;    
