@@ -49,7 +49,7 @@ Template.activityTagsPopoverX.helpers({
     var title = activity.title;
     if (activity.tag)
       title += ' (' + activity.tag + ')';
-    if (status.tag)
+    if (status.tag && (!activity.inBlockHeader || !activity.inTeacherWall))
       title += ' <strong>(' + status.tag + ')</strong>';
     return title || 'Add/change tags';
   },
@@ -61,6 +61,16 @@ Template.activityTagsPopoverX.helpers({
   },
   recentTags: function() {
     return Tags.find({},{sort:{frequency: -1,date:-1},limit:10});
+  },
+  inBlockHeaderInTeacherWall: function() {
+    var tmpl = Template.instance();
+    var activity = tmpl.activity.get();
+    if (activity) {
+      var inBlockHeader = activity.inBlockHeader || false;
+      var inTeacherWall = activity.inTeacherWall || false;
+      return (inBlockHeader && inTeacherWall);
+    }
+    return false;    
   }
 })
 
