@@ -65,7 +65,7 @@ Template.block.helpers({
         subactivity.inBlockHeader = true;
         subactivity.inTeacherWall = (wall.type == 'teacher');
         subactivity.tag = '';
-        subactivity.title = "link activity to this block"
+        subactivity.title = "link an activity to this block"
         subactivity._id = '';
         return subactivity;
       }

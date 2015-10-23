@@ -58,7 +58,7 @@
   <p class='calendarEvent'>
     <!-- need pointsToOrID helper, copy from activity item and group members names-->
     <a href="{{pathFor 'activityPage' _id=pointsToOrID}}" title="group members">
-      {{title}}
+      {{title}} {{#if tag}}({{{tag}}}){{/if}} {{#if statusTag}} <strong>({{{statusTag}}})</strong>{{/if}}
     </a>
     <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}
     <a class="glyphicon glyphicon-remove deleteCalendarEvent" title="Delete Event"></a>-->

@@ -1,0 +1,24 @@
+div#addCalendarEventModal p.activityForChoosing {
+  background-color: #afafaf;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#afafaf));
+  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #afafaf);
+  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  background-image: linear-gradient(#ffffff, #ffffff 25%, #afafaf);
+  margin-right: 5px;
+  padding-top: 5px;
+  display: inline-block;
+  max-width: 33%;
+}
+div#addCalendarEventModal p.activityForChoosing.active {
+  background-color: #377AB7;
+  background-image: linear-gradient(#ffffff, #ffffff 25%, #377AB7);
+}
+div#addCalendarEventModal p.activityForChoosing a {
+    color: #555555;
+    font-size: small;
+}
+div#addCalendarEventModal p.activityForChoosing.active {
+  background-color: #337AB7;
+}

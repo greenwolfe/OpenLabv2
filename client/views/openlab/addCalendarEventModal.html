@@ -26,15 +26,15 @@
                       </li>
                     {{/each}}
                   </ul>
-                  <ul class="nav nav-pills">
+                  <div id='#calEventModalActivitiesList'>
                     {{#with activeUnit}}
                         {{#each activeUnitActivities}}
-                          <li class="activityForChoosing {{activeActivity}}">
-                            <a href="#">{{title}}</a>
-                          </li>
+                          <p class="activityForChoosing {{activeActivity}}">
+                            <a href="#">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
+                          </p>
                         {{/each}}
                     {{/with}}
-                  </ul>
+                  </div>
                 </div>
               </div>
             </div>

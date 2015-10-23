@@ -92,6 +92,7 @@ Template.calendarDay.events({
     $('#addCalendarEventModal').modal();
   },
   'click div.daysEvents p.calendarEvent': function(event,tmpl) {
+    //don't open modal if click on an existing calendar event
     event.stopPropagation();
   }
 });
@@ -112,6 +113,17 @@ Template.calendarEvent.events({
 Template.calendarEvent.helpers({
   title: function() {
     return (this.activityID) ? Activities.findOne(this.activityID).title : this.title;
+  },
+  tag: function() {
+    return (this.activityID) ? Activities.findOne(this.activityID).tag : '';
+  },
+  statusTag: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activity = (this.activityID) ? Activities.findOne(this.activityID) : null;
+    if (!studentID || !activity)
+      return '';
+    var status = ActivityStatuses.findOne({studentID: studentID,activityID: this.activityID});
+    return (status) ? status.tag : '';
   },
   pointsToOrID: function() {
     var activity = Activities.findOne(this.activityID);
