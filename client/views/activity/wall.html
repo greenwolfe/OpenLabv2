@@ -30,7 +30,7 @@
         {{#if inEditedWall}}
           {{>helpBannerNavPills messages=helpMessages}}
         {{/if}}
-        {{#if Template.subscriptionsReady}}
+        {{#if initialColumnSubscriptionReady}}
           {{#each columns}}
             {{> column}}
           {{/each}}
