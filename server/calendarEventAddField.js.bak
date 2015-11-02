@@ -1,0 +1,8 @@
+Meteor.startup(function () {
+  CalendarEvents.find().forEach(function(cE) {
+    CalendarEvents.update(cE._id,{$set: {
+      dataValidated: true,
+      day: moment(cE.date).format('ddd')
+    }});
+  });
+});

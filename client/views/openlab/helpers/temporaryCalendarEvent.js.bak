@@ -1,0 +1,26 @@
+TemporaryCalendarEvents = new Meteor.Collection(null);
+
+Meteor.startup(function () {
+    var calendarEvent = {
+      date: new Date(),
+      activityID: null,      
+      workplace: 'OOC',
+      title: '', 
+      note: '', 
+      startTime: null,
+      endTime: null,
+      nameOfTimePeriod: '',
+      modifiedBy: '', 
+      modifiedOn: '',           
+      group: [], 
+      invite: [], 
+      createdBy: '',              
+      createdOn: '',           
+      visible: true    
+    }
+    
+    Meteor.call('insertTemporaryCalendarEvent',calendarEvent);
+});
+//insert, update and delete methods in collections, so they
+//can be called like other methods, but they first check
+//for where they are running and only run on the client

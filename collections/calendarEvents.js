@@ -6,22 +6,29 @@ Meteor.methods({
   insertCalendarEvent: function(calendarEvent) {
     check(calendarEvent,{
       //required fields to create the new calendar event
-      activityID: Match.OneOf(Match.idString,null),
       date: Date,
       group: [Match.idString], //contains userIDs, sectionIDs, or siteID
-      invite: [Match.idString], //contains only userIDs
-                                //only a teacher would invite the entire section or all students, in which case the event should 
-                                //show up in the calendar with no chance to decline and no need to accept an invitation
-      workplace: Match.OneOf('OOC','FTF','HOM'),
-
-      title: Match.Optional(Match.nonEmptyString), //must be present if activityID is null, otherwise filled from activity
+  
+      //fields required for validation
+      activityID: Match.Optional(Match.OneOf(Match.idString,null)), //or title
+      title: Match.Optional(String), //must be present if activityID is null, otherwise filled from activity
+      workplace: Match.Optional(Match.OneOf('OOC','FTF','HOM','')),
       note: Match.Optional(String), 
-      startTime: Date,
-      endTime: Date,
-      nameOfTimePeriod: Match.Optional(String)
+      //these three currently not required ... not yet implemented
+      startTime: Match.Optional(Date),
+      endTime: Match.Optional(Date),
+      nameOfTimePeriod: Match.Optional(String),
+
+      //fields whose value would have to be passed in, but are not required for validation
+      invite: Match.Optional([Match.idString])  
+          //contains only userIDs
+          //only a teacher would invite the entire section or all students, in which case the event should 
+          //show up in the calendar with no chance to decline and no need to accept an invitation
 
       /*fields that will be initially filled based on the information passed in
-      createdBy: Match.idString,              //current user
+      dataValidated: Match.Optional(Boolean), //certain data required to be validated
+      day: Match.Optional(Match.OneOf('Mon','Tue','Wed','Thu','Fri','Sat','Sun')),
+      createdBy: Match.Optional(Match.idString),  //current user
       createdOn: Match.Optional(Date),            //today's date
       modifiedBy: Match.Optional(Match.idString), //current user
       modifiedOn: Match.Optional(Date),           //current date
@@ -36,29 +43,8 @@ Meteor.methods({
       throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new calendar events.");
     if (!Roles.userIsInRole(cU,['student','teacher']))
       throw new Meteor.Error('notStudentOrTeacher','Only teachers and students may post events to the calendar.'); 
-    //if student, check if frozen
-
-    calendarEvent.createdBy = cU._id;
-    calendarEvent.modifiedBy = cU._id;
-    var today = new Date();
-    calendarEvent.createdOn = today;
-    calendarEvent.modifiedOn = today;
-    calendarEvent.visible = true;
-    if (!('note' in calendarEvent))
-      calendarEvent.note = '';
-    if (!('nameOfTimePeriod' in calendarEvent))
-      calendarEvent.nameOfTimePeriod = '';
-
-    if (!calendarEvent.activityID && !('title' in calendarEvent)) {
-      throw new Meteor.Error('mustHaveTitle','Cannot post calendar event.  Must have a valid activityID or title');
-    } else {
-      var activity = Activities.findOne(calendarEvent.activityID);
-      if (!activity)
-        throw new Meteor.Error('invalidActivity','Cannot post calendar event.  Invalid activity ID.');
-      calendarEvent.title = activity.title;
-    }
-
     //group list contains valid users (students or teachers), sections or site
+    
     calendarEvent.group.forEach(function(ID) {
       var studentOrTeacher = Meteor.users.findOne(ID);
       if (studentOrTeacher) {
@@ -74,7 +60,75 @@ Meteor.methods({
     });
     if (Roles.userIsInRole(cU,'student') && !_.contains(calendarEvent.group,cU._id))
       throw new Meteor.Error('notPartOfGroup', 'Cannot create calendar event unless you are part of the group.');      
+      //if student, check if frozen
+    if (Roles.userIsInRole(cU,'teacher') && calendarEvent.group.length == 0)
+     throw new Meteor.Error('noGroup', 'Cannot create calendar event without at least one individual in the group.');      
 
+    calendarEvent.day = moment(calendarEvent.date).format('ddd');
+    calendarEvent.createdBy = cU._id;
+    calendarEvent.modifiedBy = cU._id;
+    var today = new Date();
+    calendarEvent.createdOn = today;
+    calendarEvent.modifiedOn = today;
+    calendarEvent.visible = true;
+
+    calendarEvent.dataValidated = true; //but set false if certain things don't check out below
+    //activityID and title
+    var justTheText = '';
+    if (calendarEvent.title) {
+      justTheText = _.str.clean(
+        _.str.stripTags(
+          _.unescapeHTML(
+            calendarEvent.title.replace(/&nbsp;/g,'')
+      )));
+      if (!justTheText)
+        calendarEvent.title = '';
+    }
+    if (calendarEvent.activityID) {
+      var activity = Activities.findOne(calendarEvent.activityID);
+      if (!activity)
+        throw new Meteor.Error('invalidActivity','Cannot post calendar event.  Invalid activity ID.');
+      calendarEvent.title = '';
+    } else if (calendarEvent.title) {
+      calendarEvent.activityID == null;
+    } else {
+      calendarEvent.title = '';
+      calendarEvent.activityID = null;
+      calendarEvent.dataValidated = false;
+    }
+
+    //workplace
+    if (!('workplace' in calendarEvent))
+      calendarEvent.workplace = '';
+    if (!calendarEvent.workplace)
+      calendarEvent.dataValidated = false;
+    //note
+    if (!('note' in calendarEvent)) 
+      calendarEvent.note = '';
+    if (calendarEvent.note) {
+      justTheText = _.str.clean(
+        _.str.stripTags(
+          _.unescapeHTML(
+            calendarEvent.note.replace(/&nbsp;/g,'')
+      )));
+      if (!justTheText)
+        calendarEvent.note = '';
+    }
+    if (!calendarEvent.note)
+      calendarEvent.dataValidated = false;
+
+    //time period - name, startTime, endTiime
+    //currently not used ... will be filled in later
+    //therefore dataValidated not set to false
+    if (!('nameOfTimePeriod' in calendarEvent))
+      calendarEvent.nameOfTimePeriod = '';
+    if (!'startTime' in calendarEvent)
+      calendarEvent.startTime = calendarEvent.date;
+    if (!'endTime' in calendarEvent)
+      calendarEvent.endTime = calendarEvent.date;
+
+    if (!calendarEvent.invite)
+      calendarEvent.invite = [];
     calendarEvent.invite.forEach(function(ID) {
       //invite list can only contain IDs of teachers or students
       //if a teacher creates an event for a whole section or all students, they cannot decline and there is no need to accept an invite
@@ -175,7 +229,7 @@ Meteor.methods({
     CalendarEvents.update(eventID,{$addToSet: {invite : user._id} });
   },
 
-  /***** INVITE ANOTHER ****/
+  /***** ADD DIRECTLY TO GROUP ****/
   addToCalendarGroup: function(eventID,ID) {
     check(eventID,Match.idString);
     check(ID,Match.idString);
@@ -217,6 +271,8 @@ Meteor.methods({
       //values passed in will be ignored
       modifiedBy: Match.Optional(Match.idString), //current user
       modifiedOn: Match.Optional(Date),           //current date
+      day: Match.Optional(Match.OneOf('Mon','Tue','Wed','Thu','Fri','Sat','Sun')),
+      dataValidated: Match.Optional(Boolean),
 
       // fields that should not be changed.  Can be passed in, but will be replaced with values from event
       group: Match.Optional([Match.idString]), //Only changed by accepting invite
@@ -243,8 +299,37 @@ Meteor.methods({
 
     calendarEvent.modifiedBy = cU._id;
     calendarEvent.modifiedOn = new Date();
+    if (calendarEvent.date) 
+      calendarEvent.day = moment(calendarEvent.date).format('ddd');
 
-    var fields = ['date','activityID','workplace','title','note','startTime','endTime','nameOfTimePeriod','modifiedBy','modifiedOn'];
+    if (calendarEvent.title) {
+      var justTheText = _.str.clean(
+        _.str.stripTags(
+          _.unescapeHTML(
+            calendarEvent.title.replace(/&nbsp;/g,'')
+      )));
+      if (!justTheText)
+        calendarEvent.title = '';
+    }
+    if (calendarEvent.activityID) {
+      var activity = Activities.findOne(calendarEvent.activityID);
+      if (activity)
+        calendarEvent.title = '';
+    } else if (calendarEvent.title) {
+      calendarEvent.activityID == null;
+    }
+
+    if (calendarEvent.note) {
+      justTheText = _.str.clean(
+        _.str.stripTags(
+          _.unescapeHTML(
+            calendarEvent.note.replace(/&nbsp;/g,'')
+      )));
+      if (!justTheText)
+        calendarEvent.note = '';
+    }
+
+    var fields = ['date','activityID','workplace','title','note','startTime','endTime','nameOfTimePeriod','modifiedBy','modifiedOn','day','dataValidated'];
     fields.forEach(function(field) {
       if ((field in calendarEvent) && (calendarEvent[field] != originalCE[field])) {
         var set = {};
@@ -252,6 +337,22 @@ Meteor.methods({
         CalendarEvents.update(calendarEvent._id,{$set: set});
       }
     });
+
+    var updatedCE = CalendarEvents.findOne(calendarEvent._id); //calendarEvent
+    updatedCE.dataValidated = true; //but set false if certain things don't check out below
+    if (!updatedCE.activityID && !updatedCE.title)
+      updatedCE.dataValidated = false;
+    if (!updatedCE.workplace)
+      updatedCE.dataValidated = false;
+    if (!updatedCE.note) 
+      updatedCE.dataValidated = false;
+
+    //time period - name, startTime, endTiime
+    //currently not used ... will be filled in later
+    //therefore not checked and dataValidated not set to false
+    if (updatedCE.dataValidated != originalCE.dataValidated)
+      CalendarEvents.update(calendarEvent._id,{$set: {dataValidated:updatedCE.dataValidated}});
+
     return calendarEvent._id; 
   },
 

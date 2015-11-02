@@ -3,50 +3,51 @@
 </body>
 
 <template name="addCalendarEventModal">
-  {{#with calendarEvent}}
-    <div id="addCalendarEventModal" class="modal">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <span class="text-center">
-              {{formatDate date}} <h3>{{title}}</h3>
-              </span>
-            </div>
-            <div class="modal-body">
-              <div class="container-fluid">
-                <div class="row">
-                  <h4 class="text-center">Select an activity</h4>
-                  <ul id='units' class="nav nav-pills">
-                    {{#each units}}
-                      <li class="unitTitle {{active}}">
-                        <a class='displayTitle' lang="en" href="#" title="{{longname}}"> 
-                          {{{title}}}
-                        </a>
-                      </li>
+  <div id="addCalendarEventModal" class="modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          {{#with calendarEvent}}
+            {{formatDate date}} <h3>{{{title}}}</h3><p class="text-center">{{{tags}}}</p>
+          {{/with}}
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row">
+              <h4 class="text-center">Select an activity</h4>
+              <ul id='units' class="nav nav-pills">
+                {{#each units}}
+                  <li class="unitTitle {{active}}">
+                    <a class='displayTitle' lang="en" href="#" title="{{longname}}"> 
+                      {{{title}}}
+                    </a>
+                  </li>
+                {{/each}}
+              </ul>
+              <div id='calEventModalActivitiesList'>
+                {{#with activeUnit}}
+                    {{#each activeUnitActivities}}
+                      <p class="activityForChoosing {{activeActivity}}">
+                        <a href="#">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
+                      </p>
                     {{/each}}
-                  </ul>
-                  <div id='#calEventModalActivitiesList'>
-                    {{#with activeUnit}}
-                        {{#each activeUnitActivities}}
-                          <p class="activityForChoosing {{activeActivity}}">
-                            <a href="#">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
-                          </p>
-                        {{/each}}
-                    {{/with}}
-                  </div>
-                </div>
+                {{/with}}
+                <p> <strong>Work plan and Progress: </strong>Before you start, note what will you be working on,i.e. what part of the activity you will do.  Afterwards, note how much progress you made.</p>
+                <div id="calEventModalNote"></div>
               </div>
-            </div>
-            <div class="modal-footer">
-              {{#if dataValidated}}
-                <button class="btn btn-primary" id="saveCalendarEvent">
-                  Save
-                </button>
-              {{/if}}
             </div>
           </div>
         </div>
+        <div class="modal-footer bg-{{messageType}}">
+          {{#unless dataValidated}}
+            <p>Please fill in missing fields.</p>
+          {{/unless}}
+          <button class="btn btn-primary"  id="saveCalendarEvent">
+              Save
+          </button>
+        </div>
+      </div>
     </div>
-  {{/with}}
+  </div>
 </template>

@@ -73,12 +73,12 @@ Template.block.helpers({
     }
     return '';
   },
-  virtualWorkStatus: function() {
+  /*virtualWorkStatus: function() {
     return 'icon-raise-virtual-hand';
   },
   raiseHand: function () {
     return this.raiseHand || '';
-  },
+  },*/
   canView: function() {
     var cU = Meteor.user();
     if (!cU) return false;

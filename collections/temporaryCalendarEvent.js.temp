@@ -1,0 +1,107 @@
+//temporaryCalendarEvents = new Meteor.Collection(null);
+//collection defined only on client in /client/openlab/helpers/temporaryCalendarEvent.js
+//but methods are here because summernote needs to call them like other methods
+
+Meteor.methods({
+  insertTemporaryCalendarEvent: function(tCE) { 
+    check(tCE,{
+      _id: Match.Optional(Match.idString),
+      date: Date,
+      activityID: Match.OneOf(Match.idString,null),      
+      workplace: Match.OneOf('OOC','FTF','HOM'),
+      title: String, 
+      note: String, 
+      startTime: Match.OneOf(Date,null),
+      endTime: Match.OneOf(Date,null),
+      nameOfTimePeriod: String,
+
+      //fields that will be filled based on the information passed in.  
+      //values passed in will be ignored
+      modifiedBy: Match.OneOf(Match.idString,''), //current user
+      modifiedOn: Match.OneOf(Date,''),           //current date
+
+      // fields that should not be changed.  Can be passed in, but will be replaced with values from event
+      group: [Match.idString], //Only changed by accepting invite
+      invite: [Match.idString], //Only changed by add to invite
+      createdBy: Match.OneOf(Match.idString,''),              //current user
+      createdOn: Match.OneOf(Date,''),           
+      visible: Boolean //set in showHideMethod.js          
+    });
+    if (Meteor.isServer) //do not run on server
+      return;
+
+    //can only be one
+    TemporaryCalendarEvents.find().forEach(function(c) {
+      TemporaryCalendarEvents.remove(c._id);
+    })
+
+    //checked passing check and getting past call to remove
+    //insert call works, just not from method ... why?
+    return TemporaryCalendarEvents.insert(tCE);
+  },
+
+  deleteTemporaryCalendarEvent: function() {
+    if (Meteor.isServer) //do not run on server
+      return;  
+
+    Meteor.call('insertTemporaryCalendarEvent',{
+      date: new Date(),
+      activityID: null,      
+      workplace: 'OOC',
+      title: '', 
+      note: '', 
+      startTime: null,
+      endTime: null,
+      nameOfTimePeriod: '',
+      modifiedBy: '', 
+      modifiedOn: '',           
+      group: [], 
+      invite: [], 
+      createdBy: '',              
+      createdOn: '',           
+      visible: true    
+    })
+  },
+
+  updateTemporaryCalendarEvent: function(calendarEvent) {
+    check(calendarEvent,{
+      _id: Match.idString,
+      date: Match.Optional(Date),
+      activityID: Match.Optional(Match.OneOf(Match.idString,null)),      
+      workplace: Match.Optional(Match.OneOf('OOC','FTF','HOM')),
+      title: Match.Optional(Match.nonEmptyString), //can only change if activityID is null
+      note: Match.Optional(String), 
+      startTime: Match.Optional(Date),
+      endTime: Match.Optional(Date),
+      nameOfTimePeriod: Match.Optional(String),
+
+      //fields that will be filled based on the information passed in.  
+      //values passed in will be ignored
+      modifiedBy: Match.Optional(Match.idString), //current user
+      modifiedOn: Match.Optional(Date),           //current date
+
+      // fields that should not be changed.  Can be passed in, but will be replaced with values from event
+      group: Match.Optional([Match.idString]), //Only changed by accepting invite
+      invite: Match.Optional([Match.idString]), //Only changed by add to invite
+      createdBy: Match.Optional(Match.idString),              //current user
+      createdOn: Match.Optional(Date),            
+      visible: Match.Optional(Boolean) //set in showHideMethod.js          
+    });
+    if (Meteor.isServer) //do not run on server
+      return;
+
+    var originalCE = TemporaryCalendarEvents.findOne();
+    if (!originalCE)
+      Meteor.call('insertTemporaryCalendarEvent',calendarEvent);
+
+    var fields = ['date','activityID','workplace','title','note','startTime','endTime','nameOfTimePeriod','modifiedBy','modifiedOn','group','invite'];
+    fields.forEach(function(field) {
+      if ((field in calendarEvent) && (calendarEvent[field] != originalCE[field])) {
+        var set = {};
+        set[field] = calendarEvent[field];
+        TemporaryCalendarEvents.update(calendarEvent._id,{$set: set});
+      }
+    });
+    return calendarEvent._id;     
+  }
+});

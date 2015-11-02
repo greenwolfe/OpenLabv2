@@ -3,29 +3,40 @@
 /**********************************/
 
 Template.addCalendarEventModal.onCreated(function() {
-  this.calendarEvent = new ReactiveVar({});
   this.activeUnit = new ReactiveVar(openlabSession.get('activeUnit'));
 });
 
+Template.addCalendarEventModal.onRendered(function() {
+  this.$('#calEventModalNote').summernote({ //default/standard air popover toolbar
+    airMode: true,
+    airPopover: [
+      ['style',['style']],
+      ['color', ['color']],
+      ['fontname', ['fontname']],
+      ['fontsize', ['fontsize']],
+      ['supersub', ['superscript','subscript']],
+      ['font', ['bold', 'italic', 'strikethrough', 'underline', 'clear']],
+      ['para', ['ul', 'ol', 'paragraph']],
+      ['table', ['table']],
+      ['insert', ['link', 'picture','hr'/*,'video'*/]],
+      //['undoredo', ['undo','redo']], //leaving out for now ... not clear what is undone ... not a large queue of past changes, and ctrl-z, ctrl-shift-z reacts more like what you would expect
+      ['other',[/*'codeview','fullscreen',*/'help','hide']]
+      //ISSUE codeview, fullscreen, not working ... does it work from toolbar and just not from air mode?
+      //ISSUE video works, but can't resize it, no context menu as for image
+      //leaving out video for now, can use video blocks until this is better
+    ]
+  })
+})
+
 Template.addCalendarEventModal.events({
   'show.bs.modal #addCalendarEventModal': function(event,tmpl) {
-    var calendarEvent = Session.get('calendarEvent');
-    calendarEvent.group = calendarEvent.group || [Meteor.impersonatedOrUserId()];
-    calendarEvent.invite = calendarEvent.invite || [];
-    calendarEvent.workplace = 'OOC';
-    calendarEvent.note = calendarEvent.note || '';
-    calendarEvent.title = calendarEvent.title || '';
-    calendarEvent.activityID = calendarEvent.activityID || null;
-    calendarEvent.startTime = calendarEvent.date;
-    calendarEvent.endTime = calendarEvent.date;
-    var selectedSection = Meteor.selectedSection();
-    if (selectedSection) {
-      calendarEvent.nameOfTimePeriod = selectedSection.name || '';
-    } else {
-      calendarEvent.nameOfTimePeriod = '';
-    }
-    tmpl.calendarEvent.set(calendarEvent);
     tmpl.activeUnit.set(openlabSession.get('activeUnit'));
+    var note = '';
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    var calendarEvent =  CalendarEvents.findOne(calendarEventID);
+    if (calendarEvent)
+      note = calendarEvent.note;
+    $('#calEventModalNote').code(note);   
   }
 })
 
@@ -34,8 +45,31 @@ var dateFormat = "ddd, MMM D YYYY";
 
 Template.addCalendarEventModal.helpers({
   calendarEvent: function() {
-    var tmpl = Template.instance();
-    return tmpl.calendarEvent.get();
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    return CalendarEvents.findOne(calendarEventID);
+  },
+  title: function() {
+    if (this.title) return this.title;
+    if (this.activityID) {
+      var activity = Activities.findOne(this.activityID);
+      if (activity)
+        return activity.title;
+    }
+    return '';
+  },
+  tags: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = this.activityID;
+    var activity = Activities.findOne(activityID);
+    if (!activity)
+      return '';
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    var tags = '';
+    if (activity.tag) 
+      tags += ' (' + activity.tag + ')';
+    if ((status) && (status.tag))
+      tags += '<strong> (' + status.tag + ')</strong>';
+    return tags;    
   },
   formatDate: function(date) {
     return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
@@ -64,49 +98,45 @@ Template.addCalendarEventModal.helpers({
     })
   },
   activeActivity: function() {
-    var tmpl = Template.instance();
-    var calendarEvent = tmpl.calendarEvent.get();
-    if (!('activityID' in calendarEvent))
-      return '';
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    var calendarEvent =  CalendarEvents.findOne(calendarEventID);
+    if (!calendarEvent) return '';
     return (calendarEvent.activityID == this._id) ? 'active' : '';
   },
   dataValidated: function() {
-    var tmpl = Template.instance();
-    var calendarEvent = tmpl.calendarEvent.get();
-
-    return Match.test(calendarEvent,Match.ObjectIncluding({
-      activityID: Match.idString, //Match.oneOf(Match.idString,null), make more sophisticated later
-      date: Date,
-      group: [Match.idString], //contains userIDs, sectionIDs, or siteID
-      invite: [Match.idString], //contains only userIDs
-      workplace: Match.OneOf('OOC','FTF','HOM'),
-      title: Match.nonEmptyString, //must be present if activityID is null, otherwise filled from activity
-      note: String, 
-      startTime: Date,
-      endTime: Date,
-      nameOfTimePeriod: String
-    }));
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    var calendarEvent =  CalendarEvents.findOne(calendarEventID);
+    if (!calendarEvent) return false;
+    return (calendarEvent.dataValidated)
+  },
+  messageType: function() {
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    var calendarEvent =  CalendarEvents.findOne(calendarEventID);
+    if (!calendarEvent) return 'warning';
+    return (calendarEvent.dataValidated) ? 'success' : 'warning';
+  },
+  saveButtonDisabled: function() {
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    var calendarEvent =  CalendarEvents.findOne(calendarEventID);
+    if (!calendarEvent) return 'disabled';
+    return (this.dataValidated) ? '' : 'disabled';
   }
 })
 
 Template.addCalendarEventModal.events({
   'click .unitTitle' : function(event,tmpl) {
-    tmpl.activeUnit.set(this._id)
+    tmpl.activeUnit.set(this._id);
+    event.preventDefault();
   },
   'click .activityForChoosing' : function(event,tmpl) {
-    var calendarEvent = tmpl.calendarEvent.get();
-    calendarEvent.activityID = this._id;
     var activity = Activities.findOne(this._id);
-    calendarEvent.title = activity.title;
-    tmpl.calendarEvent.set(calendarEvent);
+    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
+    Meteor.call('updateCalendarEvent',{_id: calendarEventID,activityID: this._id,});
+    event.preventDefault();
   },
   'click #saveCalendarEvent' : function(event,tmpl) {
-    var calendarEvent = tmpl.calendarEvent.get();
-    if ('_id' in calendarEvent) {
-      Meteor.call('updateCalendarEvent',calendarEvent);
-    } else {
-      Meteor.call('insertCalendarEvent',calendarEvent);
-    }
+    var note = tmpl.$('#calEventModalNote').code();
+    console.log(note);
     $('#addCalendarEventModal').modal('hide');
   }
 })

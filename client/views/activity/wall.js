@@ -277,9 +277,6 @@ Template.studentStatus.helpers({
     return (this._id == Meteor.impersonatedId()) ? 'bg-primary' : '';
   },
   leftTheGroup: function(groupID) {
-    console.log('leftTheGroup');
-    console.log(groupID);
-    console.log(Meteor.dateLeftGroup(this._id,groupID));
     return Meteor.dateLeftGroup(this._id,groupID) ? 'text-warning' : '';
   },
   leavingDate: function(groupID) {
