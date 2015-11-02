@@ -26,19 +26,26 @@ Template.activityPage.onCreated(function() {
   if (Roles.userIsInRole(cU,'teacher') && Roles.userIsInRole(iU,'parentOrAdvisor')) 
     loginButtonsSession.set('viewAs',cU);
   activityPageSession.set('editedWall',null);
+  activityPageSession.set('columnSubscriptionReady',false);
+  activityPageSession.set('blockSubscriptionReady',false);
+  activityPageSession.set('fileSubscriptionReady',false);
 
   var instance = this;
   if (Roles.userIsInRole(cU,'teacher'))
     instance.subscribe('groupWalls',FlowRouter.getParam('_id'));
   instance.initialWallSubscriptionReady = new ReactiveVar(false);
   var wallSubscription, sectionwallSubscription;
+  var columnSubscription,blockSubscription,fileSubscription;
   instance.autorun(function() {
     var studentID = Meteor.impersonatedOrUserId();
     var activityID = FlowRouter.getParam('_id');
     var sectionID = Meteor.selectedSectionId();
     wallSubscription = instance.subscribe('walls', studentID,activityID);
     sectionwallSubscription = instance.subscribe('walls',sectionID,activityID);
- 
+    columnSubscription = instance.subscribe('columns', studentID,activityID);
+    blockSubscription = instance.subscribe('blocks', studentID,activityID);
+    fileSubscription = instance.subscribe('files', studentID,activityID);
+
     var activity = Activities.findOne(activityID);
     if (activity) {
       instance.subscribe('subActivityStatuses',studentID,activity.pointsTo);
@@ -51,6 +58,19 @@ Template.activityPage.onCreated(function() {
       if ((typeof sectionwallSubscription !== 'undefined') && sectionwallSubscription.ready()) 
         instance.initialWallSubscriptionReady.set(true);
     }
+  })
+
+  instance.autorun(function() {
+    if (typeof columnSubscription !== 'undefined')
+      activityPageSession.set('columnSubscriptionReady',columnSubscription.ready());
+  })
+  instance.autorun(function() {
+    if (typeof blockSubscription !== 'undefined')
+      activityPageSession.set('blockSubscriptionReady',blockSubscription.ready());
+  })
+  instance.autorun(function() {
+    if (typeof fileSubscription !== 'undefined')
+      activityPageSession.set('fileSubscriptionReady',fileSubscription.ready());
   })
 
   instance.autorun(function() {

@@ -1,8 +1,18 @@
 Template.wall.onCreated(function() {
   var instance = this;
-  instance.subscribe('columns', instance.data._id);
+//  instance.subscribe('columns', instance.data._id);
   instance.showStatus = new ReactiveVar(false);
   instance.whichGroups = new ReactiveVar("thisActivity");
+})
+
+Template.wall.onRendered(function() {
+    var instance = this;
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = FlowRouter.getParam('_id');
+    var sectionID = Meteor.selectedSectionId();
+    instance.subscribe('columns', studentID,activityID);
+    instance.subscribe('blocks', studentID,activityID);
+    instance.subscribe('files', studentID,activityID);
 })
 
 Template.wall.onDestroyed(function() {
@@ -10,6 +20,9 @@ Template.wall.onDestroyed(function() {
 })
 
 Template.wall.helpers({
+  initialColumnSubscriptionReady: function() {
+    return activityPageSession.get('columnSubscriptionReady');
+  },
   title: function() {
     if (this.type == 'teacher') return 'Teacher Wall';
     if (this.type == 'student') {

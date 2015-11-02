@@ -220,9 +220,8 @@ Template.fileBlock.onCreated(function() {
 })
 
 Template.fileBlock.helpers({
-  fileSubscriptionReady: function() {
-    var tmpl = Template.instance();
-    return tmpl.fileSubscription.ready();
+  initialFileSubscriptionReady: function() {
+    return activityPageSession.get('fileSubscriptionReady');
   },
   files: function() {
     var selector = {blockID:this._id};

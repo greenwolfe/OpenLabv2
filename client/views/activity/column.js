@@ -51,6 +51,9 @@ var getCreatedFor = function(wallID) {
 }
 
 Template.column.helpers({
+  initialBlockSubscriptionReady: function() {
+    return activityPageSession.get('blockSubscriptionReady');
+  },
   blocks: function() {
     return getBlocks(this);
   },

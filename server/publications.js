@@ -76,11 +76,6 @@ Meteor.publish('site',function() {
   return Site.find();
 });
 
-Meteor.publish('files',function(blockID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  check(blockID,Match.idString);
-  return Files.find({blockID:blockID});
-});
-
 //issue with sections - right now sending all of a user's
 //sections, even if the student switched sections in the past and has two
 //memberships.  How to select also those section walls with content that
@@ -123,9 +118,35 @@ Meteor.publish('groupWalls',function(activityID) {
   return Walls.find({type:'group',activityID:activity.pointsTo});
 });
 
-Meteor.publish('columns',function(wallID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  check(wallID,Match.idString);
-  return Columns.find({wallID:wallID});
+var currentWallIds = function(studentOrSectionID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  var studentID = studentOrSectionID || Meteor.userId(); 
+
+  var selector = {};
+  var createdFors = [Site.findOne()._id]
+  if (Roles.userIsInRole(studentID,'student')) {
+    createdFors.push(studentID);
+    var studentsGroupSectionIds = _.pluck(Memberships.find({
+      memberID:studentID,
+      collectionName: {$in: ['Groups','Sections']},
+    },{fields: {itemID: 1}}).fetch(), 'itemID');
+    createdFors = _.union(createdFors,studentsGroupSectionIds);
+  } else { //check if section selected without selecting a student 
+    var section = Sections.findOne(studentOrSectionID);
+    if (section)
+      createdFors.push(studentOrSectionID);
+  }
+  selector.createdFor = {$in: createdFors};
+  if (Activities.find({_id:activityID}).count() > 0)
+    selector.activityID = activityID;
+
+  return _.pluck(Walls.find(selector,{fields:{_id:1}}).fetch(),'_id');
+};
+
+Meteor.publish('columns',function(studentOrSectionID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(studentOrSectionID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  check(activityID,Match.idString); 
+  var wallIds = currentWallIds(studentOrSectionID,activityID);
+  return Columns.find({wallID:{$in:wallIds}});
 });
 
 Meteor.publish('assessment',function(assessmentID){
@@ -146,21 +167,33 @@ Meteor.publish('assessmentSubactivity',function(activityID) {
   }  
 });
 
-Meteor.publish('blocks',function(columnID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
-  check(columnID,Match.idString);
+Meteor.publish('blocks',function(studentOrSectionID,activityID)  {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(studentOrSectionID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  check(activityID,Match.idString); 
+  var wallIds = currentWallIds(studentOrSectionID,activityID);
   //if parent, only publish titles (except for text blocks in student wall)
   if (Roles.userIsInRole(this.userId,'parentOrAdvisor')) {
-    var column = Columns.findOne(columnID);
-    if (!column) return this.ready();
-    var wall = Walls.findOne(column.wallID);
-    if (!wall) return this.ready();
-    if ((wall.type == 'group') || (wall.type == 'section'))
-      return this.ready();
-    if (wall.type == 'student') 
-      return Blocks.find({columnID:columnID,type:{$in:['file','assessment','text']}});
+    studentWallIds = wallIds.filter(function(wallID) { 
+      var wall = Walls.findOne(wallID);
+      return ((wall) && (wall.type == 'student'));
+    })
+    teacherWallIds = wallIds.filter(function(wallID) { 
+      var wall = Walls.findOne(wallID);
+      return ((wall) && (wall.type == 'teacher'));
+    })
+    return Blocks.find({$or: [
+      {wallID:{$in:studentWallIds},type:{$in:['file','assessment','text']}},
+      {wallID:{$in:teacherWallIds}}
+    ]});
   }
-  //below includes teacher wall for parent
-  return Blocks.find({columnID:columnID});
+  return Blocks.find({wallID:{$in:wallIds}});
+});
+
+Meteor.publish('files',function(studentOrSectionID,activityID) {  //change to user or section ID in order to generate summary page for whole activity and section ... later!
+  check(studentOrSectionID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  check(activityID,Match.idString); 
+  var wallIds = currentWallIds(studentOrSectionID,activityID);
+  return Files.find({wallID:{$in:wallIds}});
 });
 
 Meteor.publish('activityStatuses',function(studentID,unitID) { 

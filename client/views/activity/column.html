@@ -49,7 +49,7 @@
       </nav>
     {{/if}}
     {{#if visibleOrEditing}}
-      {{#if Template.subscriptionsReady}}
+      {{#if initialBlockSubscriptionReady}}
         {{#sortable1c items=blocks options=sortableOpts}}
           {{> block}}
         {{/sortable1c}}

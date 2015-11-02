@@ -104,7 +104,7 @@
   <p>
     {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
   </p>
-  {{#if fileSubscriptionReady}}
+  {{#if initialFileSubscriptionReady}}
     {{#sortable1c items=files  options=sortableOpts}} 
       {{>fileLink}}
     {{/sortable1c}}
