@@ -49,13 +49,9 @@
       </nav>
     {{/if}}
     {{#if visibleOrEditing}}
-      {{#if initialBlockSubscriptionReady}}
-        {{#sortable1c items=blocks options=sortableOpts}}
-          {{> block}}
-        {{/sortable1c}}
-      {{else}}
-        Loading blocks ...
-      {{/if}}
+      {{#sortable1c items=blocks options=sortableOpts}}
+        {{> block}}
+      {{/sortable1c}}
     {{/if}}
   </div>
 </Template>

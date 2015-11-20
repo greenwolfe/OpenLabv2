@@ -25,70 +25,17 @@ Template.activityPage.onCreated(function() {
   var cU = Meteor.userId();
   if (Roles.userIsInRole(cU,'teacher') && Roles.userIsInRole(iU,'parentOrAdvisor')) 
     loginButtonsSession.set('viewAs',cU);
-  activityPageSession.set('editedWall',null);
-  activityPageSession.set('columnSubscriptionReady',false);
-  activityPageSession.set('blockSubscriptionReady',false);
-  activityPageSession.set('fileSubscriptionReady',false);
 
+  //if cU or iU is a student, that student's default walls are addeded, and data is sent over 
+  //in full by flowrouter and fast-render with the initial page load.
   var instance = this;
-  if (Roles.userIsInRole(cU,'teacher'))
+  //get all groups walls for this activity to create the group list for browsing
+  if (Roles.userIsInRole(cU,'teacher')) {
     instance.subscribe('groupWalls',FlowRouter.getParam('_id'));
-  instance.initialWallSubscriptionReady = new ReactiveVar(false);
-  var wallSubscription, sectionwallSubscription;
-  var columnSubscription,blockSubscription,fileSubscription;
-  instance.autorun(function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityID = FlowRouter.getParam('_id');
-    var sectionID = Meteor.selectedSectionId();
-    wallSubscription = instance.subscribe('walls', studentID,activityID);
-    sectionwallSubscription = instance.subscribe('walls',sectionID,activityID);
-    columnSubscription = instance.subscribe('columns', studentID,activityID);
-    blockSubscription = instance.subscribe('blocks', studentID,activityID);
-    fileSubscription = instance.subscribe('files', studentID,activityID);
-
-    var activity = Activities.findOne(activityID);
-    if (activity) {
-      instance.subscribe('subActivityStatuses',studentID,activity.pointsTo);
-      instance.subscribe('subActivityProgress',studentID,activity.pointsTo);
-    } 
-  });
-
-  instance.autorun(function() {
-    if ((typeof wallSubscription !== 'undefined') && wallSubscription.ready()) {
-      if ((typeof sectionwallSubscription !== 'undefined') && sectionwallSubscription.ready()) 
-        instance.initialWallSubscriptionReady.set(true);
-    }
-  })
-
-  instance.autorun(function() {
-    if (typeof columnSubscription !== 'undefined')
-      activityPageSession.set('columnSubscriptionReady',columnSubscription.ready());
-  })
-  instance.autorun(function() {
-    if (typeof blockSubscription !== 'undefined')
-      activityPageSession.set('blockSubscriptionReady',blockSubscription.ready());
-  })
-  instance.autorun(function() {
-    if (typeof fileSubscription !== 'undefined')
-      activityPageSession.set('fileSubscriptionReady',fileSubscription.ready());
-  })
-
-  instance.autorun(function() {
-    var cU = Meteor.userId();
-    if ((!cU) || Roles.userIsInRole(cU,'parentOrAdvisor'))
-      return;
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityID = FlowRouter.getParam('_id');
-    if ((studentID) && (activityID))
-      Meteor.call('addDefaultWalls',studentID,activityID,alertOnError);
-  })
+  }
 })
 
 Template.activityPage.helpers({
-  initialWallSubscriptionReady: function() {
-    tmpl = Template.instance();
-    return tmpl.initialWallSubscriptionReady.get();
-  },
   walls: function() {
     //need to put studentID, groupID's, sectionID in this selector? or should I trust the template level subscription?
     var selector = {activityID:FlowRouter.getParam('_id')}

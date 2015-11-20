@@ -30,13 +30,9 @@
         {{#if inEditedWall}}
           {{>helpBannerNavPills messages=helpMessages}}
         {{/if}}
-        {{#if initialColumnSubscriptionReady}}
-          {{#each columns}}
-            {{> column}}
-          {{/each}}
-        {{else}}
-          Loading Wall contents ... 
-        {{/if}}
+        {{#each columns}}
+          {{> column}}
+        {{/each}}
       </div>
     {{/if}}
     {{#if isInRole 'teacher'}}

@@ -76,6 +76,102 @@ Meteor.publish('site',function() {
   return Site.find();
 });
 
+/* send initial wall, column, block and file information
+   as well as subactivityStatuses, subactivityProgresses
+   with initial page info
+   (note all activities, tags, standards and workperiods loaded at site level)
+   when switching student or section, only change the relevant walls
+   and statuses, progress and workPeriods
+   without re-rendering the teacher, group, or section wall if unchanged
+*/
+//for later ... more limited publish/subscribe for memberships and groups ??
+Meteor.publish('activityPageInit',function(studentOrSectionID,activityID) {
+  check(studentOrSectionID,Match.Optional(Match.OneOf(Match.idString,null))); 
+  check(activityID,Match.idString);
+  console.log(studentOrSectionID);
+  console.log(activityID); 
+  var studentID = studentOrSectionID || this.userId;
+  var isNotTeacher = !Roles.userIsInRole(this.userId,'teacher');
+  //create student, group, section walls for this activity if they don't exist
+  Meteor.call('addDefaultWalls',studentOrSectionID,activityID);
+
+  //walls
+  var selector = {};
+  var createdFors = [Site.findOne()._id]
+  if (Roles.userIsInRole(studentID,'student')) {
+    createdFors.push(studentID);
+    var studentsGroupSectionIds = _.pluck(Memberships.find({
+      memberID:studentID,
+      collectionName: {$in: ['Groups','Sections']},
+    },{fields: {itemID: 1}}).fetch(), 'itemID');
+    createdFors = _.union(createdFors,studentsGroupSectionIds);
+  } else { //check if section selected without selecting a student 
+    var section = Sections.findOne(studentOrSectionID);
+    if (section)
+      createdFors.push(studentOrSectionID);
+  }
+  selector.createdFor = {$in: createdFors};
+  if (Activities.find({_id:activityID}).count() > 0)
+    selector.activityID = activityID;
+  if (isNotTeacher)
+    selector.visible = true; //send only visible walls
+  var wallIds = _.pluck(Walls.find(selector,{fields:{_id:1}}).fetch(),'_id');
+
+  //columns,just return all columns for all walls, nothing more to do
+
+  //blocks
+  var blockSelector = {};
+  //if parent, only publish locks in teacher wall and some blocks in student wall)
+  if (Roles.userIsInRole(this.userId,'parentOrAdvisor')) {
+    studentWallIds = wallIds.filter(function(wallID) { 
+      var wall = Walls.findOne(wallID);
+      return ((wall) && (wall.type == 'student'));
+    })
+    teacherWallIds = wallIds.filter(function(wallID) { 
+      var wall = Walls.findOne(wallID);
+      return ((wall) && (wall.type == 'teacher'));
+    })
+    blockSelector = {$or: [
+      {wallID:{$in:studentWallIds},type:{$in:['file','assessment','text']}},
+      {wallID:{$in:teacherWallIds}}
+    ]}
+  } else {
+    blockSelector.wallID = {$in:wallIds};
+  }
+
+  //files,just return all files for all walls, nothing more to do
+  //parents not given live link to student files (but could ferret out file URL if clever and uses the console?),
+  //doesn't see blocks on section/group walls anyway
+
+  //activity status and progress
+  var statusProgressSelector = {};
+  if (Roles.userIsInRole(studentID,'student'))
+    statusProgressSelector.studentID = studentID;
+  if (Activities.find({_id:activityID}).count() > 0)
+    statusProgressSelector.pointsTo = activityID;
+  if (_.isEmpty(statusProgressSelector)) //return nothing
+    statusProgressSelector = {_id:'none'};
+
+  //levels of mastery
+  var LoMSelector = {};
+  if (Roles.userIsInRole(studentID,'student'))
+    LoMSelector.studentID = studentID;
+  if (isNotTeacher)
+    LoMSelector.visible = true; //send only visible LoMs
+  if (_.isEmpty(LoMSelector)) //return nothing
+    LoMSelector = {_id:'none'};
+
+  return [
+          Walls.find(selector),
+          Columns.find({wallID:{$in:wallIds}}),
+          Blocks.find(blockSelector),
+          Files.find({wallID:{$in:wallIds}}),
+          ActivityStatuses.find(statusProgressSelector),
+          ActivityProgress.find(statusProgressSelector),
+          LevelsOfMastery.find(LoMSelector)
+        ];
+});
+
 //issue with sections - right now sending all of a user's
 //sections, even if the student switched sections in the past and has two
 //memberships.  How to select also those section walls with content that
@@ -110,6 +206,7 @@ Meteor.publish('walls',function(studentOrSectionID,activityID) {  //change to us
   return Walls.find(selector);
 });
 
+//to provide teacher with access to a list of current groups for the activity page
 Meteor.publish('groupWalls',function(activityID) {
   check(activityID,Match.idString);
   var activity = Activities.findOne(activityID);
@@ -210,7 +307,7 @@ Meteor.publish('activityStatuses',function(studentID,unitID) {
   return ActivityStatuses.find(selector);
 });
 
-Meteor.publish('Tags',function() {
+Meteor.publish('tags',function() {
   return Tags.find()
 })
 

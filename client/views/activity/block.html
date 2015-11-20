@@ -104,13 +104,9 @@
   <p>
     {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
   </p>
-  {{#if initialFileSubscriptionReady}}
-    {{#sortable1c items=files  options=sortableOpts}} 
-      {{>fileLink}}
-    {{/sortable1c}}
-  {{else}}
-    Loading files ...
-  {{/if}}
+  {{#sortable1c items=files  options=sortableOpts}} 
+    {{>fileLink}}
+  {{/sortable1c}}
   {{#if editingBlock}}
     <p>
       {{>upload_bootstrap formData=formData callbacks=processUpload}}
@@ -226,31 +222,21 @@
   {{else}}
     <p>{{{text}}}</p>
   {{/if}}
-  {{#if standardsSubscriptionReady}}
-    {{#each standards}}
-      <p class='assessment standard'>
-        <a  href="{{pathFor 'standardPage' _id=_id}}" data-toggle="tooltip" title="{{description}}" data-html=true>{{title}}</a>
-        {{#if LoMAveragetext}}
-          <span class='badge badge-inverse {{LoMAveragecolorcode}}' data-toggle="tooltip" title= "Current score from all assessments.">
-            {{LoMAveragetext}}
-          </span>
-        {{/if}}
-        {{#if LoMsubscriptionReady}}
-          <div class="LoMlist">
-            {{#each LoMs}}
-              {{>LoMitem}}
-            {{/each}}
-          </div>
-        {{else}}
-          {{#if impersonatedId}}
-            <p>Loading grades and comments ... </p>
-          {{/if}}
-        {{/if}}
-      </p>
-    {{/each}}
-  {{else}}
-    <p>Loading Standards ... </p>
-  {{/if}}
+  {{#each standards}}
+    <p class='assessment standard'>
+      <a  href="{{pathFor 'standardPage' _id=_id}}" data-toggle="tooltip" title="{{description}}" data-html=true>{{title}}</a>
+      {{#if LoMAveragetext}}
+        <span class='badge badge-inverse {{LoMAveragecolorcode}}' data-toggle="tooltip" title= "Current score from all assessments.">
+          {{LoMAveragetext}}
+        </span>
+      {{/if}}
+      <div class="LoMlist">
+        {{#each LoMs}}
+          {{>LoMitem}}
+        {{/each}}
+      </div>
+    </p>
+  {{/each}}
 </template>
 
 <!--

@@ -303,6 +303,23 @@ Template.activityItem.helpers({
   pointsToOrID: function() {
     return this.pointsTo || this._id;
   },
+  studentOrSectionID: function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var studentID = Meteor.impersonatedId();
+      if (studentID)
+        return 'id=' + studentID;
+      var sectionID = Meteor.selectedSectionId();
+      if (sectionID)
+        return 'id=' + sectionID;
+      return '';
+    } else {
+      var studentID = Meteor.impersonatedOrUserId(); //in case is parent viewing as student
+      if (studentID)
+        return 'id=' + studentID; 
+      return '';     
+    }
+  },
   status: function() {
     var status = currentStatus(this._id);
     if (!status)

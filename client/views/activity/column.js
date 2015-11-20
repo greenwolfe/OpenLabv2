@@ -1,11 +1,3 @@
-Template.column.onCreated(function() {
-  var instance = this;
-  instance.subscribe('blocks', instance.data._id);
-//edited Aug 21, 2015 ... delete if it causes no problems
-/*  instance.autorun(function() {
-    var blockSubscription = instance.subscribe('blocks', instance.data._id);
-  });*/
-})
 
   /**********************/
  /******* HELPERS ******/
@@ -51,9 +43,6 @@ var getCreatedFor = function(wallID) {
 }
 
 Template.column.helpers({
-  initialBlockSubscriptionReady: function() {
-    return activityPageSession.get('blockSubscriptionReady');
-  },
   blocks: function() {
     return getBlocks(this);
   },

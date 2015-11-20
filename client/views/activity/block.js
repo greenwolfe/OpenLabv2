@@ -220,9 +220,6 @@ Template.fileBlock.onCreated(function() {
 })
 
 Template.fileBlock.helpers({
-  initialFileSubscriptionReady: function() {
-    return activityPageSession.get('fileSubscriptionReady');
-  },
   files: function() {
     var selector = {blockID:this._id};
     if (!inEditedWall(this.wallID)) //if not editing
@@ -581,48 +578,12 @@ Template.newSubactivity.helpers({
  /**** ASSESSMENT BLOCK *****/
 /***************************/
 
-Template.assessmentBlock.onCreated(function() {
-  var instance = this;
-  instance.standardsSubscription = instance.subscribe('standards'); //need all of them in order to add them to assessment
-
-  instance.autorun(function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activity = Activities.findOne(instance.data.activityID);
-    var data = Template.currentData();
-    if ((!studentID) || !Roles.userIsInRole(studentID,'student'))
-      return;
-    if (!activity) 
-      return;
-
-    //first get the info that will be immediately shown
-    instance.LoMsThisStudentAndAssessment = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,activity._id);
-
-    if (instance.LoMsThisStudentAndAssessment.ready()) { //then load the rest in the background
-      instance.$('span.badge[data-toggle="tooltip"]').tooltip();
-      var LoMsThisStudent = instance.subscribe('levelsOfMastery',data.standardIDs,studentID,null); //all levels and comments for these standards
-      
-      if (LoMsThisStudent.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        instance.subscribe('levelsOfMastery',data.standardIDs,null,null); //and for all students ... for copy and pasting of past comments
-    }
-  });
-});
-
 Template.assessmentBlock.onRendered(function() {
   instance = this;
   instance.$('[data-toggle="tooltip"]').tooltip();
 })
 
 Template.assessmentBlock.helpers({
-  standardsSubscriptionReady: function() {
-    var tmpl = Template.instance();
-    return tmpl.standardsSubscription.ready();
-  },
-  LoMsubscriptionReady: function() {
-    var tmpl = Template.instance();
-    if (!('LoMsThisStudentAndAssessment' in tmpl))
-      return false;
-    return tmpl.LoMsThisStudentAndAssessment.ready();
-  },
   standards: function() {
     var selectedStandardIDs = this.standardIDs || [];
     var selectedStandards = Standards.find({_id:{$in:selectedStandardIDs}}).fetch();

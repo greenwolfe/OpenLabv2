@@ -3,9 +3,6 @@
 var VALID_KEYS = [
   'editedWall',
   'assessmentID', //ID of assessment block passed to chooseStandardsModal
-  'columnSubscriptionReady',
-  'blockSubscriptionReady',
-  'fileSubscriptionReady'
 ];
 
 var validateKey = function (key) {
