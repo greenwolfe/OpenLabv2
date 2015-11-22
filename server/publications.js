@@ -85,33 +85,39 @@ Meteor.publish('site',function() {
    without re-rendering the teacher, group, or section wall if unchanged
 */
 //for later ... more limited publish/subscribe for memberships and groups ??
-Meteor.publish('activityPageInit',function(studentOrSectionID,activityID) {
-  check(studentOrSectionID,Match.Optional(Match.OneOf(Match.idString,null))); 
+Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
+  check(studentOrSectionIDs,[Match.idString]); 
   check(activityID,Match.idString);
-  console.log(studentOrSectionID);
-  console.log(activityID); 
-  var studentID = studentOrSectionID || this.userId;
+  var studentIDs = studentOrSectionIDs.filter(function(studentID) {
+    return Roles.userIsInRole(studentID,'student');
+  });
+  if (Roles.userIsInRole(this.userId,'student'))
+    studentIDs.push(this.userId);
+  var sectionIDs = studentOrSectionIDs.filter(function(sectionID) {
+    return Sections.find(sectionID,{limit:1}).count();
+  });
   var isNotTeacher = !Roles.userIsInRole(this.userId,'teacher');
-  //create student, group, section walls for this activity if they don't exist
-  Meteor.call('addDefaultWalls',studentOrSectionID,activityID);
 
   //walls
   var selector = {};
   var createdFors = [Site.findOne()._id]
-  if (Roles.userIsInRole(studentID,'student')) {
+  studentIDs.forEach(function(studentID) {
+    //create student, group, section walls for this activity if they don't exist
+    Meteor.call('addDefaultWalls',studentID,activityID);
     createdFors.push(studentID);
     var studentsGroupSectionIds = _.pluck(Memberships.find({
       memberID:studentID,
       collectionName: {$in: ['Groups','Sections']},
     },{fields: {itemID: 1}}).fetch(), 'itemID');
     createdFors = _.union(createdFors,studentsGroupSectionIds);
-  } else { //check if section selected without selecting a student 
-    var section = Sections.findOne(studentOrSectionID);
-    if (section)
-      createdFors.push(studentOrSectionID);
-  }
+  });
+  sectionIDs.forEach(function(sectionID) {
+    //create section walls for this activity
+    Meteor.call('addDefaultWalls',sectionID,activityID);
+    createdFors.push(sectionID);
+  });
   selector.createdFor = {$in: createdFors};
-  if (Activities.find({_id:activityID}).count() > 0)
+  if (Activities.find({_id:activityID},{limit:1}).count() > 0)
     selector.activityID = activityID;
   if (isNotTeacher)
     selector.visible = true; //send only visible walls
@@ -119,6 +125,7 @@ Meteor.publish('activityPageInit',function(studentOrSectionID,activityID) {
 
   //columns,just return all columns for all walls, nothing more to do
 
+  //revise from here
   //blocks
   var blockSelector = {};
   //if parent, only publish locks in teacher wall and some blocks in student wall)
@@ -144,22 +151,22 @@ Meteor.publish('activityPageInit',function(studentOrSectionID,activityID) {
   //doesn't see blocks on section/group walls anyway
 
   //activity status and progress
-  var statusProgressSelector = {};
-  if (Roles.userIsInRole(studentID,'student'))
-    statusProgressSelector.studentID = studentID;
-  if (Activities.find({_id:activityID}).count() > 0)
-    statusProgressSelector.pointsTo = activityID;
-  if (_.isEmpty(statusProgressSelector)) //return nothing
-    statusProgressSelector = {_id:'none'};
+  if (studentIDs.length == 0) { //return nothing
+    var statusProgressSelector = {_id:'none'};
+  } else {
+    var statusProgressSelector = {studentID:{$in:studentIDs}};
+    if (Activities.find({_id:activityID},{limit:1}).count() > 0)
+      statusProgressSelector.pointsTo = activityID;
+  }
 
   //levels of mastery
-  var LoMSelector = {};
-  if (Roles.userIsInRole(studentID,'student'))
-    LoMSelector.studentID = studentID;
-  if (isNotTeacher)
-    LoMSelector.visible = true; //send only visible LoMs
-  if (_.isEmpty(LoMSelector)) //return nothing
-    LoMSelector = {_id:'none'};
+  if (studentIDs.length == 0) { //return nothing
+    var LoMSelector = {_id:'none'};
+  } else {
+    var LoMSelector = {studentID:{$in:studentIDs}};
+    if (isNotTeacher)
+      LoMSelector.visible = true; //send only visible LoMs
+  }
 
   return [
           Walls.find(selector),

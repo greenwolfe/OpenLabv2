@@ -1,5 +1,9 @@
 <Template name='activityPage'>
-  {{#sortable1c items=walls options=sortableOpts}}
-    {{> wall}}
-  {{/sortable1c}}
+  {{#if subsReady 'initialActivityPagePub'}}
+    {{#sortable1c items=walls options=sortableOpts}}
+      {{> wall}}
+    {{/sortable1c}}
+  {{else}}
+    <p> Loading... </p>
+  {{/if}}
 </Template>
