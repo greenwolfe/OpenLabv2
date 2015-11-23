@@ -48,7 +48,17 @@ Template.activityPage.onCreated(function() {
       this.reactive.set(newvalue) 
     }
   };
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if ((!cU) || Roles.userIsInRole(cU,'parentOrAdvisor'))
+      return;
+    var studentID = Meteor.impersonatedOrUserId();
+    var activityID = FlowRouter.getParam('_id');
+    if ((studentID) && (activityID))
+      Meteor.call('addDefaultWalls',studentID,activityID,alertOnError);
+  })
   //get all groups walls for this activity to create the group list for browsing
+  //move to flow-router
   if (Roles.userIsInRole(cU,'teacher')) {
     instance.subscribe('groupWalls',FlowRouter.getParam('_id'));
   }
