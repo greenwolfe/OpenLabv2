@@ -5,7 +5,6 @@ Template.wall.onCreated(function() {
   instance.whichGroups = new ReactiveVar("thisActivity");
 })
 
-//put in activityPage.js, delete all walls if empty
 Template.wall.onDestroyed(function() {
   Meteor.call('deleteWallIfEmpty',this.data._id);
 })
