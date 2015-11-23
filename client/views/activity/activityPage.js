@@ -81,19 +81,6 @@ Template.activityPage.onRendered(function() {
         instance.requestedStudentIDs.set(rSIDs);
       }
     })
-  }
-  if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
-    instance.autorun(function() {
-      var iU = Meteor.impersonatedId();
-      var childOrAdviseeIds = Meteor.childOrAdviseeIds(Meteor.users(cU));
-      var rSIDs = instance.requestedStudentIDs.plainarray;
-      if (_.contains(childOrAdviseeIds,iU) && (!_.contains(rSIDs,iU))) {
-        rSIDs.push(iU);
-        instance.requestedStudentIDs.set(rSIDs); 
-      }
-    })
-  }
-  if (Roles.userIsInRole(cU,['teacher','parentOrAdvisor'])) {
     instance.autorun(function() {
       var rSIDs = instance.requestedStudentIDs.reactive.get();
       var activityID = FlowRouter.getParam('_id');
@@ -106,13 +93,47 @@ Template.activityPage.onRendered(function() {
           return section.name;
         return id;
       });
-      console.log('loading' + names.join());
+      console.log('loading: ' + names.join(', '));
       instance.subscribe('activityPagePubs',rSIDs,activityID,function() {
         console.log('loaded');
         instance.loadedStudentIDs.set(rSIDs);
         var sectionID = Meteor.selectedSectionId();
         var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
         var urSIDs = _.difference(sectionMemberIds,rSIDs); //unrequested student IDs
+        var numberToAdd = Math.min(urSIDs.length,3);
+        if (numberToAdd) 
+          instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd))); 
+      });
+    });
+  }
+  if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
+    instance.autorun(function() {
+      var iU = Meteor.impersonatedId();
+      var childOrAdviseeIds = Meteor.childOrAdviseeIds(cU);
+      var rSIDs = instance.requestedStudentIDs.plainarray;
+      if (_.contains(childOrAdviseeIds,iU) && (!_.contains(rSIDs,iU))) {
+        rSIDs.push(iU);
+        instance.requestedStudentIDs.set(rSIDs); 
+      }
+    })
+    instance.autorun(function() {
+      var rSIDs = instance.requestedStudentIDs.reactive.get();
+      var activityID = FlowRouter.getParam('_id');
+      var names = rSIDs.map(function(id) {
+        var user = Meteor.users.findOne(id);
+        if (user)
+          return user.username;
+        var section = Sections.findOne(id);
+        if (section)
+          return section.name;
+        return id;
+      });
+      console.log('loading: ' + names.join(', '));
+      instance.subscribe('activityPagePubs',rSIDs,activityID,function() {
+        console.log('loaded');
+        instance.loadedStudentIDs.set(rSIDs);
+        var childOrAdviseeIds = Meteor.childOrAdviseeIds();
+        var urSIDs = _.difference(childOrAdviseeIds,rSIDs); //unrequested student IDs
         var numberToAdd = Math.min(urSIDs.length,3);
         if (numberToAdd) 
           instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd))); 
