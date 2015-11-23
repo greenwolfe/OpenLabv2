@@ -23,6 +23,7 @@ Template.activityPage.onCreated(function() {
   //reset to teacher if teacher reached the page while impersonating a parent
   var iU = Meteor.impersonatedOrUserId();
   var cU = Meteor.userId();
+  activityPageSession.initializePage(); //set initial values of session variables
   if (Roles.userIsInRole(cU,'teacher') && Roles.userIsInRole(iU,'parentOrAdvisor')) 
     loginButtonsSession.set('viewAs',cU);
 
@@ -53,9 +54,22 @@ Template.activityPage.onCreated(function() {
     if ((!cU) || Roles.userIsInRole(cU,'parentOrAdvisor'))
       return;
     var studentID = Meteor.impersonatedOrUserId();
+    var studentOrSectionID = (Roles.userIsInRole(studentID,'student'))  ? studentID: Meteor.selectedSectionId();
     var activityID = FlowRouter.getParam('_id');
-    if ((studentID) && (activityID))
-      Meteor.call('addDefaultWalls',studentID,activityID,alertOnError);
+    if ((studentOrSectionID) && (activityID)) {
+      Meteor.call('addDefaultWalls',studentOrSectionID,activityID,function(error,wallsCreated) {
+        if (error)
+          console.log(error.reason);
+        if (wallsCreated) { //resubscribe to get columns, blocks, files for new wall
+          var rSIDs = instance.requestedStudentIDs.plainarray;
+          instance.subscribe('activityPagePubs',rSIDs,activityID,function(error,result) {
+            if (error)
+              console.log(error.reason);
+            console.log('resubscribed for ' + wallsCreated + ' new walls.');
+          });
+        }     
+      });
+    }
   })
   //get all groups walls for this activity to create the group list for browsing
   //move to flow-router
@@ -153,25 +167,56 @@ Template.activityPage.helpers({
     return tmpl.initialSubscriptionsLoaded.get();
   },
   walls: function() {
-    //need to put studentID, groupID's, sectionID in this selector? or should I trust the template level subscription?
     var selector = {activityID:FlowRouter.getParam('_id')}
     var cU = Meteor.userId();
     if (!Roles.userIsInRole(cU,'teacher'))
       selector.visible = true;
-
+    selector.type = 'teacher'; //default
+    var showWalls = activityPageSession.get('showWalls');
     var studentID = Meteor.impersonatedOrUserId();
-    var createdFors = [Site.findOne()._id]
-    if (Roles.userIsInRole(studentID,'student')) {
-      createdFors.push(studentID);
-      var studentsGroupIds = _.pluck(Memberships.find({
-        memberID:studentID,
-        collectionName: 'Groups',
-      },{fields: {itemID: 1}}).fetch(), 'itemID');
-      createdFors = _.union(createdFors,studentsGroupIds);
-    }
-    createdFors.push(Meteor.selectedSectionId());
-    selector.createdFor = {$in: createdFors};
+    var sectionID = Meteor.selectedSectionId();
 
+    if (showWalls == 'student') {
+      if ((studentID) && Roles.userIsInRole(studentID,'student')) {
+        selector.createdFor = studentID;
+        selector.type = 'student';
+      } else if ((sectionID) && Roles.userIsInRole(cU,'teacher')) {
+        selector.createdFor = {$in: Meteor.sectionMemberIds(sectionID)};
+        selector.type = 'student';
+      }
+    } else if (showWalls == 'group') {
+      if ((studentID) && Roles.userIsInRole(studentID,'student')) {
+        var studentsGroupIds = _.pluck(Memberships.find({
+          memberID:studentID,
+          collectionName: 'Groups',
+        },{fields: {itemID: 1}}).fetch(), 'itemID');
+        selector.createdFor = {$in:studentsGroupIds};
+        selector.type = 'group';
+      } else if ((sectionID) && Roles.userIsInRole(cU,'teacher')) {
+        var studentsGroupIds = _.pluck(Memberships.find({
+          memberID:{$in: Meteor.sectionMemberIds(sectionID)},
+          collectionName: 'Groups',
+        },{fields: {itemID: 1}}).fetch(), 'itemID');
+        selector.createdFor = {$in:studentsGroupIds};        
+        selector.type = 'group'
+      }     
+    } else if (showWalls == 'section') {
+      selector.createdFor = sectionID;
+      selector.type = 'section';
+    } else if (showWalls == 'allTypes') {
+      delete selector.type;
+      var createdFors = [Site.findOne()._id]
+      if (Roles.userIsInRole(studentID,'student')) {
+        createdFors.push(studentID);
+        var studentsGroupIds = _.pluck(Memberships.find({
+          memberID:studentID,
+          collectionName: 'Groups',
+        },{fields: {itemID: 1}}).fetch(), 'itemID');
+        createdFors = _.union(createdFors,studentsGroupIds);
+      }
+      createdFors.push(Meteor.selectedSectionId());
+      selector.createdFor = {$in: createdFors};
+    } 
     return Walls.find(selector,{sort: {order:1}});
   },
   sortableOpts: function() {

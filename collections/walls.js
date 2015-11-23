@@ -42,7 +42,7 @@ Meteor.methods({
       throw new Meteor.Error('notStudent','Could not create student wall.  Assigned user is not a student.');
     
     return Walls.insert(wall , function( error, _id) { 
-      if ( error ) console.log ( error ); //info about what went wrong
+      if ( error ) console.log ( error.reason ); //info about what went wrong
       if ( _id ) {
         Meteor.call('insertColumn',_id,-1,'right');
         Meteor.call('insertColumn',_id,0,'right');
@@ -76,6 +76,7 @@ Meteor.methods({
       return;
     check(studentOrSectionID,Match.idString);
     check(activityID,Match.idString);
+    var wallsCreated = 0;
     var activity = Activities.findOne(activityID);
     //if activity doesn't exist, just don't create walls for it
     //but don't throw error ... see if this is OK
@@ -92,11 +93,13 @@ Meteor.methods({
         type: 'student',
         createdFor: studentID
       }
-     if (Walls.find(wall).count() == 0) 
+     if (Walls.find(wall).count() == 0) {
         Meteor.call('insertWall',wall,function(error,id) {
           if (error)
             console.log(error.reason);
         });
+        wallsCreated += 1;
+      }
 
       wall.type = 'group';
       var groupIds = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
@@ -108,6 +111,7 @@ Meteor.methods({
           if (error)
             console.log(error.reason);
         });
+        wallsCreated += 1;
       }
     } else {
       var sectionID = studentOrSectionID;
@@ -120,12 +124,15 @@ Meteor.methods({
     if (section) {
       wall.type = 'section';
       wall.createdFor = sectionID;
-      if ((wall.createdFor) && (Walls.find(wall).count() == 0))
+      if ((wall.createdFor) && (Walls.find(wall).count() == 0)) {
          Meteor.call('insertWall',wall,function(error,id) {
           if (error)
             console.log(error.reason);
         });
+        wallsCreated += 1;
+      }
     }
+    return wallsCreated;
   }
 });
 

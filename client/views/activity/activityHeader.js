@@ -31,3 +31,40 @@ Template.activityHeader.events({
     openlabSession.set('editingMainPage',!editing);
   }*/
 })
+
+Template.showWalls.helpers({
+  showWalls: function() {
+    var showWalls = activityPageSession.get('showWalls');
+    if (showWalls == 'allTypes')
+      return 'all types';
+    return showWalls;
+  },
+  wallTypes: function() {
+    return [
+      {type: 'all types'},
+      {type: 'teacher'},
+      {type: 'student'},
+      {type: 'group'},
+      {type: 'section'}
+    ]
+  }
+});
+
+Template.wallTypeSelector.helpers({
+  active: function() {
+    var wallType = activityPageSession.get('showWalls');
+    if (wallType == 'allTypes')
+      wallType = 'all types';
+    return (this.type == wallType);
+  }
+});
+
+Template.wallTypeSelector.events({
+  'click li a': function(event,tmpl) {
+    event.stopPropagation();
+    var wallType = this.type;
+    if (wallType == 'all types')
+      wallType = 'allTypes';
+    activityPageSession.set('showWalls',wallType);
+  }
+})

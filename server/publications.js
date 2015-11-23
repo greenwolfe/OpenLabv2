@@ -111,7 +111,6 @@ Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
   });
   sectionIDs.forEach(function(sectionID) {
     //create section walls for this activity
-    Meteor.call('addDefaultWalls',sectionID,activityID);
     createdFors.push(sectionID);
   });
   selector.createdFor = {$in: createdFors};

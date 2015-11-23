@@ -13,7 +13,7 @@ Template.wall.helpers({
   title: function() {
     if (this.type == 'teacher') return 'Teacher Wall';
     if (this.type == 'student') {
-      var student = Meteor.impersonatedOrUser();
+      var student = Meteor.users.findOne(this.createdFor);
       if (student)
         return 'Student Wall for ' + Meteor.getname(student,'full');
     }
