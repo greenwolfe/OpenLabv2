@@ -102,8 +102,6 @@ Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
   var selector = {};
   var createdFors = [Site.findOne()._id]
   studentIDs.forEach(function(studentID) {
-    //create student, group, section walls for this activity if they don't exist
-    Meteor.call('addDefaultWalls',studentID,activityID);
     createdFors.push(studentID);
     var studentsGroupSectionIds = _.pluck(Memberships.find({
       memberID:studentID,

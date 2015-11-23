@@ -29,6 +29,9 @@ Template.activityPage.onCreated(function() {
   //if cU or iU is a student, that student's default walls are addeded, and data is sent over 
   //in full by flowrouter and fast-render with the initial page load.
   var instance = this;
+  //reactive var needed so this doesn't flip when the publication is invalidated when student data is loaded in the background
+  instance.initialSubscriptionsLoaded = new ReactiveVar(false);
+
   instance.requestedStudentIDs = {
     plainarray: [FlowRouter.getQueryParam('id')],
     reactive: new ReactiveVar([FlowRouter.getQueryParam('id')]),
@@ -44,7 +47,7 @@ Template.activityPage.onCreated(function() {
       this.plainarray = newvalue; 
       this.reactive.set(newvalue) 
     }
-  }
+  };
   //get all groups walls for this activity to create the group list for browsing
   if (Roles.userIsInRole(cU,'teacher')) {
     instance.subscribe('groupWalls',FlowRouter.getParam('_id'));
@@ -58,19 +61,15 @@ Template.activityPage.onRendered(function() {
     instance.autorun(function() {
       var iU = Meteor.impersonatedId();
       var rSIDs = instance.requestedStudentIDs.plainarray;
-      if (!_.contains(rSIDs,iU)) {
+      if (Roles.userIsInRole(iU,'student') && !_.contains(rSIDs,iU)) {
         rSIDs.push(iU);
         instance.requestedStudentIDs.set(rSIDs); 
       }
-    })
-    instance.autorun(function() {
-      var sectionID = Meteor.selectedSectionId(); //establishes dependency
-      var sectionMemberIds = Meteor.sectionMemberIds();
-      var rSIDs = instance.requestedStudentIDs.plainarray;
-      var urSIDs = _.difference(sectionMemberIds,rSIDs); //unrequested student IDs
-      var numberToAdd = Math.min(urSIDs.length,3);
-      if (numberToAdd) 
-        instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd-1))); 
+      var sectionID = Meteor.selectedSectionId();
+      if ((sectionID) && !_.contains(rSIDs,sectionID)) {
+        rSIDs.push(sectionID);
+        instance.requestedStudentIDs.set(rSIDs);
+      }
     })
   }
   if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
@@ -84,10 +83,44 @@ Template.activityPage.onRendered(function() {
       }
     })
   }
-
+  if (Roles.userIsInRole(cU,['teacher','parentOrAdvisor'])) {
+    instance.autorun(function() {
+      var rSIDs = instance.requestedStudentIDs.reactive.get();
+      var activityID = FlowRouter.getParam('_id');
+      var names = rSIDs.map(function(id) {
+        var user = Meteor.users.findOne(id);
+        if (user)
+          return user.username;
+        var section = Sections.findOne(id);
+        if (section)
+          return section.name;
+        return id;
+      });
+      console.log('loading' + names.join());
+      instance.subscribe('activityPagePubs',rSIDs,activityID,function() {
+        console.log('loaded');
+        instance.loadedStudentIDs.set(rSIDs);
+        var sectionID = Meteor.selectedSectionId();
+        var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
+        var urSIDs = _.difference(sectionMemberIds,rSIDs); //unrequested student IDs
+        var numberToAdd = Math.min(urSIDs.length,3);
+        if (numberToAdd) 
+          instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd))); 
+      });
+    });
+  }
 });
 
 Template.activityPage.helpers({
+  initialSubscriptionsLoaded: function() {
+    var tmpl = Template.instance();
+    var subsReady = FlowRouter.subsReady('initialActivityPagePub');
+    if (subsReady) { //latch this so it doesn't invalidate when publish function is called to load more student data in the background
+      tmpl.initialSubscriptionsLoaded.set(true);
+      return true;
+    }
+    return tmpl.initialSubscriptionsLoaded.get();
+  },
   walls: function() {
     //need to put studentID, groupID's, sectionID in this selector? or should I trust the template level subscription?
     var selector = {activityID:FlowRouter.getParam('_id')}

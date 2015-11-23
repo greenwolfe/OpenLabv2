@@ -16,7 +16,7 @@ Meteor.methods({
     });
     var cU = Meteor.user();
     if (!cU)  
-      throw new Meteor.Error('notLoggedIn', "You must be logged in to create a new block.");
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to create a new wall.");
     if (Roles.userIsInRole(cU,'parentOrAdvisor'))
       throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new content.");
     //if student, check if student is a member of createdFor group or section
@@ -92,8 +92,11 @@ Meteor.methods({
         type: 'student',
         createdFor: studentID
       }
-      if (Walls.find(wall).count() == 0) 
-        Meteor.call('insertWall',wall);
+     if (Walls.find(wall).count() == 0) 
+        Meteor.call('insertWall',wall,function(error,id) {
+          if (error)
+            console.log(error.reason);
+        });
 
       wall.type = 'group';
       var groupIds = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
@@ -101,7 +104,10 @@ Meteor.methods({
       if (Walls.find(wall).count() == 0) { //count non-empty walls for all past groups
         wall.createdFor = Meteor.currentGroupId(studentID); //if none, create wall for current group
         if (wall.createdFor)
-          Meteor.call('insertWall',wall);
+          Meteor.call('insertWall',wall,function(error,id) {
+          if (error)
+            console.log(error.reason);
+        });
       }
     } else {
       var sectionID = studentOrSectionID;
@@ -115,7 +121,10 @@ Meteor.methods({
       wall.type = 'section';
       wall.createdFor = sectionID;
       if ((wall.createdFor) && (Walls.find(wall).count() == 0))
-         Meteor.call('insertWall',wall);
+         Meteor.call('insertWall',wall,function(error,id) {
+          if (error)
+            console.log(error.reason);
+        });
     }
   }
 });
