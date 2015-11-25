@@ -194,7 +194,7 @@
           <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
           <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
           <i class="activityPunctual {{late}}" title="late"></i>
-          <a  href="{{pathFor 'activityPage' _id=pointsTo}}">
+          <a  href="{{pathFor 'activityPage' _id=pointsTo query=studentOrSectionID}}">
             {{{title}}}{{{tags}}}
           </a>        
         {{/if}}

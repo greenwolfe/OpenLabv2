@@ -35,7 +35,7 @@ Template.activityTagsPopoverX.onCreated(function() {
   instance.autorun(function() {
     var activity = Session.get('activityForTagModal') || instance.nullActivity;
     instance.activity.set(activity);
-    var studentID = Meteor.impersonatedOrUserId();
+    var studentID = Session.get('studentIDForTagModal') || Meteor.impersonatedOrUserId();
     var status = ActivityStatuses.findOne({studentID:studentID,activityID:activity._id}) || instance.nullStatus;
     instance.status.set(status);
   })
@@ -54,7 +54,7 @@ Template.activityTagsPopoverX.helpers({
     return title || 'Add/change tags';
   },
   studentID: function() {
-    var studentID = Meteor.impersonatedOrUserId();
+    var studentID = Session.get('studentIDForTagModal') || Meteor.impersonatedOrUserId();
     if (Roles.userIsInRole(studentID,'student'))
       return studentID;
     return '';
@@ -84,6 +84,7 @@ Template.activityTagsPopoverX.events({
   },
   'hide.bs.modal #activityTagsPopoverX': function(event,tmpl) {
     Session.set('activityForTagModal',tmpl.nullActivity);
+    Session.set('studentIDForTagModal','');
     tmpl.activity.set(tmpl.nullActivity);
     tmpl.status.set(tmpl.nullStatus);
     tmpl.$('#newTag').val('');
@@ -91,7 +92,7 @@ Template.activityTagsPopoverX.events({
   'click #saveForStudent' : function(event,tmpl) {
     var newTag = tmpl.$('#newTag').val();
     var activity = tmpl.activity.get();
-    var studentID = Meteor.impersonatedOrUserId();
+    var studentID = Session.get('studentIDForTagModal') || Meteor.impersonatedOrUserId();
     Meteor.call('statusSetTag',studentID,activity._id,newTag,function(error,id) {
       if (error) {
         alert(error.reason);

@@ -1,6 +1,7 @@
 accounts-base@1.2.0
 accounts-password@1.1.1
 alanning:roles@1.2.13
+aldeed:template-extension@3.4.3
 arillo:flow-router-helpers@0.4.1
 audit-argument-checks@1.0.3
 autoupdate@1.2.1

@@ -43,6 +43,7 @@ Meteor.methods({
     block.createdBy = cU._id;
     block.modifiedBy = cU._id;
     if (Roles.userIsInRole(cU,'student')) {
+      //workSubmit block deprecated
       //for workSubmit block, put a teacherID in createdBy at all times, even if a student creates it
       //restrict certain fields by default so student can never edit them
       //workSubmit blocks probably deprecated ... no harm done leaving this in for now

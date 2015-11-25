@@ -214,11 +214,6 @@ Template.codemirror.events({
  /**** FILEBLOCK *******/
 /**********************/
 
-Template.fileBlock.onCreated(function() {
-  var instance = this;
-  instance.fileSubscription = instance.subscribe('files', instance.data._id);
-})
-
 Template.fileBlock.helpers({
   files: function() {
     var selector = {blockID:this._id};
@@ -295,19 +290,6 @@ Template.fileBlock.helpers({
   },
   editingBlock:editingBlock
 });
-
-Template.fileBlock.events({
-  'click .markIsExtraPractice': function(event,tmpl) {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityID = this.subActivityID;
-    Meteor.call('setStatus',studentID,activityID,'isExtraPractice',true);
-  },
-  'click .markIsNotExtraPractice': function(event,tmpl) {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityID = this.subActivityID;
-    Meteor.call('setStatus',studentID,activityID,'isExtraPractice',false);
-  }
-})
 
   /**********************/
  /**** FILELINK  *******/
@@ -386,6 +368,10 @@ Template.subactivitiesBlock.helpers({
 /* currentStatus */
 var currentStatus = function(activityID) {
   var studentID = Meteor.impersonatedOrUserId();
+  var data = Template.parentData(function(data){return ('createdFor' in data)});
+  if ((data) && Meteor.users.find(data.createdFor).count())
+    studentID = data.createdFor;
+  var studentID = ((data) && Meteor.users.find(data.createdFor).count()) ? data.createdFor : Meteor.impersonatedOrUserId();
   if (!Roles.userIsInRole(studentID,'student'))
     return undefined;
   return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
@@ -393,6 +379,9 @@ var currentStatus = function(activityID) {
 /* currentProgress */
 var currentProgress = function(activityID) {
   var studentID = Meteor.impersonatedOrUserId();
+  var data = Template.parentData(function(data){return ('createdFor' in data)});
+  if ((data) && Meteor.users.find(data.createdFor).count())
+    studentID = data.createdFor;
   if (!Roles.userIsInRole(studentID,'student'))
     return undefined;
   return ActivityProgress.findOne({studentID:studentID,activityID:activityID});
@@ -407,7 +396,7 @@ Template.subactivityItem.helpers({
     return ((this._id != this.pointsTo) || ((numBlocks == 0) && (numSubActivities == 1)) );
   },
   subactivities: function() {
-    return Activities.find({pointsTo:this.pointsTo}).fetch();
+    return Activities.find({pointsTo:this.pointsTo});
   },
   workPeriod: function () {
     //find existing workPeriod
@@ -493,8 +482,34 @@ Template.subactivityItem.helpers({
       return '';
     return (status.late) ? 'icon-late' : '';  
   },
+  studentOrSectionID: function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var studentID = Meteor.impersonatedId();
+      var data = Template.parentData(function(data){return ('createdFor' in data)});
+      if ((data) && Meteor.users.find(data.createdFor).count())
+        studentID = data.createdFor;
+      if (studentID)
+        return 'id=' + studentID;
+      var sectionID = Meteor.selectedSectionId();
+      if (sectionID)
+        return 'id=' + sectionID;
+      return '';
+    } else {
+      var studentID = Meteor.impersonatedOrUserId(); //in case is parent viewing as student
+      var data = Template.parentData(function(data){return ('createdFor' in data)});
+      if ((data) && Meteor.users.find(data.createdFor).count())
+        studentID = data.createdFor;
+      if (studentID)
+        return 'id=' + studentID; 
+      return '';     
+    }
+  },
   tags: function() {
     var studentID = Meteor.impersonatedOrUserId();
+    var data = Template.parentData(function(data){return ('createdFor' in data)});
+    if ((data) && Meteor.users.find(data.createdFor).count())
+      studentID = data.createdFor;
     var activityID = this._id;
     var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
     var tags = '';
@@ -502,7 +517,7 @@ Template.subactivityItem.helpers({
       tags += ' (' + this.tag + ')';
     var block = Template.parentData();
     var wall = Walls.findOne(block.wallID);
-    if ((wall.type == 'teacher') && (this.inBlockHeader))
+    if ((wall) && (wall.type == 'teacher') && (this.inBlockHeader))
       return tags;
     if ((status) && (status.tag))
       tags += '<strong> (' + status.tag + ')</strong>';
@@ -539,24 +554,38 @@ Template.subactivityItem.events({
   },
   'click .activityProgress': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
+    var data = Template.parentData(function(data){return ('createdFor' in data)});
+    if ((data) && Meteor.users.find(data.createdFor).count())
+      studentID = data.createdFor;
     if (!Roles.userIsInRole(studentID,'student'))
       return; 
     Meteor.call('incrementProgress',studentID,tmpl.data._id,alertOnError);  
   },
   'click .activityStatus': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
+    var data = Template.parentData(function(data){return ('createdFor' in data)});
+    if ((data) && Meteor.users.find(data.createdFor).count())
+      studentID = data.createdFor;
     if (!Roles.userIsInRole(studentID,'student'))
       return; 
     Meteor.call('incrementStatus',studentID,tmpl.data._id,alertOnError);  
   },
   'click .activityPunctual': function(event,tmpl) {
     var studentID = Meteor.impersonatedOrUserId();
+    var data = Template.parentData(function(data){return ('createdFor' in data)});
+    if ((data) && Meteor.users.find(data.createdFor).count())
+      studentID = data.createdFor;
     if (!Roles.userIsInRole(studentID,'student'))
       return; 
     Meteor.call('markOnTime',studentID,tmpl.data._id,alertOnError);  
   },
   'click .tagActivity': function(event,tmpl) {
     Session.set('activityForTagModal',this);
+    var studentID = Meteor.impersonatedOrUserId();
+    var data = Template.parentData(function(data){return ('createdFor' in data)});
+    if ((data) && Meteor.users.find(data.createdFor).count())
+      studentID = data.createdFor;
+    Session.set('studentIDForTagModal',studentID);
   }
 })
 
@@ -593,7 +622,9 @@ Template.assessmentBlock.helpers({
     return selectedStandards;
   },
   LoMs: function() {
-    var studentID = Meteor.impersonatedOrUserId();
+    var block = Template.parentData();
+    var wall = Walls.findOne(block.wallID);
+    var studentID = (wall.type == 'student') ? block.createdFor : Meteor.impersonatedOrUserId();
     var standardID = this._id;
     var instance = Template.instance();
     if (!studentID || !standardID)
@@ -607,7 +638,9 @@ Template.assessmentBlock.helpers({
     return LevelsOfMastery.find(selector,{sort:{submitted:-1}});
   },
   LoMAveragecolorcode: function() {
-    var studentID = Meteor.impersonatedOrUserId();
+    var block = Template.parentData();
+    var wall = Walls.findOne(block.wallID);
+    var studentID = (wall.type == 'student') ? block.createdFor : Meteor.impersonatedOrUserId();
     var standardID = this._id;
     if (!studentID || !standardID)
       return '';
@@ -618,7 +651,9 @@ Template.assessmentBlock.helpers({
     //update for grading period when available
   },
   LoMAveragetext: function() {
-    var studentID = Meteor.impersonatedOrUserId();
+    var block = Template.parentData();
+    var wall = Walls.findOne(block.wallID);
+    var studentID = (wall.type == 'student') ? block.createdFor : Meteor.impersonatedOrUserId();
     var standardID = this._id;
     if (!studentID || !standardID)
       return '';
@@ -637,6 +672,9 @@ Template.assessmentBlock.events({
     activityPageSession.set('assessmentID',tmpl.data._id);
   },
   'click .gradeAssessment': function(event,tmpl) {
+    var data = Template.parentData(function(data){return ('createdFor' in data)});
+    if ((data) && Roles.userIsInRole(data.createdFor,'student'))
+      loginButtonsSession.set('viewAs',data.createdFor);    
     FlowRouter.go('assessmentPage',{_id:tmpl.data._id});
   }
 })

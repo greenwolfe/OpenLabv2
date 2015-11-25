@@ -51,7 +51,7 @@ Template.activityPage.onCreated(function() {
   };
   instance.autorun(function() {
     var cU = Meteor.userId();
-    if ((!cU) || Roles.userIsInRole(cU,'parentOrAdvisor'))
+    if ((!cU) || !FlowRouter.subsReady() || Roles.userIsInRole(cU,'parentOrAdvisor'))
       return;
     var studentID = Meteor.impersonatedOrUserId();
     var studentOrSectionID = (Roles.userIsInRole(studentID,'student'))  ? studentID: Meteor.selectedSectionId();

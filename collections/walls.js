@@ -69,9 +69,6 @@ Meteor.methods({
     return Walls.remove(wallID);
   },
   addDefaultWalls: function(studentOrSectionID,activityID) {
-    //under new scheme if this is no longer called
-    //from the client, then move it to publications
-    //and make it just a function rather than a method
     if (Meteor.isSimulation)
       return;
     check(studentOrSectionID,Match.idString);
