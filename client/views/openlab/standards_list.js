@@ -173,25 +173,6 @@ Template.standardListHeader.helpers({
  /** STANDARD LIST  *******/
 /*************************/
 
-Template.standardList.onCreated(function() {
-  instance = this;
-
-  instance.autorun(function() {
-    var userID = Meteor.impersonatedOrUserId();
-    if (!userID)
-      return;
-    var categoryID = instance.data._id;
-    //first get the info that will be immediately shown
-    var LoMsThisCategory = Meteor.subscribe('levelsOfMastery',categoryID,userID,null);
-
-    if (LoMsThisCategory.ready()) { //then load the rest in the background
-      var LoMsThisUser = Meteor.subscribe('levelsOfMastery',null,userID,null); 
-      if (LoMsThisUser.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('levelsOfMastery',categoryID,null,null);
-    }
-  })
-})
-
 Template.standardList.helpers({
   colWidth: function() {
     return openlabSession.get('activeCategory2') ? 'col-md-6' : 'col-md-12';

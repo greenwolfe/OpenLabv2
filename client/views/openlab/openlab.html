@@ -1,4 +1,7 @@
 <template name = "openlab">
+  {{#unless studentSubscriptionLoaded}}
+    <p class='bg-info'> Loading data for {{getname impersonatedOrUserId 'full'}}</p>
+  {{/unless}}
   <div class='container-fluid'>
     <div class="row"> <!-- class="modal-body row" to scroll -->
 	    <div class='col-md-7'>

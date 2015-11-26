@@ -151,40 +151,6 @@ Template.activityListHeader.helpers({
  /** ACTIVITY LIST  *******/
 /*************************/
 
-Template.activityList.onCreated(function() {
-  instance = this;
-
-  instance.autorun(function() {
-    var userID = Meteor.impersonatedOrUserId();
-    if (!userID)
-      return;
-    var sectionID = Meteor.selectedSectionId();
-    //var unitID = instance.data._id; //not reactive?
-    var unitID = Template.currentData()._id;
-    //first get the info that will be immediately shown
-    var activitiesThisUnit = Meteor.subscribe('activityStatuses',userID,unitID);
-    var progressThisUnit = Meteor.subscribe('activityProgress',userID,unitID);
-    //workPeriods subscriptions should now just be loaded once when app starts
-    //var workPeriodsThisUnit = Meteor.subscribe('workPeriods',sectionID,unitID);
-
-    if (activitiesThisUnit.ready()) { //then load the rest in the background
-      var activityStatuses = Meteor.subscribe('activityStatuses',userID); 
-      if (activityStatuses.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('activityStatuses');
-    }
-    if (progressThisUnit.ready()) { //then load the rest in the background
-      var activityProgress = Meteor.subscribe('activityProgress',userID); 
-      if (activityProgress.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('activityProgress');
-    }
-/*    if (workPeriodsThisUnit.ready()) {
-      var workPeriods = Meteor.subscribe('workPeriods',sectionID);
-      if (workPeriods.ready() && Roles.userIsInRole(Meteor.userId(),'teacher'))
-        Meteor.subscribe('workPeriods');
-    } */
-  })
-})
-
 Template.activityList.helpers({
   activities0: function() {
     var activeUnit2 = openlabSession.get('activeUnit2');

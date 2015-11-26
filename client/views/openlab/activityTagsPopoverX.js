@@ -30,8 +30,6 @@ Template.activityTagsPopoverX.onCreated(function() {
   };
   instance.status = new ReactiveVar(this.nullStatus);
 
-  instance.subscribe('Tags');
-
   instance.autorun(function() {
     var activity = Session.get('activityForTagModal') || instance.nullActivity;
     instance.activity.set(activity);

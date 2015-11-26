@@ -76,13 +76,47 @@ Meteor.publish('site',function() {
   return Site.find();
 });
 
+Meteor.publish('openlabPagePubs',function(studentIDs) {
+  check(studentIDs,[Match.idString]);
+  var studentIDs = studentIDs.filter(function(studentID) {
+    return Roles.userIsInRole(studentID,'student');
+  });
+  if (Roles.userIsInRole(this.userId,'student'))
+    studentIDs.push(this.userId);
+  var isNotTeacher = !Roles.userIsInRole(this.userId,'teacher');
+
+
+  //activity status and progress
+  if (studentIDs.length == 0) { //return nothing
+    var statusProgressSelector = {_id:'none'};
+  } else {
+    var statusProgressSelector = {studentID:{$in:studentIDs}};
+  }
+
+  //levels of mastery
+  if (studentIDs.length == 0) { //return nothing
+    var LoMSelector = {_id:'none'};
+  } else {
+    var LoMSelector = {studentID:{$in:studentIDs}};
+    if (isNotTeacher)
+      LoMSelector.visible = true; //send only visible LoMs
+  }
+
+  //calendar events
+  //loaded one user at a time in calendar.js
+
+  return [
+    ActivityStatuses.find(statusProgressSelector),
+    ActivityProgress.find(statusProgressSelector),
+    LevelsOfMastery.find(LoMSelector)
+  ];
+})
+
 /* send initial wall, column, block and file information
    as well as subactivityStatuses, subactivityProgresses
    with initial page info
    (note all activities, tags, standards and workperiods loaded at site level)
-   when switching student or section, only change the relevant walls
-   and statuses, progress and workPeriods
-   without re-rendering the teacher, group, or section wall if unchanged
+   Call with increasingly longer student list to load for all students in background once initial page loads
 */
 //for later ... more limited publish/subscribe for memberships and groups ??
 Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
@@ -166,14 +200,14 @@ Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
   }
 
   return [
-          Walls.find(selector),
-          Columns.find({wallID:{$in:wallIds}}),
-          Blocks.find(blockSelector),
-          Files.find({wallID:{$in:wallIds}}),
-          ActivityStatuses.find(statusProgressSelector),
-          ActivityProgress.find(statusProgressSelector),
-          LevelsOfMastery.find(LoMSelector)
-        ];
+    Walls.find(selector),
+    Columns.find({wallID:{$in:wallIds}}),
+    Blocks.find(blockSelector),
+    Files.find({wallID:{$in:wallIds}}),
+    ActivityStatuses.find(statusProgressSelector),
+    ActivityProgress.find(statusProgressSelector),
+    LevelsOfMastery.find(LoMSelector)
+  ];
 });
 
 //issue with sections - right now sending all of a user's
