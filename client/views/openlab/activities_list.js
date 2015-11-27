@@ -247,10 +247,52 @@ Template.activityList.helpers({
 /* currentStatus */
 var currentStatus = function(activityID) {
   var studentID = Meteor.impersonatedOrUserId();
-  if (!Roles.userIsInRole(studentID,'student'))
-    return undefined;
-  return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+  var sectionID = Meteor.selectedSectionId();
+  var cU = Meteor.userId();
+  if (Roles.userIsInRole(studentID,'student')) {
+    return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+  } else if (Roles.userIsInRole(cU,'teacher') && (sectionID)) {
+    //indicate lowest level so it is flagged if 
+    var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
+    var levels = _.pluck(ActivityStatuses.find({
+      studentID:{$in:sectionMemberIds},
+      activityID:activityID},
+      {fields: {level: 1}}).fetch(),'level');
+    if (levels.length) {
+      var statuses = ['nostatus','submitted','returned','donewithcomments','done'];
+      //at least one student has submitted something for teacher to look at
+      if (_.contains(levels,'submitted')) {
+        return {
+          late:false,
+          level: 'submitted'
+        }
+      }
+      //every student marked done
+      var numberMarkedDone = levels.reduce(function(n,l){
+        return n + _.str.count(l,'done');
+      },0)
+      if (numberMarkedDone == sectionMemberIds.length) {
+        return {
+          late: false,
+          level: 'done'
+        }
+      }
+      //teacher has returned all submissions
+      //late tag indicates some students still have not submitted
+      var numberMarkedReturned = levels.reduce(function(n,l){
+        return n + _.str.count(l,'done') + _.str.count(l,'return');
+      },0)
+      if (numberMarkedReturned == levels.length) {
+        return {
+          late: (sectionMemberIds.length - numberMarkedReturned),
+          level: 'returned'
+        }
+      }
+    }
+  }
+  return undefined;
 }
+
 /* currentProgress */
 var currentProgress = function(activityID) {
   var studentID = Meteor.impersonatedOrUserId();
@@ -302,12 +344,23 @@ Template.activityItem.helpers({
     var status = currentStatus(this._id);
     if (!status)
       return 'not started';
-    var titleDict = {
-      'nostatus':'empty inbox: not started',
-      'submitted':'full inbox: work submitted, waiting for teacher response',
-      'returned':'full outbox:  Returned with comments by your teacher.  Please revise and resubmit.',
-      'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
-      'done':'Done.'};
+    if ('_id' in status) {
+      var titleDict = {
+        'nostatus':'empty inbox: not started',
+        'submitted':'full inbox: work submitted, waiting for teacher response',
+        'returned':'full outbox:  Returned with comments by your teacher.  Please revise and resubmit.',
+        'donewithcomments':'Done.  Revisions not required but review comments by your teacher before taking an assessment',
+        'done':'Done.'
+      };
+    } else {
+      var titleDict = {
+        'nostatus':'empty inbox: no students have submitted work.',
+        'submitted':'at least one student has put an assignment in your inbox.',
+        'returned':'full outbox:  All submitted assignments have been returned, but some are awaiting revisions.',
+        'donewithcomments':"All students have submitted work, and it is all graded and marked done.",
+        'done':"All students have submitted work, and it is all graded and marked done."
+      };
+    }
     return titleDict[status.level];
   },
   progressTitle: function() {
@@ -328,6 +381,12 @@ Template.activityItem.helpers({
     if (!status)
       return '';
     return (status.late) ? 'icon-late' : '';  
+  },
+  lateHoverText: function() {
+    var status = currentStatus(this._id);
+    if (!status || _.isBoolean(status.late))
+      return 'late';
+    return status.late + ' students have not yet submitted this assignment.';
   },
 /*  expected: function() { //compute based on workPeriod
     return 'expected';

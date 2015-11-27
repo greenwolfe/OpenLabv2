@@ -54,10 +54,31 @@ Template.activityPage.onCreated(function() {
     if ((!cU) || !FlowRouter.subsReady() || Roles.userIsInRole(cU,'parentOrAdvisor'))
       return;
     var studentID = Meteor.impersonatedOrUserId();
-    var studentOrSectionID = (Roles.userIsInRole(studentID,'student'))  ? studentID: Meteor.selectedSectionId();
+    var sectionID = Meteor.selectedSectionId();
+    var studentOrSectionIDs = [];
+    var wallType = activityPageSession.get('showWalls');
+    if (Roles.userIsInRole(studentID,'student')) {
+      studentOrSectionIDs.push(studentID);
+    } else if (Roles.userIsInRole(cU,'teacher') && (sectionID) && (wallType != 'teacher')) {
+      if (_.contains(['section','allTypes'],wallType)) {
+        studentOrSectionIDs.push(sectionID);
+      } else if (_.contains(['student','group'],wallType)) {
+        studentOrSectionIDs = Meteor.sectionMemberIds(sectionID);
+        var statusFilter = activityPageSession.get('statusFilter');
+        var subactivityFilter = activityPageSession.get('subactivityFilter');
+        if (statusFilter != 'nofilter') {
+          studentOrSectionIDs = studentOrSectionIDs.filter(function(studentID) {
+            var status = ActivityStatuses.findOne({studentID:studentID,activityID:subactivityFilter});
+            if (!status)
+              return (statusFilter == 'nostatus');
+            return _.str.count(status.level,statusFilter);
+          });
+        }
+      }
+    }
     var activityID = FlowRouter.getParam('_id');
-    if ((studentOrSectionID) && (activityID)) {
-      Meteor.call('addDefaultWalls',studentOrSectionID,activityID,function(error,wallsCreated) {
+    if ((studentOrSectionIDs.length) && (activityID)) {
+      Meteor.call('addDefaultWalls',studentOrSectionIDs,activityID,wallType,function(error,wallsCreated) {
         if (error)
           console.log(error.reason);
         if (wallsCreated) { //resubscribe to get columns, blocks, files for new wall
@@ -175,13 +196,26 @@ Template.activityPage.helpers({
     var showWalls = activityPageSession.get('showWalls');
     var studentID = Meteor.impersonatedOrUserId();
     var sectionID = Meteor.selectedSectionId();
+    var statusFilter = activityPageSession.get('statusFilter');
+    var subactivityFilter = activityPageSession.get('subactivityFilter');
 
     if (showWalls == 'student') {
       if ((studentID) && Roles.userIsInRole(studentID,'student')) {
         selector.createdFor = studentID;
         selector.type = 'student';
       } else if ((sectionID) && Roles.userIsInRole(cU,'teacher')) {
-        selector.createdFor = {$in: Meteor.sectionMemberIds(sectionID)};
+        var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
+        if (statusFilter == 'nofilter') {
+          selector.createdFor = {$in: sectionMemberIds};
+        } else {
+          var filteredIds = sectionMemberIds.filter(function(studentID) {
+            var status = ActivityStatuses.findOne({studentID:studentID,activityID:subactivityFilter});
+            if (!status)
+              return (statusFilter == 'nostatus');
+            return _.str.count(status.level,statusFilter);
+          });
+          selector.createdFor = {$in: filteredIds};
+        }
         selector.type = 'student';
       }
     } else if (showWalls == 'group') {
@@ -193,8 +227,19 @@ Template.activityPage.helpers({
         selector.createdFor = {$in:studentsGroupIds};
         selector.type = 'group';
       } else if ((sectionID) && Roles.userIsInRole(cU,'teacher')) {
+        var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
+        if (statusFilter == 'nofilter') {
+          var filteredIds = sectionMemberIds;
+        } else {
+          var filteredIds = sectionMemberIds.filter(function(studentID) {
+            var status = ActivityStatuses.findOne({studentID:studentID,activityID:subactivityFilter});
+            if (!status)
+              return (statusFilter == 'nostatus');
+            return _.str.count(status.level,statusFilter);
+          });
+        }
         var studentsGroupIds = _.pluck(Memberships.find({
-          memberID:{$in: Meteor.sectionMemberIds(sectionID)},
+          memberID:{$in: filteredIds},
           collectionName: 'Groups',
         },{fields: {itemID: 1}}).fetch(), 'itemID');
         selector.createdFor = {$in:studentsGroupIds};        

@@ -28,6 +28,9 @@ i.icon-fiveBars {
   background-image: url('fiveBars.png');
 }
 
+i.icon-nofilter {
+  background-image: url('nofilter.png');
+}
 i.icon-nostatus {
   background-image: url('noStatus.png');
   background-color: Lavender;

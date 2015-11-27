@@ -17,7 +17,13 @@
             </li>-->
             {{>showWalls}}
             {{>viewAs}}
-            {{>groups}}
+            {{#if sectionOnlySelected}}
+              {{#if showingStudentOrGroupWalls}}
+                {{>filterStudents}}
+              {{/if}}
+            {{else}}
+              {{>groups}}
+            {{/if}}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             {{> loginButtons}} 
@@ -45,6 +51,53 @@
     <a href="#">{{type}}</a>
   </li>
 </template>
+
+<template name= 'filterStudents'>
+<span class='navbar-text marginLR0'>Filter students:</span>
+  <li id="status-dropdown-list" class="dropdown">
+    <a class="dropdown-toggle paddingR3 paddingL3" data-toggle="dropdown">
+      <b class="caret"></b>
+      <i class="activityStatus icon-{{statusFilter}}"></i> 
+    </a>
+    <ul class="dropdown-menu">
+      {{#each statusSelectors}}
+        {{>statusSelector}}
+      {{/each}}
+    </ul>
+  </li>
+  <li id="subactivities-dropdown-list" class="dropdown">
+    <a class="dropdown-toggle paddingL3" data-toggle="dropdown">
+      {{#with subactivityFilter}}
+        <span> {{title}}{{#if tag}} ({{{tag}}}){{/if}} </span>
+      {{/with}}
+      <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+      {{#each subactivities}}
+        {{> subactivitySelector}}
+      {{/each}}
+    </ul>
+  </li>
+</template>
+
+<template name = 'statusSelector'>
+  <li  class='{{active}}'>
+    <a href="#">
+      <i class="activityStatus {{status}}"></i>
+      <span>{{statusText}}</span>
+    </a>
+  </li>
+</template>
+
+<template name = 'subactivitySelector'>
+  <li  class='{{active}}'>
+    <a href="#">
+      <span>{{title}}{{#if tag}} ({{{tag}}}){{/if}}</span>
+    </a>
+  </li>
+</template>
+
+
 
 
 

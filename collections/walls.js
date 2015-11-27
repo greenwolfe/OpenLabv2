@@ -68,11 +68,15 @@ Meteor.methods({
     }
     return Walls.remove(wallID);
   },
-  addDefaultWalls: function(studentOrSectionID,activityID) {
+  addDefaultWalls: function(studentOrSectionIDs,activityID,wallType) {
     if (Meteor.isSimulation)
       return;
-    check(studentOrSectionID,Match.idString);
+    check(wallType,Match.OneOf('allTypes','teacher','student','group','section'));
+    check(studentOrSectionIDs,[Match.idString]);
     check(activityID,Match.idString);
+    if (wallType == 'teacher') //default teacher wall added when activity is created and then never removed
+      return 0;
+    var wallTypes = (wallType == 'allTypes') ? ['teacher','student','group','section'] : [wallType];
     var wallsCreated = 0;
     var activity = Activities.findOne(activityID);
     //if activity doesn't exist, just don't create walls for it
@@ -80,17 +84,25 @@ Meteor.methods({
     if (!activity)
       return;
       //throw new Meteor.Error('activityNotFound','Cannot create default walls.  Activity not found.');
-    var student = Meteor.users.findOne(studentOrSectionID);
-    if ((student) && Roles.userIsInRole(student,'student')) {
-      var studentID = studentOrSectionID;
-      var sectionID = Meteor.currentSectionId(studentID);
+    var studentIDs = studentOrSectionIDs.filter(function(studentID) {
+      return Roles.userIsInRole(studentID,'student');
+    })
+    var sectionIDs = studentOrSectionIDs.filter(function(sectionID) {
+      return Sections.find(sectionID,{limit:1}).count();
+    })
 
-      var wall = {
+    var wall = {};
+    studentIDs.forEach(function(studentID) {
+      var sectionID = Meteor.currentSectionId(studentID);
+      if (sectionID && !_.contains(sectionIDs,sectionID))
+        sectionIDs.push(sectionID);
+
+      wall = {
         activityID: activityID,
         type: 'student',
         createdFor: studentID
       }
-     if (Walls.find(wall).count() == 0) {
+      if (_.contains(wallTypes,'student') && (Walls.find(wall).count() == 0)) {
         Meteor.call('insertWall',wall,function(error,id) {
           if (error)
             console.log(error.reason);
@@ -101,7 +113,7 @@ Meteor.methods({
       wall.type = 'group';
       var groupIds = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
       wall.createdFor = {$in: groupIds}; 
-      if (Walls.find(wall).count() == 0) { //count non-empty walls for all past groups
+      if (_.contains(wallTypes,'group') && (Walls.find(wall).count() == 0)) { //count non-empty walls for all past groups
         wall.createdFor = Meteor.currentGroupId(studentID); //if none, create wall for current group
         if (wall.createdFor)
           Meteor.call('insertWall',wall,function(error,id) {
@@ -110,25 +122,27 @@ Meteor.methods({
         });
         wallsCreated += 1;
       }
-    } else {
-      var sectionID = studentOrSectionID;
+    })
+
+    sectionIDs.forEach(function(sectionID) {
       var wall = {
         activityID: activityID
       }
-    }
 
-    var section = Sections.findOne(sectionID);
-    if (section) {
-      wall.type = 'section';
-      wall.createdFor = sectionID;
-      if ((wall.createdFor) && (Walls.find(wall).count() == 0)) {
-         Meteor.call('insertWall',wall,function(error,id) {
-          if (error)
-            console.log(error.reason);
-        });
-        wallsCreated += 1;
+      var section = Sections.findOne(sectionID);
+      if (section) {
+        wall.type = 'section';
+        wall.createdFor = sectionID;
+        if ((_.contains(wallTypes,'section')) && (Walls.find(wall).count() == 0)) {
+           Meteor.call('insertWall',wall,function(error,id) {
+            if (error)
+              console.log(error.reason);
+          });
+          wallsCreated += 1;
+        }
       }
-    }
+    });
+
     return wallsCreated;
   }
 });

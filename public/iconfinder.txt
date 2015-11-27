@@ -2,6 +2,7 @@
 **https://www.iconfinder.com/icons/62236/outbox_icon#size=64
   https://www.iconfinder.com/icons/62268/tray_icon#size=64
 **https://www.iconfinder.com/icons/62219/inbox_icon#size=64
+  https://www.iconfinder.com/icons/169885/access_no_not_permitted_icon#size=128
 
 https://www.iconfinder.com/icons/265515/nosignal_weak_wifi_icon#size=128
 https://www.iconfinder.com/icons/265508/signal_weak_wifi_icon#size=128

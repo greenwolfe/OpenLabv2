@@ -37,3 +37,13 @@ i.fa.fa-question-circle:hover {
 .fullwidth {
     width: 100%;
 }
+.marginLR0 {
+  margin-left: 0;
+  margin-right: 0;
+}
+.nav > li > a.paddingR3 {
+  padding-right: 3px;
+}
+.nav > li > a.paddingL3 {
+  padding-left: 3px;
+}
