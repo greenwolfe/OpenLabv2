@@ -28,6 +28,8 @@ percentExpected =  function() {
 }
 percentCompleted = function() {
   var studentID = Meteor.impersonatedOrUserId();
+  var cU = Meteor.userId();
+  var sectionID = Meteor.selectedSectionId();
   var activityIDs = _.pluck(Activities.find(
     {
       unitID:this._id,
@@ -36,16 +38,34 @@ percentCompleted = function() {
     {fields:{_id:1}}).fetch(),'_id')
   var total = activityIDs.length; 
   if (total == 0) return 0;
+  
+  var today = new Date();
+  var expectedActivityIDs = activityIDs.filter(function(activityID) {
+    var workPeriod = WorkPeriods.findOne({
+      activityID: activityID,
+      sectionID: sectionID
+    });
+    return ((workPeriod) && (today > workPeriod.endDate));
+  });
+  var selector = {
+    activityID:{$in:expectedActivityIDs}
+  };
+  var numStudents = 1;
+  if (Roles.userIsInRole(studentID,'student')) {
+    selector.studentID = studentID;
+  } else  if (Roles.userIsInRole(cU,'teacher') && (sectionID)) {
+    var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
+    numStudents = Math.max(sectionMemberIds.length,1);
+    selector.studentID = {$in: sectionMemberIds};
+  } else {
+    selector.studentID =  studentID; //will find no statuses
+  }
 
-  var statuses = ActivityStatuses.find(
-    {
-      activityID:{$in:activityIDs},
-      studentID:studentID
-    }).fetch();
+  var statuses = ActivityStatuses.find(selector).fetch();
   var completed = statuses.filter(function(status) {
     return _.str.include(status.level,'done')
   }).length
-  return 100*completed/total;
+  return 100*completed/numStudents/total;
 }  
 
   /*************************/

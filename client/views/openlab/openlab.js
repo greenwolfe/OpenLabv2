@@ -23,25 +23,32 @@ Template.openlab.onCreated(function() {
 
 Template.openlab.onRendered(function() {
   var instance = this;
-  var cU = Meteor.userId();
-  if (Roles.userIsInRole(cU,'student')) {
-    instance.requestedStudentIDs.set([cU]);
-    console.log('loading: ' + Meteor.user().username);
-    instance.subscribe('openlabPagePubs',[cU],function() {
-      console.log('loaded');
-      instance.loadedStudentIDs.set([cU]);
-    });
-  }
-  if (Roles.userIsInRole(cU,'teacher')) {
-    instance.autorun(function() {
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'student')) {
+      instance.requestedStudentIDs.set([cU]);
+      console.log('loading: ' + Meteor.user().username);
+      instance.subscribe('openlabPagePubs',[cU],function() {
+        console.log('loaded');
+        instance.loadedStudentIDs.set([cU]);
+      });
+    }
+  });
+
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
       var iU = Meteor.impersonatedId();
       var rSIDs = instance.requestedStudentIDs.plainarray;
       if (Roles.userIsInRole(iU,'student') && !_.contains(rSIDs,iU)) {
         rSIDs.push(iU);
         instance.requestedStudentIDs.set(rSIDs); 
       }
-    });
-    instance.autorun(function() {
+    }
+  });
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
       var sectionID = Meteor.selectedSectionId();
       if ((sectionID) && !(Meteor.impersonatedId())) { //section itself selected, rather than student in section
         var rSIDs = instance.requestedStudentIDs.plainarray;
@@ -51,8 +58,11 @@ Template.openlab.onRendered(function() {
         if (numberToAdd) 
           instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd))); 
       }
-    });
-    instance.autorun(function() {
+    }
+  });
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
       var rSIDs = instance.requestedStudentIDs.reactive.get();
       var names = rSIDs.map(function(id) {
         var user = Meteor.users.findOne(id);
@@ -71,10 +81,12 @@ Template.openlab.onRendered(function() {
         if (numberToAdd) 
           instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd))); 
       });
-    });
-  }
-  if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
-    instance.autorun(function() {
+    }
+  });
+
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
       var iU = Meteor.impersonatedId();
       var childOrAdviseeIds = Meteor.childOrAdviseeIds(cU);
       var rSIDs = instance.requestedStudentIDs.plainarray;
@@ -82,8 +94,11 @@ Template.openlab.onRendered(function() {
         rSIDs.push(iU);
         instance.requestedStudentIDs.set(rSIDs); 
       }
-    })
-    instance.autorun(function() {
+    }
+  });
+  instance.autorun(function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
       var rSIDs = instance.requestedStudentIDs.reactive.get();
       var names = rSIDs.map(function(id) {
         var user = Meteor.users.findOne(id);
@@ -101,8 +116,8 @@ Template.openlab.onRendered(function() {
         if (numberToAdd) 
           instance.requestedStudentIDs.set(rSIDs.concat(urSIDs.slice(0,numberToAdd))); 
       });
-    });
-  }
+    }
+  });
 });
 
 Template.openlab.helpers({
