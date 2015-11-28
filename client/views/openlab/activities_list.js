@@ -280,34 +280,56 @@ var currentStatus = function(activityID) {
       {fields: {level: 1}}).fetch(),'level');
     if (levels.length) {
       var statuses = ['nostatus','submitted','returned','donewithcomments','done'];
-      //at least one student has submitted something for teacher to look at
-      if (_.contains(levels,'submitted')) {
-        return {
-          late:false,
-          level: 'submitted'
-        }
-      }
-      //every student marked done
+      var numberMarkedSubmitted = levels.reduce(function(n,l){
+        return n  + _.str.count(l,'submitted');
+      },0)
       var numberMarkedDone = levels.reduce(function(n,l){
         return n + _.str.count(l,'done');
       },0)
+      var numberMarkedReturned = levels.reduce(function(n,l){
+        return n + _.str.count(l,'return');
+      },0)
+      var numberNotSubmitted = sectionMemberIds.length - numberMarkedSubmitted - numberMarkedReturned - numberMarkedDone;
+      var tag = numberMarkedSubmitted + ' submitted. ' + numberMarkedReturned + ' returned to students for resubmission. ' + numberMarkedDone + ' done. ' + numberNotSubmitted + ' not yet submitted.';
+      //at least one student has submitted something for teacher to look at
+      if (numberMarkedSubmitted) {
+        return {
+          late:false,
+          level: 'submitted',
+          tag: tag 
+        }
+      }
+      //every student marked done
       if (numberMarkedDone == sectionMemberIds.length) {
         return {
           late: false,
-          level: 'done'
+          level: 'done',
+          tag: tag
         }
       }
       //teacher has returned all submissions
       //late tag indicates some students still have not submitted
-      var numberMarkedReturned = levels.reduce(function(n,l){
-        return n + _.str.count(l,'done') + _.str.count(l,'return');
-      },0)
-      if (numberMarkedReturned == levels.length) {
+      if (numberMarkedReturned + numberMarkedDone == levels.length) {
         return {
-          late: (sectionMemberIds.length - numberMarkedReturned),
-          level: 'returned'
+          late: (sectionMemberIds.length - numberMarkedReturned - numberMarkedDone),
+          level: 'returned',
+          tag: tag
         }
       }
+      //some (all?) assignments not submitted yet
+      if (numberNotSubmitted) {
+        return {
+          late: false,
+          level: 'nostatus',
+          tag: tag
+        }
+      }
+    } else {
+      return {
+        late: false,
+        level: 'nostatus',
+        tag: '0 submitted. 0 returned to students for resubmission. 0 done. ' + sectionMemberIds.length + ' not yet submitted.'
+      } 
     }
   }
   return undefined;
@@ -374,11 +396,11 @@ Template.activityItem.helpers({
       };
     } else {
       var titleDict = {
-        'nostatus':'empty inbox: no students have submitted work.',
-        'submitted':'at least one student has put an assignment in your inbox.',
-        'returned':'full outbox:  All submitted assignments have been returned, but some are awaiting revisions.',
-        'donewithcomments':"All students have submitted work, and it is all graded and marked done.",
-        'done':"All students have submitted work, and it is all graded and marked done."
+        'nostatus':'empty inbox. ' + status.tag,
+        'submitted': 'Inbox has submissions. ' + status.tag,
+        'returned':'Outbox has returned work. ' + status.tag,
+        'donewithcomments':"All students marked done.",
+        'done':"All students marked done."
       };
     }
     return titleDict[status.level];
