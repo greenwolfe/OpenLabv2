@@ -150,6 +150,17 @@ Template.wall.helpers({
 })
 
 Template.wall.events({
+  'click .setViewStudent': function(event,tmpl) {
+    event.preventDefault();
+    var wall = tmpl.data;
+    loginButtonsSession.set('viewAs',wall.createdFor);
+  },
+  'click .setViewSection': function(event,tmpl) {
+    event.preventDefault();
+    var wall = tmpl.data;
+    var section = Meteor.currentSectionId(wall.createdFor);
+    loginButtonsSession.set('viewAs',section);
+  },
   'click .editColumns': function(event,tmpl) {
     var wall = tmpl.data._id;
     if (activityPageSession.get('editedWall') != wall) {

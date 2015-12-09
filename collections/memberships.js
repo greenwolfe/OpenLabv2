@@ -1,5 +1,30 @@
 Memberships = new Meteor.Collection('Memberships');
 
+//for groups, switch to request to join, welcome new member, leave group
+//cannot request to join unless first leave old group
+//fields:
+//   welcomingCommittee ... all current members at the time new member requests to join
+//   welcomedBy ... members who have welcomed the current member
+//   welcomed ... boolean (true if previous two lists are the same)
+//   or status ... requestedToJoin, welcomed, left, disbanded ... requires some thought
+//membership is destroyed if not welcomed, and have to apply again
+//if accepted, withdraw other applications
+
+//if leave ... set welcoming fields to false, []
+//if last to leave ... set welcomed=true for yourself and anyone who recently left
+//                 ... define recently?  since last content posted and/or last few days (?)
+
+//or set up separate leave/disband systems
+//if leave, then lose access after that date ... unwelcomed, endDate set
+//if disband (select "vote to disband" button) welcoming fields left untouched
+//   endDate not set until last person votes to disband
+
+//in group menu:  current group:  names ... leave button
+// list of members who have requested to join with "welcome name to the groupb" yes/now
+//if no current group:  create new group button ... list of available groups with request to join button
+
+//on activity page:  if group wall is blank, menu to select past group
+//                   if group wall has contents, button to add wall
 Meteor.methods({
   //do any of these need checks that currentUser is teacher
   //or membership.member is or is not the current user?
@@ -31,6 +56,7 @@ Meteor.methods({
       throw new Meteor.Error('user-not-found', "Cannot add member.  User not found.");
 
     //deactivate any past memberships before adding new membership
+    //throw error instead ... cannot join unless have left past groups/sections
     Memberships.find({memberID:membership.memberID,collectionName:membership.collectionName}).forEach(function(mship){
       if (today < mship.endDate)
         Memberships.update(mship._id,{$set:{endDate:aLittleWhileAgo}})
@@ -62,6 +88,7 @@ Meteor.methods({
     var member = Meteor.users.findOne(membership.memberID);
     if (!member)
       throw new Meteor.Error('user-not-found', "Cannot add member.  User not found.");
+    //only allow invitation if not a member of another group?
 
     return Memberships.insert(membership);
   },
@@ -78,6 +105,7 @@ Meteor.methods({
     var today = new Date();
     var wayWayInTheFuture = new Date(8630000000000000);
     //deactivate any past memberships before adding new membership
+    //throw error instead, cannot accept invite unless student has left all past groups
     Memberships.find({memberID:membership.memberID,collectionName:membership.collectionName}).forEach(function(mship) {
       if (today < mship.endDate)
         Memberships.update(mship._id,{$set:{endDate:today}})

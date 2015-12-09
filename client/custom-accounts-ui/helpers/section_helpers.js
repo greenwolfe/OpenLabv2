@@ -8,6 +8,15 @@ Meteor.currentSection = function(memberID) {
 }
 Template.registerHelper('currentSection',Meteor.currentSection);
 
+Meteor.currentSectionName = function(memberID) {
+  var sectionID = Meteor.currentSectionId(memberID);
+  var section = Sections.findOne(sectionID);
+  if (section)
+    return section.name;
+  return '';
+}
+Template.registerHelper('currentSectionName',Meteor.currentSectionName);
+
 //if sectionOrID is not passed, returns members of current section for currently impersonated user or current user
 
 Meteor.sectionMembers = function(sectionOrID) {
