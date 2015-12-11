@@ -25,6 +25,15 @@ Template.wall.helpers({
     }
     return '';
   },
+  showingStudentWalls: function() {
+    return (activityPageSession.get('showWalls') == 'student');
+  },
+  studentActive: function() {
+    return (this.createdFor == Meteor.impersonatedId()) ? 'bg-primary text-white' : '';
+  },
+  sectionActive: function() {
+    return ((this.createdFor != Meteor.impersonatedId()) && (Meteor.currentSectionId(this.createdFor) == Meteor.selectedSectionId())) ? 'bg-primary text-white' : '';
+  },
   helpMessages: function () {
     return [
       'Use the add block menu to add a block to a column in this wall.',

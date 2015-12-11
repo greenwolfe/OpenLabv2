@@ -1,0 +1,18 @@
+Meteor.startup(function () {
+  Memberships.find().forEach(function(membership) {
+    newfields = {
+      welcomingCommittee: []
+    };
+    var today = new Date();
+    if (today < membership.startDate) {
+      newfields.status = 'pending';
+    } else if ((membership.startDate < today) && (today < membership.endDate)) {
+      newfields.status = 'current';
+    } else if (today > membership.endDate) {
+      newfields.status = 'final';
+    } else {
+      newfields.status = 'current'; // should be no way this is used
+    }
+    Memberships.update(membership._id,{$set: newfields});
+  });
+});

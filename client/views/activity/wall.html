@@ -3,12 +3,16 @@
     <div class="panel-heading text-center clearfix">
       <div>
         {{{title}}}
-        {{#if inStudentWall}}
-          <span>(View As:</span>
-          <a href="#" class='setViewStudent'>{{getname createdFor 'first'}}</a>
-          <span>/</span>
-          <a href="#" class='setViewSection'>{{currentSectionName createdFor}} </a>
-          <span>)</span>
+        {{#if isInRole 'teacher'}}
+          {{#if inStudentWall}}
+            {{#if showingStudentWalls}}
+              <span>(Viewing as:</span>
+              <a href="#" class='setViewStudent {{studentActive}}'>{{getname createdFor 'first'}}</a>
+              <span>/</span>
+              <a href="#" class='setViewSection {{sectionActive}}'>{{currentSectionName createdFor}} </a>
+              <span>)</span>
+            {{/if}}
+          {{/if}}
         {{/if}}
         <div class="pull-right">
           {{#if canEditWall}}

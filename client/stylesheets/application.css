@@ -47,3 +47,6 @@ i.fa.fa-question-circle:hover {
 .nav > li > a.paddingL3 {
   padding-left: 3px;
 }
+.text-white {
+  color: white;
+}
