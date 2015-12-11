@@ -102,6 +102,17 @@ Template.activityPage.onCreated(function() {
 Template.activityPage.onRendered(function() {
   var instance = this;
   var cU = Meteor.userId();
+  if (Roles.userIsInRole(cU,'student')) {
+    var activityID = FlowRouter.getParam('_id');
+    instance.requestedStudentIDs.set([cU]);
+    console.log('loading: ' + Meteor.user().username);
+    instance.subscribe('activityPagePubs',[cU],activityID,function() {
+      console.log('loaded');
+      instance.loadedStudentIDs.set([cU]);
+      instance.initialSubscriptionsLoaded.set(true);
+    });
+  }
+
   if (Roles.userIsInRole(cU,'teacher')) {
     instance.autorun(function() {
       var iU = Meteor.impersonatedId();
@@ -131,6 +142,7 @@ Template.activityPage.onRendered(function() {
       console.log('loading: ' + names.join(', '));
       instance.subscribe('activityPagePubs',rSIDs,activityID,function() {
         console.log('loaded');
+        instance.initialSubscriptionsLoaded.set(true);
         instance.loadedStudentIDs.set(rSIDs);
         var sectionID = Meteor.selectedSectionId();
         var sectionMemberIds = Meteor.sectionMemberIds(sectionID);
@@ -141,6 +153,7 @@ Template.activityPage.onRendered(function() {
       });
     });
   }
+
   if (Roles.userIsInRole(cU,'parentOrAdvisor')) {
     instance.autorun(function() {
       var iU = Meteor.impersonatedId();
@@ -166,6 +179,7 @@ Template.activityPage.onRendered(function() {
       console.log('loading: ' + names.join(', '));
       instance.subscribe('activityPagePubs',rSIDs,activityID,function() {
         console.log('loaded');
+        instance.initialSubscriptionsLoaded.set(true);
         instance.loadedStudentIDs.set(rSIDs);
         var childOrAdviseeIds = Meteor.childOrAdviseeIds();
         var urSIDs = _.difference(childOrAdviseeIds,rSIDs); //unrequested student IDs
@@ -180,11 +194,11 @@ Template.activityPage.onRendered(function() {
 Template.activityPage.helpers({
   initialSubscriptionsLoaded: function() {
     var tmpl = Template.instance();
-    var subsReady = FlowRouter.subsReady('initialActivityPagePub');
-    if (subsReady) { //latch this so it doesn't invalidate when publish function is called to load more student data in the background
-      tmpl.initialSubscriptionsLoaded.set(true);
-      return true;
-    }
+    //var subsReady = FlowRouter.subsReady('initialActivityPagePub');
+    //if (subsReady) { //latch this so it doesn't invalidate when publish function is called to load more student data in the background
+    //  tmpl.initialSubscriptionsLoaded.set(true);
+    //  return true;
+    //}
     return tmpl.initialSubscriptionsLoaded.get();
   },
   walls: function() {
