@@ -1,11 +1,9 @@
 Meteor.startup(function () {
   Memberships.find().forEach(function(membership) {
-    newfields = {
-      welcomingCommittee: []
-    };
+    newfields = {};
     var today = new Date();
     if (today < membership.startDate) {
-      newfields.status = 'pending';
+      newfields.status = 'pending'; //deprecated should not be used any more
     } else if ((membership.startDate < today) && (today < membership.endDate)) {
       newfields.status = 'current';
     } else if (today > membership.endDate) {
@@ -14,5 +12,32 @@ Meteor.startup(function () {
       newfields.status = 'current'; // should be no way this is used
     }
     Memberships.update(membership._id,{$set: newfields});
+/*    Memberships.update(membership._id,{$unset:{
+      welcomingCommittee: '',
+      status: ''
+    }})*/
+  });
+  Groups.find().forEach(function(group) {
+    var longLongAgo = new Date(0);
+    var today = new Date();
+    var wayWayInTheFuture = new Date(8630000000000000); //new Date(8640000000000000) =  Sat Sep 13 275760 01:00:00 GMT+0100 (BST) and is the maximum possible javascript Date
+
+    Groups.update(group._id,{$set: {
+      openUntil: longLongAgo,
+      votesToOpen: [],
+      pollClosesAt: longLongAgo,
+      status: 'active'
+    }});
+  });
+  Sections.find().forEach(function(section) {
+    var wayWayInTheFuture = new Date(8630000000000000); //new Date(8640000000000000) =  Sat Sep 13 275760 01:00:00 GMT+0100 (BST) and is the maximum possible javascript Date
+    var longLongAgo = new Date(0);
+    
+    Sections.update(section._id,{$set: {
+      openUntil: wayWayInTheFuture,
+      votesToOpen: [],
+      pollClosesAt: longLongAgo,
+      status: 'active'
+    }});
   });
 });

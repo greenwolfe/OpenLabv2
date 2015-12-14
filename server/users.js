@@ -204,12 +204,16 @@ Meteor.methods({
     if (Roles.userIsInRole(cU,'student')) {
       var sectionID = user.profile.postEnrollmentInfo.sectionID || null;
       if (sectionID) {
-        var currentMembership = Memberships.find(
-          {memberID:user._id,collectionName:'Sections'},
-          {$sort:{to:-1}},
+        var currentMembership = Memberships.find({
+            memberID:user._id,
+            collectionName:'Sections',
+            status:'current'},
+          {$sort:{endDate:-1}},
           {limit:1}
         ).fetch().pop();
-        if (!currentMembership || (currentMembership.in != sectionID)) {
+        if ((currentMembership) && (currentMembership.itemID != sectionID))
+          Meteor.call('removeMember',currentMembership._id,'former');          
+        if (!currentMembership || (currentMembership.itemID != sectionID)) {
           Meteor.call('addMember',{
             memberID: user._id,
             itemID: sectionID,

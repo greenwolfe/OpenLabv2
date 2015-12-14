@@ -4,101 +4,192 @@
 
 /* groups helpers */
 Template.groups.helpers({
-  sections: function() {
-    return Sections.find({},{sort:{name:1}});
+  openGroups: function() {
+    var groupIDs = [];
+    var students = Roles.getUsersInRole('student');
+    students.forEach(function(student) {
+      var currentGroupID = Meteor.currentGroupId(student._id);
+      if (currentGroupID)
+        groupIDs.push(currentGroupID);
+    });
+    groupIDs = _.unique(groupIDs);
+    var today = new Date();
+    return Groups.find({_id:{$in:groupIDs},openUntil:{$gt:today}});
   },
-  selectedSection: function() {
-    return loginButtonsSession.get('sectionID');
+  openGroupsCount: function() {
+    var groupIDs = [];
+    var students = Roles.getUsersInRole('student');
+    students.forEach(function(student) {
+      var currentGroupID = Meteor.currentGroupId(student._id);
+      if (currentGroupID)
+        groupIDs.push(currentGroupID);
+    });
+    groupIDs = _.unique(groupIDs);
+    var today = new Date();
+    return Groups.find({_id:{$in:groupIDs},openUntil:{$gt:today}}).count();
   },
-  invitees: function() {
-    var invitees = loginButtonsSession.get('invitees');
-    if (!invitees || !_.isArray(invitees))
-      return '_____';
-    if (invitees.length == 0)
-      return '_____';
-    return groupToString(invitees);
+  groupIsOpen: function() {
+    var today = new Date();
+    return (today < this.openUntil);
   },
-  inviteesMinusCurrent: function() {
-    var invitees = loginButtonsSession.get('invitees');
-    if (!invitees || !_.isArray(invitees))
-      return '_____';
-    if (invitees.length == 0)
-      return '_____';
-    var currentGroup = Meteor.groupMemberIds();
-    if ((currentGroup) && _.isArray(currentGroup))
-      invitees = _.difference(invitees,currentGroup);
-    if (invitees.length == 0)
-      return '_____';    
-    return groupToString(invitees);        
+  pollIsOpen: function() {
+    var today = new Date();
+    return (today < this.pollClosesAt);
   },
-  openInvitesCount: function() {
-    return Meteor.openInvites().count();
+  voteIsYes: function() {
+    var today = new Date();
+    if (today > this.pollClosesAt)
+      return false;
+    return _.contains(this.votesToOpen,Meteor.impersonatedOrUserId());
+  },
+  membersWhoVotedToOpen: function() {
+    var today = new Date();
+    if (today > this.pollClosesAt)
+      return '';
+    var verb = (this.votesToOpen.length > 1) ? ' have' : ' has';
+    return groupToString(this.votesToOpen) + verb;
+  },
+  formerMembers: function() {
+    var formerMembers = Meteor.groupMembers('former',this._id).count();
+    if (this.status == 'active') 
+      formerMembers += Meteor.groupMembers('final',this._id).count();
+    return formerMembers;
+  },
+  strictlyFormerMembers: function() {
+    return Meteor.groupMembers('former',this._id).count();
+  },
+  finalMembers: function() {
+    return (this.status == 'active') ? Meteor.groupMembers('final',this._id).count() : 0;
+  },
+  hasPastGroups: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,['student','teacher']))
+      return 0;
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return 0;
+    var groupIDs = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
+    groupIDs = _.unique(groupIDs);
+    groupIDs = _.without(groupIDs,Meteor.currentGroupId());
+    return groupIDs.length;
+  },
+  pastGroups: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,['student','teacher']))
+      return '';
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return '';
+    var groupIDs = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
+    groupIDs = _.unique(groupIDs);
+    groupIDs = _.without(groupIDs,Meteor.currentGroupId());
+    if (!groupIDs.length)
+      return '';
+    var pastGroups = [];
+    groupIDs.forEach(function(groupID) {
+      var pastGroupies = Meteor.groupies('current',groupID);
+      if (pastGroupies == 'none') 
+        pastGroupies = Meteor.groupies('final',groupID);
+      if (pastGroupies == 'none')
+        return;
+      var membership = Memberships.findOne({
+        memberID:studentID,
+        collectionName:'Groups',
+        itemID:groupID
+      },{sort:{startDate:-1}});
+      pastGroupies += ' from ' + moment(membership.startDate).format("MMM D YYYY") + ' to ' + moment(membership.endDate).format("MMM D YYYY");
+      pastGroups.push({names:pastGroupies});
+    })
+    return pastGroups;
   }
 })
 
 /* groups events */
 Template.groups.events({
-  'click #join-group': function(event,tmpl) {
+  'click #leave-group': function(event,tmpl) {
     var user = Meteor.user();
     if (!Roles.userIsInRole(user,['student','teacher']))
       return;
-    var student = Meteor.impersonatedOrUser();
-    if (!Roles.userIsInRole(student,'student'))
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
       return;
-    var invitees = loginButtonsSession.get('invitees');
-    if (!invitees || !_.isArray(invitees))
-      return;
-    if (invitees.length == 0)
-      return;
-    var memberIDs = Meteor.groupMemberIds();
-    if ((memberIDs) && _.isArray(memberIDs))
-      invitees = _.difference(invitees,memberIDs);
-    if (invitees.length == 0)
-      return; 
-    var currentGroup = Meteor.currentGroup();
-    invitees.forEach(function(studentID){
-      Meteor.call('inviteMember',{
-        memberID:studentID,
-        itemID: currentGroup._id,
-        collectionName: 'Groups'
-      },
-      alertOnError);
+    var groupID = Meteor.currentGroupId();
+    var today = new Date();
+    var membership = Memberships.findOne({
+      itemID:groupID,
+      collectionName:'Groups',
+      memberID: studentID,
+      status: 'current',
+      startDate: {$lt:today},
+      endDate: {$gt:today}
     });
+    if (!membership)
+      return;
+    Meteor.call('removeMember',membership._id,'final',alertOnError);
+  },
+  'click #open-group': function(event,tmpl) {
+    var user = Meteor.user();
+    if (!Roles.userIsInRole(user,['student','teacher']))
+      return;
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return;
+    var groupID = Meteor.currentGroupId();
+    Meteor.call('voteToOpenGroup',groupID,studentID,alertOnError);
+  },
+  'click #close-group': function(event,tmpl) {
+    var user = Meteor.user();
+    if (!Roles.userIsInRole(user,['student','teacher']))
+      return;
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return;
+    var groupID = Meteor.currentGroupId();
+    Meteor.call('closeGroup',groupID,studentID,alertOnError);
   },
   'click #form-new-group': function(event,tmpl) {
     var user = Meteor.user();
     if (!Roles.userIsInRole(user,['student','teacher']))
       return;
-    var student = Meteor.impersonatedOrUser();
-    if (!Roles.userIsInRole(student,'student'))
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
       return;
-    var invitees = loginButtonsSession.get('invitees');
-    if (!invitees || !_.isArray(invitees))
-      return;
-    if (invitees.length == 0)
-      return;
-    //make new group
-    Meteor.call('addGroup',function(error,groupID) {
+    //make new group and keep it open to new members for two minutes
+    var twoMinutesFromNow = moment().add(2,'minutes').toDate();
+    Meteor.call('addGroup',twoMinutesFromNow,function(error,groupID) {
       if (error) {
         alert(Error.Reason);
-      } else {
-        //add current user to new group (automatically expired fromm old one)
+      } else {  //add current user to new group 
         Meteor.call('addMember',{
-          memberID:student._id,
+          memberID:studentID,
           itemID: groupID,
           collectionName: 'Groups'
-        },alertOnError)
-        //invite others
-        // (passed through from context above?) var invitees = loginButtonsSession.get('invitees');
-        invitees.forEach(function(userID){
-          Meteor.call('inviteMember',{
-            memberID:userID,
-            itemID: groupID,
-            collectionName: 'Groups'
-          },alertOnError);
+        },function(error,membershipID){
+          if (error) {
+            alert(Error.Reason)
+          } else { //and then close it
+            Meteor.call('closeGroup',groupID,studentID,alertOnError);
+          }
         });
       }
     })
+  }
+})
+
+Template.joinGroup.events({
+  'click #join-group': function(event,tmpl) {
+    event.preventDefault();
+    var user = Meteor.user();
+    if (!Roles.userIsInRole(user,['student','teacher']))
+      return;
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return;
+    Meteor.call('addMember',{
+      memberID: studentID,
+      itemID: this._id,
+      collectionName: 'Groups'
+    },alertOnError);    
   }
 })
 
@@ -119,12 +210,15 @@ var groupToString = function(invitees) {
   return groupies;
 }
 
+
+/* EVERYTHING DEPRECATED BELOW I THINK */
+
   /****************************/
  /******* USER TO VIEW *******/
 /****************************/
 
 /* user to view helpers */
-Template.userChooseGroupMembers.helpers({
+/*Template.userChooseGroupMembers.helpers({
   active: function() {
     return (_.contains(loginButtonsSession.get('invitees'),this._id)) ? 'active' : '';
   },
@@ -135,45 +229,45 @@ Template.userChooseGroupMembers.helpers({
       return (_.contains(Meteor.groupMemberIds(),this._id) || (Meteor.impersonatedOrUserId() == this._id)) ? 'disabled' : '';
     }
   }
-})
+})*/
 
 /* user to view events */
-Template.userChooseGroupMembers.events({
+/*Template.userChooseGroupMembers.events({
   'click li a': function(event,tmpl) {
     event.stopPropagation();
     if (tmpl.$('li').hasClass('disabled'))
       return;
     loginButtonsSession.toggleArray('invitees',tmpl.data._id);
   }
-})
+})*/
 
   /*******************************/
  /******* SECTION TO VIEW *******/
 /*******************************/
 
 /* section to view helpers */
-Template.sectionChooseGroupMembers.helpers({
+/*Template.sectionChooseGroupMembers.helpers({
   active: function() {
     var sectionID = loginButtonsSession.get('sectionID')
     if (!sectionID) return '';
     return (this._id == sectionID) ? 'active' : '';
   }
-})
+})*/
 
 /* section to view events */
-Template.sectionChooseGroupMembers.events({
+/*Template.sectionChooseGroupMembers.events({
   'click li a': function(event,tmpl) {
     event.stopPropagation();
     loginButtonsSession.set('sectionID',tmpl.data._id);
   }
-})
+})*/
 
   /***************************/
  /******* OPEN INVITE *******/
 /***************************/
 
 /* open invite helpers */
-Template.openInvite.helpers({
+/*Template.openInvite.helpers({
   invitingMembers: function() {
     var invitingMembers = Meteor.groupMemberIds(this.itemID);
     return groupToString(invitingMembers);
@@ -189,10 +283,10 @@ Template.openInvite.helpers({
   someoneElseInvited: function() {
     return (Meteor.invitedMembers(this.itemID).count() > 1);
   }
-})
+})*/
 
 /* open invite events */
-Template.openInvite.events({
+/*emplate.openInvite.events({
   'click #accept-invite': function(event,tmpl) {
     event.stopPropagation();
     Meteor.call('acceptInvite',tmpl.data._id,alertOnError);
@@ -201,5 +295,4 @@ Template.openInvite.events({
     event.stopPropagation();
     Meteor.call('declineInvite',tmpl.data._id,alertOnError);
   }
-})
-
+})*/

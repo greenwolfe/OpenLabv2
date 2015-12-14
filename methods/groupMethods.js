@@ -3,27 +3,32 @@
 /*************************/
 
 //if groupOrID is not passed, returns members of current group for currently impersonated user or current user
-Meteor.groupMemberIds = function(groupOrID) {
+Meteor.groupMemberIds = function(status,groupOrID) {
   var groupID = ((groupOrID) && ('object' === typeof groupOrID)) ? groupOrID._id : groupOrID;
   if (Meteor.isClient)
     groupID = groupID || Meteor.currentGroupId();
   var today = new Date();
-  var memberships = Memberships.find({
+  var selector = {
       collectionName:'Groups',
       itemID:groupID,
-      startDate: {$lt: today},   //don't include invited members
-      //endDate: {$gt: today}   //want to list this for all members, even if they have left
-                               //to do otherwise creates problems for the users past groups
+      startDate: {$lt: today} //truly necessary now that I am not doing invitations or pending requests to join?   
+  }
+  if (_.contains(['current','former','final'],status))
+    selector.status = status;
+  //the following should be redundant
+  if (status == 'current') {
+    selector.endDate = {$gt: today};
+  } else if (_.contains(['former','final'],status)) {
+    selector.endDate = {$lt: today};
+  }
 
-    },
-    {fields:{memberID:1}}).fetch();
-  return _.pluck(memberships,'memberID');
+  return _.pluck(Memberships.find(selector,{fields:{memberID:1}}).fetch(),'memberID');
 }
 Meteor.isGroupMember = function(userOrID,groupOrID) {
   var userID = ((userOrID) && ('object' === typeof userOrID)) ? userOrID._id : userOrID;
   if (Meteor.isClient)
     userID = userID || Meteor.impersonatedOrUserId();
-  var memberIDs = Meteor.groupMemberIds(groupOrID);
+  var memberIDs = Meteor.groupMemberIds('current',groupOrID);
   return _.contains(memberIDs,userID);
 }
 Meteor.dateLeftGroup = function(userOrID,groupOrID) {
@@ -45,6 +50,7 @@ Meteor.dateLeftGroup = function(userOrID,groupOrID) {
       collectionName:'Groups',
       memberID: userID,
       itemID:groupID,
+      status:'current',
       startDate: {$lt: today}, //don't include invited members, who haven't entered the group yet
       endDate: {$gt: today}  //so is current member
     }).count(); 
@@ -60,6 +66,7 @@ Meteor.currentGroupId = function(memberID) {
   var membership = Memberships.find({
       memberID:memberID,
       collectionName:'Groups',
+      status:'current',
       startDate: {$lt: today}, //startDate < today < endDate
       endDate: {$gt: today}
     },

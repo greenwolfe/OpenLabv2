@@ -16,8 +16,9 @@ Meteor.currentGroup = function(memberID) {
 }
 Template.registerHelper('currentGroup',Meteor.currentGroup);
 
+//deprecated 12-13-15
 //if memberID is not passed, returns open invitations for currently impersonated user or current user
-Meteor.openInvites = function(memberID) {
+/*Meteor.openInvites = function(memberID) {
   var today = new Date();
   var memberID = memberID || Meteor.impersonatedOrUserId();
   return Memberships.find({
@@ -29,15 +30,17 @@ Meteor.openInvites = function(memberID) {
   )
 }
 Template.registerHelper('openInvites',Meteor.openInvites)
+*/
 
-Meteor.groupMembers = function(groupOrID) {
-  var memberIDs = Meteor.groupMemberIds(groupOrID);
+Meteor.groupMembers = function(status,groupOrID) {
+  var memberIDs = Meteor.groupMemberIds(status,groupOrID);
   return Meteor.users.find({_id: {$in: memberIDs}});
 }
 Template.registerHelper('groupMembers',Meteor.groupMembers);
 
+//deprecated 12-13-15
 //if groupOrID is not passed, returns invitees of current group for currently impersonated user or current user
-Meteor.invitedMemberIds = function(groupOrID) {
+/*Meteor.invitedMemberIds = function(groupOrID) {
   var groupID = ((groupOrID) && ('object' === typeof groupOrID)) ? groupOrID._id : groupOrID;
   groupID = groupID || Meteor.currentGroupId();
   var today = new Date();
@@ -54,14 +57,16 @@ Meteor.invitedMembers = function(groupOrID) {
   return Meteor.users.find({_id: {$in: memberIDs}});
 }
 Template.registerHelper('invitedMembers',Meteor.invitedMembers);
-
+*/
 
 //returns a string with the names of all group members
 //if groupID is not passed, defaults to groupies of current group for currently impersonated user or current user
-Meteor.groupies = function(groupID) { 
+Meteor.groupies = function(status,groupID) { 
   var groupies = '';
-  var groupMembers = Meteor.groupMembers(groupID);
+  var groupMembers = Meteor.groupMembers(status,groupID);
   var groupSize = groupMembers.count();
+  if (!groupSize)
+    return 'none';
   groupMembers.forEach(function(user,i,gMs) {
     var fullname =  user.profile.firstName + " " + user.profile.lastName;
     var expired = "";
@@ -81,9 +86,9 @@ Meteor.groupies = function(groupID) {
 }
 Template.registerHelper('groupies',Meteor.groupies);
 
-Meteor.groupFirstNames = function(groupID) { 
+Meteor.groupFirstNames = function(status,groupID) { 
   var groupies = '';
-  var groupMembers = Meteor.groupMembers(groupID);
+  var groupMembers = Meteor.groupMembers(status,groupID);
   var groupSize = groupMembers.count();
   groupMembers.forEach(function(user,i,gMs) {
     groupies +=  user.profile.firstName;

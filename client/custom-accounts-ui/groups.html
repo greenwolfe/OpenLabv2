@@ -1,69 +1,74 @@
 <template name="groups">
   {{#if isInRole 'teacher,student'}}
-    {{#unless userIsInRole impersonatedId 'parentOrAdvisor'}}
+    {{#if userIsInRole impersonatedOrUserId 'student'}}
       <li id="groups-dropdown-list" class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">
-          Current group: {{{groupies}}}
+          Current group: {{{groupies 'current'}}}
           <b class="caret"></b>
         </a>
         <div id="groups-dropdown-menu" class="dropdown-menu">
-          {{#if openInvitesCount}}
-            <div class="alert alert-info">
-              {{#each openInvites}}
-                {{>openInvite}}
-              {{/each}}
-            </div>
-          {{/if}}
           <div>
-            Select names below to create an invitation list.  <br>
-            {{#if currentGroup}}
-              Invite {{{inviteesMinusCurrent}}} to 
-              <button class="btn btn-warning btn-nopad" id="join-group">join this group</button>
-              , or<br> invite
-            {{else}}
-              Invite
+            {{#with currentGroup}}
+              <button class="btn btn-warning btn-nopad" id="leave-group">Leave Group</button>
+              {{#if groupIsOpen}}
+                 <button class="btn btn-warning btn-nopad" id="close-group" title="Prevent this group from accepting new members.">Close Group</button>
+                 <p> This group is now open to accept new members.</p>
+              {{else}} <!-- group is closed -->
+                {{#if pollIsOpen}}
+                  {{#if voteIsYes}}
+                    <button class="btn btn-warning btn-nopad" id="close-group" title="Prevent this group from accepting new members.">Close Group</button> 
+                  {{else}}
+                    <button class="btn btn-warning btn-nopad" id="open-group" title="Allow this group to accept new members.">Open Group</button> 
+                  {{/if}}
+                  <p> {{{membersWhoVotedToOpen}}} voted to allow this group to accept new members.  Full consensus is required to open the group.</p>
+                {{else}} <!-- poll is closed -->
+                  <button class="btn btn-warning btn-nopad" id="open-group" title="Allow this group to accept new members.">Open Group</button> 
+                {{/if}}
+              {{/if}}
+              {{#if formerMembers}}
+                <p>
+                  Past Members:  
+                  {{#if strictlyFormerMembers}}
+                    {{{groupies 'former'}}}
+                  {{/if}}
+                  {{#if finalMembers}}
+                    {{#if strictlyFormerMembers}}
+                      <span>, </span>
+                    {{/if}}
+                    {{{groupies 'final'}}}
+                  {{/if}}
+                </p>
+              {{/if}}
+            {{else}} <!-- no current group -->
+              {{#if openGroupsCount}}
+                {{#each openGroups}}
+                  {{>joinGroup}}
+                {{/each}}
+              {{else}}
+                <p> At the present time, there aren't any groups open to receive new members.</p>
+              {{/if}}
+              <button class="btn btn-warning btn-nopad" id="form-new-group">Form a New Group</button> 
+            {{/with}}
+            {{#if hasPastGroups}}
+              <p> My Group History </p>
+              {{#each pastGroups}}
+                <p>{{{names}}}</p>
+              {{/each}}
             {{/if}}
-            {{{invitees}}} to
-            <button class="btn btn-warning btn-nopad" id="form-new-group">form a new group</button>.
           </div>
-          <ul class="nav nav-pills">
-            {{#each sections}}
-              {{> sectionChooseGroupMembers}}
-            {{/each}} 
-          </ul>
-          <ul class="nav nav-pills">
-            {{#each sectionMembers selectedSection}}
-              {{>userChooseGroupMembers}}
-            {{/each}}
-          </ul>
         </div>
       </li>
-    {{/unless}}
-  {{else}} 
+    {{/if}}
+  {{else}} <!-- not in student or teacher role -->
     {{#if isInRole 'parentOrAdvisor'}}
       <p class="navbar-text">Current group: {{{groupies}}}</p>
     {{/if}}
   {{/if}}
 </template>
 
-<template name = 'userChooseGroupMembers'>
-  <li class='userToView {{active}} {{disabled}}'>
-    <a href="#" title="{{profile.firstName}} {{profile.lastName}}">{{username}}</a>
-  </li>
-</template>
-
-<template name = 'sectionChooseGroupMembers'>
-  <li  class='{{active}}'>
-    <a href="#">{{name}}</a>
-  </li>
-</template>
-
-<template name = 'openInvite'>
-  {{{invitingMembers}}} {{haveHas}} invited you to form a group
-  {{#if someoneElseInvited}}
-    with {{{alsoInvited}}}
-  {{/if}}
-  .
-  <button class="btn btn-warning btn-nopad" id="accept-invite">Accept</button>
-  <button class="btn btn-warning btn-nopad" id="decline-invite">Decline</button>
+<template name="joinGroup">
+  <p>
+    <button class="btn btn-warning btn-nopad" id="join-group">Join</button> 
+    {{{groupies 'current' _id}}}
+  </p>
 </template>
