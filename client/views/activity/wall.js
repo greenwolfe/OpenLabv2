@@ -17,7 +17,12 @@ Template.wall.helpers({
       if (student)
         return 'Student Wall for ' + Meteor.getname(student,'full');
     }
-    if (this.type == 'group') return 'Group Wall for ' +  Meteor.groupies(this.createdFor);
+    if (this.type == 'group') {
+      var groupies = Meteor.groupies('current',this.createdFor);
+      if (groupies == 'none')
+        groupies = Meteor.groupies('final',this.createdFor);
+      return 'Group Wall for ' +  groupies;
+    }
     if (this.type == 'section') {
       var section = Sections.findOne(this.createdFor);
       if (section)
@@ -99,7 +104,9 @@ Template.wall.helpers({
       var groupIDs = _.pluck(Walls.find({activityID:FlowRouter.getParam('_id'),type:'group'},{fields:{createdFor:1}}).fetch(),'createdFor');
       groupIDs = _.unique(groupIDs);
       groupIDs = groupIDs.filter(function(groupID) {
-        var memberIDs = Meteor.groupMemberIds(groupID);
+        var memberIDs = Meteor.groupMemberIds('current',groupID);
+        if (!memberIDs.length)
+          memberIDs = Meteor.groupMemberIds('final',groupID);
         return _.intersection(sectionMemberIDs,memberIDs).length;
       })
       return Groups.find({_id:{$in:groupIDs}});
@@ -122,7 +129,9 @@ Template.wall.helpers({
       var groupIDs = _.pluck(Walls.find({activityID:FlowRouter.getParam('_id'),type:'group'},{fields:{createdFor:1}}).fetch(),'createdFor');
       groupIDs = _.unique(groupIDs);
       groupIDs.forEach(function(groupID) {
-        var memberIDs = Meteor.groupMemberIds(groupID);
+        var memberIDs = Meteor.groupMemberIds('current',groupID);
+        if (!memberIDs.length)
+          memberIDs = Meteor.groupMemberIds('final',groupID);
         sectionMemberIDs = _.difference(sectionMemberIDs,memberIDs);
       })
       return sectionMemberIDs.length;
@@ -147,7 +156,9 @@ Template.wall.helpers({
       var groupIDs = _.pluck(Walls.find({activityID:FlowRouter.getParam('_id'),type:'group'},{fields:{createdFor:1}}).fetch(),'createdFor');
       groupIDs = _.unique(groupIDs);
       groupIDs.forEach(function(groupID) {
-        var memberIDs = Meteor.groupMemberIds(groupID);
+        var memberIDs = Meteor.groupMemberIds('current',groupID);
+        if (!memberIDs.length)
+          memberIDs = Meteor.groupMemberIds('final',groupID);
         sectionMemberIDs = _.difference(sectionMemberIDs,memberIDs);
       })
       if (sectionMemberIDs.length == 0)  

@@ -1,0 +1,33 @@
+Meteor.startup(function () {
+  Groups.find().forEach(function(group) {
+    var longLongAgo = new Date(0);
+    var today = new Date();
+    var wayWayInTheFuture = new Date(8630000000000000); //new Date(8640000000000000) =  Sat Sep 13 275760 01:00:00 GMT+0100 (BST) and is the maximum possible javascript Date
+    var currentMembersCount = Memberships.find({
+      collectionName:'Groups',
+      itemID: group._id,
+      startDate: {$lt:today},
+      endDate: {$gt:today}
+    }).count();
+    var wallsCount = Walls.find({
+      type: 'group',
+      createdFor: group._id
+    }).count();
+    if (!wallsCount) {
+      Memberships.remove({
+        collectionName:'Groups',
+        itemID: group._id,
+      });
+      Groups.remove(group._id);
+    }
+  });
+  Memberships.find().forEach(function(membership) {
+    var longLongAgo = new Date(0);
+    var longAgo = moment(longLongAgo).add(1,'days').toDate();
+    var wayWayInTheFuture = new Date(8630000000000000);
+    var wayInTheFuture = moment(wayWayInTheFuture).subtract(1,'days').toDate();
+    if ((membership.startDate > wayInTheFuture) || (membership.endDate < longAgo)) {
+      Memberships.remove(membership._id);
+    }
+  })
+});

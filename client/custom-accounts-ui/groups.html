@@ -25,6 +25,11 @@
                   <button class="btn btn-warning btn-nopad" id="open-group" title="Allow this group to accept new members.">Open Group</button> 
                 {{/if}}
               {{/if}}
+              <span>History: </span>
+              <div class="btn-group">
+                <button class="btn btn-warning" id="show-history" >Show</button>
+                <button class="btn btn-warning" id="hide-history">Hide</button> 
+              </div>
               {{#if formerMembers}}
                 <p>
                   Past Members:  
@@ -49,11 +54,15 @@
               {{/if}}
               <button class="btn btn-warning btn-nopad" id="form-new-group">Form a New Group</button> 
             {{/with}}
-            {{#if hasPastGroups}}
+            {{#if showHistory}}
               <p> My Group History </p>
-              {{#each pastGroups}}
-                <p>{{{names}}}</p>
-              {{/each}}
+              {{#if hasPastGroups}}
+                {{#each pastGroups}}
+                  <p>{{{names}}}</p>
+                {{/each}}
+              {{else}}
+                <p> No past groups. </p>
+              {{/if}}
             {{/if}}
           </div>
         </div>

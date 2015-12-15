@@ -2,31 +2,62 @@ Meteor.startup(function () {
   Memberships.find().forEach(function(membership) {
     newfields = {};
     var today = new Date();
-    if (today < membership.startDate) {
-      newfields.status = 'pending'; //deprecated should not be used any more
-    } else if ((membership.startDate < today) && (today < membership.endDate)) {
-      newfields.status = 'current';
-    } else if (today > membership.endDate) {
-      newfields.status = 'final';
-    } else {
-      newfields.status = 'current'; // should be no way this is used
+    if (membership.collectionName == 'Sections') {
+      if ((membership.startDate < today) && (today < membership.endDate)) {
+        newfields.status = 'current';
+      } else {
+        newfields.status = 'former';
+      }
+    } else if (membership.collectionName == 'Groups') {
+      var currentMembersCount = Memberships.find({
+        collectionName:'Groups',
+        itemID: membership.itemID,
+        startDate: {$lt:today},
+        endDate: {$gt:today}
+      }).count();
+      var mostRecentlyLeft = Memberships.findOne({
+        collectionName:'Groups',
+        itemID: membership.itemID,
+        endDate: {$lt:today}        
+      },{fields:{endDate:1},sort:{endDate:-1}});
+      if ((membership.startDate < today) && (today < membership.endDate)) {
+        newfields.status = 'current';
+      } else if (today > membership.endDate) {
+        if (currentMembersCount) { //still active group.  anyone who left is a former member
+          newfields.status = 'former';
+        } else { //no current members, group is disbanded
+          if (mostRecentlyLeft) {
+            var oneWeekEarlier = moment(mostRecentlyLeft.endDate).subtract(1,'weeks').toDate();
+            if (membership.endDate < oneWeekEarlier) {
+              newfields.status = 'former';
+            } else { //left around the time of the last to leave
+              newfields.status = 'final';
+            }
+          } else { //no current members and no one has left?  Should not be possible
+            newfields.status = 'former';
+          }
+        }
+      } else {
+        newfields.status = 'former'; // should be no way this is used
+      }
     }
     Memberships.update(membership._id,{$set: newfields});
-/*    Memberships.update(membership._id,{$unset:{
-      welcomingCommittee: '',
-      status: ''
-    }})*/
   });
   Groups.find().forEach(function(group) {
     var longLongAgo = new Date(0);
     var today = new Date();
     var wayWayInTheFuture = new Date(8630000000000000); //new Date(8640000000000000) =  Sat Sep 13 275760 01:00:00 GMT+0100 (BST) and is the maximum possible javascript Date
-
+    var currentMembersCount = Memberships.find({
+      collectionName:'Groups',
+      itemID: group._id,
+      startDate: {$lt:today},
+      endDate: {$gt:today}
+    }).count();
     Groups.update(group._id,{$set: {
       openUntil: longLongAgo,
       votesToOpen: [],
       pollClosesAt: longLongAgo,
-      status: 'active'
+      status: (currentMembersCount) ? 'active' : 'disbanded'
     }});
   });
   Sections.find().forEach(function(section) {
