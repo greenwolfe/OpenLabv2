@@ -20,7 +20,6 @@
                   {{else}}
                     <button class="btn btn-warning btn-nopad" id="open-group" title="Allow this group to accept new members.">Open Group</button> 
                   {{/if}}
-                  <p> {{{membersWhoVotedToOpen}}} voted to allow this group to accept new members.  Full consensus is required to open the group.</p>
                 {{else}} <!-- poll is closed -->
                   <button class="btn btn-warning btn-nopad" id="open-group" title="Allow this group to accept new members.">Open Group</button> 
                 {{/if}}
@@ -43,6 +42,9 @@
                     {{{groupies 'final'}}}
                   {{/if}}
                 </p>
+              {{/if}}
+              {{#if pollIsOpen}}
+                <p> {{{membersWhoVotedToOpen}}} voted to allow this group to accept new members.  Full consensus is required to open the group.</p>
               {{/if}}
             {{else}} <!-- no current group -->
               {{#if openGroupsCount}}

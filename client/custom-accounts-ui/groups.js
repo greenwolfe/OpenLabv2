@@ -2,7 +2,7 @@
  /******* GROUPS *******/
 /**********************/
 
-Template.groups.OnCreated(function() {
+Template.groups.onCreated(function() {
   var instance = this;
   instance.showHistory = new ReactiveVar(false);
 })
@@ -68,8 +68,6 @@ Template.groups.helpers({
   },
   showHistory: function() {
     var tmpl = Template.instance();
-    console.log('showHistory');
-    console.log(tmpl.showHistory.get());
     return tmpl.showHistory.get();
   },
   hasPastGroups: function() {
@@ -108,8 +106,10 @@ Template.groups.helpers({
         collectionName:'Groups',
         itemID:groupID
       },{sort:{startDate:-1}});
+      if (membership.status == 'former')
+        pastGroupies = 'with ' + pastGroupies;
       var preposition = (membership.status == 'former') ? ' left on ' : ' to ';
-      pastGroupies += ' from ' + moment(membership.startDate).format("MMM D YYYY") + preposition + moment(membership.endDate).format("MMM D YYYY");
+      pastGroupies += ' from ' + moment(membership.startDate).format("MMM D, YYYY") + preposition + moment(membership.endDate).format("MMM D, YYYY");
       pastGroups.push({names:pastGroupies});
     })
     return pastGroups;
@@ -119,8 +119,7 @@ Template.groups.helpers({
 /* groups events */
 Template.groups.events({
   'click #leave-group': function(event,tmpl) {
-    console.log('click #leave-group');
-    event.preventDefault();
+    event.stopPropagation();
     var user = Meteor.user();
     if (!Roles.userIsInRole(user,['student','teacher']))
       return;
@@ -142,8 +141,7 @@ Template.groups.events({
     Meteor.call('removeMember',membership._id,'final',alertOnError);
   },
   'click #open-group': function(event,tmpl) {
-    console.log('click #open-group');
-    event.preventDefault();
+    event.stopPropagation();
     var user = Meteor.user();
     if (!Roles.userIsInRole(user,['student','teacher']))
       return;
@@ -154,7 +152,7 @@ Template.groups.events({
     Meteor.call('voteToOpenGroup',groupID,studentID,alertOnError);
   },
   'click #close-group': function(event,tmpl) {
-    event.preventDefault();
+    event.stopPropagation();
     var user = Meteor.user();
     if (!Roles.userIsInRole(user,['student','teacher']))
       return;
@@ -165,7 +163,7 @@ Template.groups.events({
     Meteor.call('closeGroup',groupID,studentID,alertOnError);
   },
   'click #form-new-group': function(event,tmpl) {
-    event.preventDefault();
+    event.stopPropagation();
     var user = Meteor.user();
     if (!Roles.userIsInRole(user,['student','teacher']))
       return;
@@ -193,13 +191,11 @@ Template.groups.events({
     })
   },
   'click #show-history': function(event,tmpl) {
-    event.preventDefault();
-    console.log('click #show-history');
+    event.stopPropagation();
     tmpl.showHistory.set(true);
   },
   'click #hide-history': function(event,tmpl) {
-    event.preventDefault();
-    console.log('click #hide-history');
+    event.stopPropagation();
     tmpl.showHistory.set(false);
   }
 })

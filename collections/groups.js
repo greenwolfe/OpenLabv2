@@ -70,10 +70,16 @@ Meteor.methods({
     if (!_.contains(currentMemberIDs,memberID))
       throw new Meteor.Error('notAMember','You cannot vote to opne the group unless you are a member');
     var today = new Date(); 
-    if (today > group.openUntil)
-      throw new Meteor.Error('alreadyClosed','This group is not open.  No need to take action to close it.');
+    if (!_.contains(group.votesToOpen,memberID)) { //no current vote to open
+      if (today > group.openUntil) //and didn't already vote to open 
+        throw new Meteor.Error('alreadyClosed','This group is not open.  No need to take action to close it.');
+    }
 
     var longLongAgo = new Date(0);
-    Groups.update(groupID,{$set: {openUntil:longLongAgo}});
+    Groups.update(groupID,{$set: {
+      openUntil:longLongAgo,
+      pollClosesAt: longLongAgo, 
+      votesToOpen: []
+    }});
   }
 });
