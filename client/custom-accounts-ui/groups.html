@@ -12,7 +12,6 @@
               <button class="btn btn-warning btn-nopad" id="leave-group">Leave Group</button>
               {{#if groupIsOpen}}
                  <button class="btn btn-warning btn-nopad" id="close-group" title="Prevent this group from accepting new members.">Close Group</button>
-                 <p> This group is now open to accept new members.</p>
               {{else}} <!-- group is closed -->
                 {{#if pollIsOpen}}
                   {{#if voteIsYes}}
@@ -24,10 +23,9 @@
                   <button class="btn btn-warning btn-nopad" id="open-group" title="Allow this group to accept new members.">Open Group</button> 
                 {{/if}}
               {{/if}}
-              <span>History: </span>
               <div class="btn-group">
-                <button class="btn btn-warning" id="show-history" >Show</button>
-                <button class="btn btn-warning" id="hide-history">Hide</button> 
+                <button class="btn btn-warning btn-nopad" id="show-history" >History: Show&nbsp;/</button>
+                <button class="btn btn-warning btn-nopad" id="hide-history">&nbsp;Hide</button> 
               </div>
               {{#if formerMembers}}
                 <p>
@@ -43,10 +41,17 @@
                   {{/if}}
                 </p>
               {{/if}}
+              {{#if groupIsOpen}}
+                 <p> This group is now open to accept new members.</p>
+              {{/if}}
               {{#if pollIsOpen}}
                 <p> {{{membersWhoVotedToOpen}}} voted to allow this group to accept new members.  Full consensus is required to open the group.</p>
               {{/if}}
             {{else}} <!-- no current group -->
+              <div class="btn-group">
+                <button class="btn btn-warning btn-nopad" id="show-history" >History: Show&nbsp;/</button>
+                <button class="btn btn-warning btn-nopad" id="hide-history">&nbsp;Hide</button> 
+              </div>
               {{#if openGroupsCount}}
                 {{#each openGroups}}
                   {{>joinGroup}}
