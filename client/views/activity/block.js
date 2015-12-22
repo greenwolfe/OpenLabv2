@@ -147,10 +147,6 @@ Template.textBlock.onCreated(function() {
 })
 
 Template.textBlock.helpers({
-  blockTextSubscriptionLoaded: function() {
-    var tmpl = Template.instance();
-    return tmpl.blockTextSubscription.ready();
-  },
   editingBlock:editingBlock
 })
 
@@ -226,10 +222,6 @@ Template.fileBlock.onCreated(function() {
 })
 
 Template.fileBlock.helpers({
-  blockTextSubscriptionLoaded: function() {
-    var tmpl = Template.instance();
-    return tmpl.blockTextSubscription.ready();
-  },
   files: function() {
     var selector = {blockID:this._id};
     if (!inEditedWall(this.wallID)) //if not editing
@@ -632,10 +624,6 @@ Template.assessmentBlock.onRendered(function() {
 })
 
 Template.assessmentBlock.helpers({
-  blockTextSubscriptionLoaded: function() {
-    var tmpl = Template.instance();
-    return tmpl.blockTextSubscription.ready();
-  },
   standards: function() {
     var selectedStandardIDs = this.standardIDs || [];
     var selectedStandards = Standards.find({_id:{$in:selectedStandardIDs}}).fetch();
