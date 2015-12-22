@@ -156,7 +156,6 @@ Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
 
   //columns,just return all columns for all walls, nothing more to do
 
-  //revise from here
   //blocks
   var blockSelector = {};
   //if parent, only publish locks in teacher wall and some blocks in student wall)
@@ -202,13 +201,36 @@ Meteor.publish('activityPagePubs',function(studentOrSectionIDs,activityID) {
   return [
     Walls.find(selector),
     Columns.find({wallID:{$in:wallIds}}),
-    Blocks.find(blockSelector),
+    Blocks.find(blockSelector,{fields:{text:0}}),
     Files.find({wallID:{$in:wallIds}}),
     ActivityStatuses.find(statusProgressSelector),
     ActivityProgress.find(statusProgressSelector),
     LevelsOfMastery.find(LoMSelector)
   ];
 });
+
+Meteor.publish('blockText',function(blockID) {
+  check(blockID,Match.idString);
+  var block = Blocks.findOne(blockID);
+  if (!block)
+    throw new Meteor.Error('blockNotFound','Cannot publish text field.  Block not found.');
+  var wall = Walls.findOne(block.wallID);
+  if (!wall)
+    throw new Meteor.Error('wallNotFound','Cannot publish text field.  Wall not found.')
+
+  //if parent, only publish locks in teacher wall and some blocks in student wall)
+  if (!_.contains(['teacher','student'],wall.type))
+    this.ready();  //return empty cursor
+  if (wall.type == 'student') {
+    if (!_.contains(['file','assessment','text'],block.type))
+      this.ready(); 
+  }
+
+  return Blocks.find(blockID,{fields:{text:1}});
+});
+
+
+
 
 //issue with sections - right now sending all of a user's
 //sections, even if the student switched sections in the past and has two

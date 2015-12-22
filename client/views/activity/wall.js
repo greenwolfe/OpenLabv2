@@ -1,3 +1,7 @@
+  /**************/
+ /**** WALL ****/
+/**************/
+
 Template.wall.onCreated(function() {
   var instance = this;
 //  instance.subscribe('columns', instance.data._id);
@@ -38,6 +42,21 @@ Template.wall.helpers({
   },
   sectionActive: function() {
     return ((this.createdFor != Meteor.impersonatedId()) && (Meteor.currentSectionId(this.createdFor) == Meteor.selectedSectionId())) ? 'bg-primary text-white' : '';
+  },
+  wallIsNotEmpty: function() {
+    return Blocks.find({wallID:this._id}).count();
+  },
+  pastGroups: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,['student','teacher']))
+      return '';
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return '';
+    var groupIDs = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1},sort:{startDate:-1}}).fetch(),'itemID');
+    groupIDs = _.unique(groupIDs);
+    groupIDs = _.without(groupIDs,Meteor.currentGroupId());
+    return Groups.find({_id:{$in:groupIDs}});
   },
   helpMessages: function () {
     return [
@@ -180,6 +199,14 @@ Template.wall.events({
     var wall = tmpl.data;
     var section = Meteor.currentSectionId(wall.createdFor);
     loginButtonsSession.set('viewAs',section);
+  },
+  'click .addGroupWall': function(event,tmpl) {
+    var wall = tmpl.data;
+    Meteor.call('insertWall',{
+      activityID: wall.activityID,
+      createdFor: wall.createdFor,
+      type: 'group'
+    },alertOnError)
   },
   'click .editColumns': function(event,tmpl) {
     var wall = tmpl.data._id;
@@ -327,5 +354,47 @@ Template.studentStatus.events({
     if (!Roles.userIsInRole(studentID,'student'))
       return; 
     Meteor.call('markOnTime',studentID,activityID,alertOnError);  
+  }
+})
+
+  /*****************************/
+ /**** PAST GROUP SELECTOR ****/
+/*****************************/
+
+Template.pastGroupSelector.helpers({
+  isInGroup: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    if (!Roles.userIsInRole(studentID,'student'))
+      return false;
+    var currentGroupIds = Meteor.groupMemberIds('current',this._id);
+    var finalGroupIds = Meteor.groupMemberIds('final',this._id);
+    var groupIds = _.union(currentGroupIds,finalGroupIds);
+    console.log('isInGroup');
+    console.log(this);
+    console.log(groupIds);
+    console.log(studentID);
+    console.log(_.contains(groupIds,studentID))
+    return (_.contains(groupIds,studentID));
+  },
+  groupMembers: function() {
+    var currentGroupies = Meteor.groupies('current',this._id);
+    var finalGroupies = Meteor.groupies('final',this._id);
+    if ((currentGroupies == 'none') && (finalGroupies == 'none'))
+      return 'none';
+    var groupies = (currentGroupies != 'none') ? currentGroupies : '';
+    if (finalGroupies != 'none') {
+      if (currentGroupies != 'none')
+        groupies += ': ';
+      groupies += finalGroupies;
+    }
+    return groupies;
+  }
+})
+
+Template.pastGroupSelector.events({
+  'click .pastGroup': function(event,tmpl) {
+    wall = Template.parentData();
+    var group = this;
+    Meteor.call('wallChangeGroup',wall._id,group._id,Meteor.impersonatedOrUserId());
   }
 })

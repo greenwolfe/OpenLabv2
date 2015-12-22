@@ -70,7 +70,11 @@
 </Template>
 
 <Template name="textBlock">
-  {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+  {{#if Template.subscriptionsReady}}
+    {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+  {{else}}
+    <p> Loading text and images ... </p>
+  {{/if}}
 </Template>
 
 <Template name="embedBlock">
@@ -89,7 +93,11 @@
     Add/edit a description.
   {{/if}}
   <p>
-    {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+    {{#if blockTextSubscriptionLoaded}}
+      {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+    {{else}}
+      <p> Loading text and images ... </p>
+    {{/if}}
   </p>
 </Template>
 
@@ -102,7 +110,11 @@
 
 <Template name="fileBlock">
   <p>
-    {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+    {{#if Template.subscriptionsReady}}
+      {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+    {{else}}
+      <p> Loading text and images ... </p>
+    {{/if}}
   </p>
   {{#sortable1c items=files  options=sortableOpts}} 
     {{>fileLink}}
@@ -211,7 +223,11 @@
 <template name='assessmentBlock'>
   {{#if isInRole 'teacher'}}
     <p>
-      {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+      {{#if Template.subscriptionsReady}}
+        {{>summernote collection='Blocks' field='text' _id=_id enabled=editingBlock options=summernoteOptions}}
+      {{else}}
+        <p> Loading text and images ... </p>
+      {{/if}}
     </p>
     <div class="assessmentBlockButtons text-center">
       <div class="btn-group">

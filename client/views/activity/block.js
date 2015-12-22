@@ -142,8 +142,15 @@ Template.block.events({
   /**********************/
  /***** TEXTBLOCK ******/
 /**********************/
+Template.textBlock.onCreated(function() {
+  this.blockTextSubscription = this.subscribe('blockText',this.data._id);
+})
 
 Template.textBlock.helpers({
+  blockTextSubscriptionLoaded: function() {
+    var tmpl = Template.instance();
+    return tmpl.blockTextSubscription.ready();
+  },
   editingBlock:editingBlock
 })
 
@@ -214,7 +221,15 @@ Template.codemirror.events({
  /**** FILEBLOCK *******/
 /**********************/
 
+Template.fileBlock.onCreated(function() {
+  this.blockTextSubscription = this.subscribe('blockText',this.data._id);
+})
+
 Template.fileBlock.helpers({
+  blockTextSubscriptionLoaded: function() {
+    var tmpl = Template.instance();
+    return tmpl.blockTextSubscription.ready();
+  },
   files: function() {
     var selector = {blockID:this._id};
     if (!inEditedWall(this.wallID)) //if not editing
@@ -607,12 +622,20 @@ Template.newSubactivity.helpers({
  /**** ASSESSMENT BLOCK *****/
 /***************************/
 
+Template.assessmentBlock.onCreated(function() {
+  this.blockTextSubscription = this.subscribe('blockText',this.data._id);
+})
+
 Template.assessmentBlock.onRendered(function() {
   instance = this;
   instance.$('[data-toggle="tooltip"]').tooltip();
 })
 
 Template.assessmentBlock.helpers({
+  blockTextSubscriptionLoaded: function() {
+    var tmpl = Template.instance();
+    return tmpl.blockTextSubscription.ready();
+  },
   standards: function() {
     var selectedStandardIDs = this.standardIDs || [];
     var selectedStandards = Standards.find({_id:{$in:selectedStandardIDs}}).fetch();

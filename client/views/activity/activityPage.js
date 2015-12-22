@@ -49,6 +49,7 @@ Template.activityPage.onCreated(function() {
       this.reactive.set(newvalue) 
     }
   };
+  //add default walls //
   instance.autorun(function() {
     var cU = Meteor.userId();
     if ((!cU) || !FlowRouter.subsReady() || Roles.userIsInRole(cU,'parentOrAdvisor'))

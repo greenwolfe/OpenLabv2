@@ -50,6 +50,37 @@ Meteor.methods({
       }
     });
   },
+  wallChangeGroup: function(wallID,newGroupID,studentID) {
+    check(wallID,Match.idString);
+    check(newGroupID,Match.idString);
+    check(studentID,Match.idString);
+    var wall = Walls.findOne(wallID);
+    if (!wall)
+      throw new Meteor.Error('wallNotFound','Cannot change group.  Wall not found.');
+    if (wall.type != 'group')
+      throw new Meteor.Error('notGroupWall','Cannot change group.  This is not a group wall.');
+    if (!Roles.userIsInRole(studentID,'student'))
+      throw new Meteor.Error('notStudent','Cannot change group wall. ' + studentID + ' is not a student.');
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'parentOrAdvisor'))
+      throw new Meteor.Error('parentNotAllowed','Parents or advisors may not change the group assigned to a wall.');
+    if (Roles.userIsInRole(cU,'student') && (cU != studentID))
+      throw new Meteor.Error('onlyChangeForSelf','A student cannot change the group on behalf of another student.');
+
+    var currentGroupMemberIds = Meteor.groupMemberIds('current',wall.createdFor);
+    var finalGroupMemberIds = Meteor.groupMemberIds('final',wall.createdFor);
+    var groupMemberIds = _.union(currentGroupMemberIds,finalGroupMemberIds);
+    if (!_.contains(groupMemberIds,studentID))
+      throw new Meteor.Error('studentNotInGroup','A student can only change the group for a wall if they are in the group to begin with.');
+    var currentNewGroupMemberIds = Meteor.groupMemberIds('current',newGroupID);
+    var finalNewGroupMemberIds = Meteor.groupMemberIds('final',newGroupID);
+    var newGroupMemberIds = _.union(currentNewGroupMemberIds,finalNewGroupMemberIds);
+    console.log(newGroupMemberIds);
+    if (!_.contains(newGroupMemberIds,studentID))
+      throw new Meteor.Error('studentNotInNewGroup','A student can only change the group for a wall if they are in the new group.');
+
+    return Walls.update(wallID,{$set:{createdFor:newGroupID}});
+  },
   deleteWallIfEmpty: function(wallID) {
     check(wallID,Match.idString);
     if (this.isSimulation)
