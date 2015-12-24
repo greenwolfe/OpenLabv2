@@ -55,16 +55,12 @@ Template.groups.helpers({
     return groupToString(this.votesToOpen) + verb;
   },
   formerMembers: function() {
-    var formerMembers = Meteor.groupMembers('former',this._id).count();
-    if (this.status == 'active') 
-      formerMembers += Meteor.groupMembers('final',this._id).count();
-    return formerMembers;
-  },
-  strictlyFormerMembers: function() {
-    return Meteor.groupMembers('former',this._id).count();
-  },
-  finalMembers: function() {
-    return (this.status == 'active') ? Meteor.groupMembers('final',this._id).count() : 0;
+    if (this.status == 'active') {
+      console.log(Meteor.groupMemberIds(['former','final'],this._id));
+      return Meteor.groupMemberIds(['former','final'],this._id).length;
+    } else {
+      return Meteor.groupMemberIds('former',this._id).length;
+    }
   },
   showHistory: function() {
     var tmpl = Template.instance();

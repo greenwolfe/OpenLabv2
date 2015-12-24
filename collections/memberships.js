@@ -39,6 +39,9 @@ Meteor.methods({
     Memberships.find({memberID:membership.memberID,collectionName:membership.collectionName}).forEach(function(mship){
       if ((mship.startDate < today) && (today < mship.endDate)) 
         throw new Meteor.Error('hasCurrentMembership','Cannot request to join a new group until you leave your old group.  groupID = ' + mship.itemID + ' collectionName = ' + mship.collectionName + ' membershipID = ' + mship._id);
+      if (mship.status == 'final') { //rejioning a group within two days of leaving ... status still final while waiting to see if all members leave
+        Memberships.update(mship._id,{$set:{status:'former'}});
+      }
     });
 
     return Memberships.insert(membership);

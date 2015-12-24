@@ -218,12 +218,14 @@ Meteor.publish('blockText',function(blockID) {
   if (!wall)
     throw new Meteor.Error('wallNotFound','Cannot publish text field.  Wall not found.')
 
-  //if parent, only publish locks in teacher wall and some blocks in student wall)
-  if (!_.contains(['teacher','student'],wall.type))
-    this.ready();  //return empty cursor
-  if (wall.type == 'student') {
-    if (!_.contains(['file','assessment','text'],block.type))
-      this.ready(); 
+  //if parent, only publish blocks in teacher wall and some blocks in student wall)
+  if (Roles.userIsInRole(this.userId,'parentOrAdvisor')) {
+    if (!_.contains(['teacher','student'],wall.type))
+      return this.ready();  //return empty cursor
+    if (wall.type == 'student') {
+      if (!_.contains(['file','assessment','text'],block.type))
+        return this.ready(); 
+    }
   }
 
   return Blocks.find(blockID,{fields:{text:1}});

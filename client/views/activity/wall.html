@@ -95,10 +95,7 @@
             <div class="row">
               {{#each groups}}
                 <div class="col-md-4 groupStatus">
-                  {{#each groupMembers 'current' _id}}
-                    {{>studentStatus}}
-                  {{/each}}
-                  {{#each groupMembers 'final' _id}}
+                  {{#each groupMembers 'current,final' _id}}
                     {{>studentStatus}}
                   {{/each}}                  
                 </div>

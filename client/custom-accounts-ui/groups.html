@@ -29,16 +29,7 @@
               </div>
               {{#if formerMembers}}
                 <p>
-                  Past Members:  
-                  {{#if strictlyFormerMembers}}
-                    {{{groupies 'former'}}}
-                  {{/if}}
-                  {{#if finalMembers}}
-                    {{#if strictlyFormerMembers}}
-                      <span>, </span>
-                    {{/if}}
-                    {{{groupies 'final'}}}
-                  {{/if}}
+                  Past Members:  {{{groupies 'former,final'}}}
                 </p>
               {{/if}}
               {{#if groupIsOpen}}
