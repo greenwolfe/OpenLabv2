@@ -56,7 +56,6 @@ Template.groups.helpers({
   },
   formerMembers: function() {
     if (this.status == 'active') {
-      console.log(Meteor.groupMemberIds(['former','final'],this._id));
       return Meteor.groupMemberIds(['former','final'],this._id).length;
     } else {
       return Meteor.groupMemberIds('former',this._id).length;
