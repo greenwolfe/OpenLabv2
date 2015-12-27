@@ -23,7 +23,7 @@ Template.plaintexteditor.events({
 
     var id = tmpl.data._id || 'new';
     if ((id == 'new') && (text == '')) 
-      return; //avioding text not changed error below, since there wasn't any text to begin with
+      return; //avoiding text not changed error below, since there wasn't any text to begin with
 
     var method = _.rtrim(tmpl.data.collection,'s'); //if collection = Posts, method=Post
     method = method.replace(/ie$/,'y'); //if collection = Activities, method  = Activity

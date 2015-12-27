@@ -9,35 +9,81 @@
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           {{#with calendarEvent}}
-            {{formatDate date}} <h3>{{{title}}}</h3><p class="text-center">{{{tags}}}</p>
+            {{formatDate date}} 
+            {{#if title}}
+              <h3>{{{title}}}</h3>
+            {{else}}
+              <h3>Add Calendar Event</h3>
+            {{/if}}
           {{/with}}
         </div>
         <div class="modal-body">
-          <div class="container-fluid">
-            <div class="row">
-              <h4 class="text-center">Select an activity</h4>
-              <ul id='units' class="nav nav-pills">
-                {{#each units}}
-                  <li class="unitTitle {{active}}">
-                    <a class='displayTitle' lang="en" href="#" title="{{longname}}"> 
-                      {{{title}}}
-                    </a>
-                  </li>
-                {{/each}}
-              </ul>
-              <div id='calEventModalActivitiesList'>
-                {{#with activeUnit}}
-                    {{#each activeUnitActivities}}
-                      <p class="activityForChoosing {{activeActivity}}">
-                        <a href="#">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
-                      </p>
-                    {{/each}}
-                {{/with}}
-                <p> <strong>Work plan and Progress: </strong>Before you start, note what will you be working on,i.e. what part of the activity you will do.  Afterwards, note how much progress you made.</p>
-                <div id="calEventModalNote"></div>
+          {{#with calendarEvent}}
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-xs-12">
+                  <span>Link With An Activity: </span>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      {{#with activeUnit}}
+                        <span lang="en" title="{{longname}}">{{{title}}}</span>
+                      {{else}}
+                        <span>Select a Unit</span>
+                      {{/with}}
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      {{#each units}}
+                        <li class="unitTitle">
+                          <a class='displayTitle' lang="en" href="#" title="{{longname}}"> 
+                            {{{title}}}
+                          </a>
+                        </li>
+                      {{/each}}                
+                    </ul>
+                  </div>
+                  <div class="btn-group">
+                    {{#if activeUnit}}
+                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        {{#with selectedActivity}}
+                          <span lang="en" title="{{longname}}">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</span>
+                        {{else}}
+                          <span>Select an activity</span>
+                        {{/with}}
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li class="chooseNoActivity">
+                          <a href="#">none</a>
+                        </li>
+                        {{#each activeUnitActivities}}
+                          <li class="activityForChoosing">
+                            <a href="#">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
+                          </li>
+                        {{/each}}                
+                      </ul>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-1">
+                  <span>Title:</span>
+                </div>
+                <div class="col-xs-11">
+                  <div id="calEventModalTitle" class='plaintexteditor' contenteditable='true' placeholder='Add a title'></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-1">
+                  <span> Notes: </span>
+                </div>
+                <div class="col-xs-11">
+                  <div id="calEventModalNote" class="summernote"></div>
+                </div>
               </div>
             </div>
-          </div>
+          {{/with}}
         </div>
         <div class="modal-footer bg-{{messageType}}">
           {{#unless dataValidated}}

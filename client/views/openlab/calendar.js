@@ -89,25 +89,7 @@ Template.calendarDay.events({
     var cU = Meteor.userId();
     if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
       return;
-    var studentID = Meteor.impersonatedOrUserId();
-    if (Roles.userIsInRole(cU,'teacher') && !Roles.userIsInRole(studentID,'student')) {
-      studentID = Meteor.selectedSectionId() || Site.findOne()._id;
-    }
-    var calendarEvent = {
-      date: new Date(tmpl.data.date),
-      group: [studentID], 
-      workplace: 'OOC'   //passing valid value for now, remove this when modal allows selection  
-    }
-    var selectedSection = Meteor.selectedSection();
-    if (selectedSection) 
-      calendarEvent.nameOfTimePeriod = selectedSection.name || '';
-    Meteor.call('insertCalendarEvent',calendarEvent,function(error,ID){
-      if (error) {
-        alert(error.reason);
-      } else {
-        Session.set('eventIdForAddCalendarEventModal',ID);
-      }
-    });
+    Session.set('dateOrIDForAddCalendarEventModal',new Date(tmpl.data.date));
     $('#addCalendarEventModal').modal();
   },
   'click div.daysEvents p.calendarEvent': function(event,tmpl) {
@@ -125,9 +107,9 @@ Template.calendarDay.events({
 Template.calendarEvent.events({
   'click .editCalendarEvent': function(event,tmpl) {
     var cU = Meteor.userId();
-    if (!cU)
+    if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
       return;
-    Session.set('eventIdForAddCalendarEventModal',this._id);
+    Session.set('dateOrIDForAddCalendarEventModal',this._id);
     $('#addCalendarEventModal').modal();    
   }
 });
