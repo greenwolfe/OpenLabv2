@@ -34,7 +34,9 @@
         {{{description}}}
       </p>
       <div id="LoMlist">
-        {{>newLoM}}
+        {{#unless editingMainPage}}
+          {{>newLoM}}
+        {{/unless}}
         {{#each LoMs}}
           {{> LoMitem}}
         {{/each}}

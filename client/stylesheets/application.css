@@ -37,6 +37,12 @@ i.fa.fa-question-circle:hover {
 .fullwidth {
     width: 100%;
 }
+hr.no-margin {
+  margin: 0;
+},
+hr.no-padding {
+  padding: 0;
+}
 .marginLR0 {
   margin-left: 0;
   margin-right: 0;

@@ -140,6 +140,12 @@ Template.LoMitem.helpers({
     )));
     return (justTheText) ? this.comment : 'No teacher comment.';
   },
+  versionWithFormatting: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      return '';
+    return (this.version) ? '(version: ' + this.version + ') ': '';
+  },
   onActivityPage: function() {
     return _.str.include(FlowRouter.getRouteName(),'activity');
   },
@@ -158,6 +164,23 @@ Template.LoMitem.helpers({
       return '';
     //else return info to make link to activity page
     return activity;
+  },
+  studentOrSectionID: function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var studentID = Meteor.impersonatedId();
+      if (studentID)
+        return 'id=' + studentID;
+      var sectionID = Meteor.selectedSectionId();
+      if (sectionID)
+        return 'id=' + sectionID;
+      return '';
+    } else {
+      var studentID = Meteor.impersonatedOrUserId(); //in case is parent viewing as student
+      if (studentID)
+        return 'id=' + studentID; 
+      return '';     
+    }
   },
   formatDate: function(date) {
     return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateFormat) : '_____';
@@ -353,13 +376,16 @@ Template.newLoM.events({
 /********************************************/
 
 var saveLoM = function(event,tmpl) {
-  var $level = tmpl.$('.level');
+  var $level = tmpl.$('.level'); 
   var level = getTrimmedValbyClass(tmpl,'level');
+  var $version = tmpl.$('.version'); 
+  var version = getTrimmedValbyClass(tmpl,'version');
   var $comment = tmpl.$('.summernote.comment');
   var comment = _.str.trim($comment.code());
   comment = _.str.trim(comment,'&nbsp;');
   var LoM = {
     level:level,
+    version: version,
     comment: comment,
     studentID: Meteor.impersonatedId(),
     standardID: tmpl.data._id
@@ -375,6 +401,12 @@ var saveLoM = function(event,tmpl) {
       $comment.code('');
       $level.val('');
       tmpl.previousLoMindex.set(-1);
+      if ( _.str.include(FlowRouter.getRouteName(),'assessment')) {
+        if (version)  //and copy assessment version to all version input fields
+          $('div.newLoM div.form-group input.form-control.version').val(version);
+      } else {
+        $version.val('');
+      }
     }
   });
 }

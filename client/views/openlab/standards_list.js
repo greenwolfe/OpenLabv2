@@ -233,32 +233,23 @@ Template.standardList.helpers({
  /** STANDARD ITEM  *******/
 /*************************/
 
+Template.standardItem.onRendered(function() {
+  instance = this;
+  instance.$('[data-toggle="tooltip"]').tooltip();
+})
+
 Template.standardItem.helpers({
-  LoMAveragecolorcode: function() {
+  latestLoM: function() {
     var studentID = Meteor.impersonatedOrUserId();
     var standard = this;
     if (!studentID || !standard)
-      return '';
-    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standard._id,visible:true});
-    if (!LoM) return '';
-    return Meteor.LoMcolorcode(LoM.average['schoolyear'],standard.scale);
-    //update for grading period when available
-  },
-  LoMAveragetext: function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    var standard = this;
-    if (!studentID || !standard)
-      return '';
-    var LoM = LevelsOfMastery.findOne({studentID:studentID,standardID:standard._id,visible:true});
-    if (!LoM) return '';
-    if (_.isArray(standard.scale))
-      return LoM.average['schoolyear']; //update for grading period when available 
-    return +LoM.average['schoolyear'].toFixed(2) + ' out of ' + standard.scale;
-  },
-  humanizedScaleHelp: function() {
-    if (_.isFinite(this.scale))
-      return '0 to ' + this.scale;
-    return this.scaleHelp;
+      return false;
+    return LevelsOfMastery.findOne({ 
+      studentID:studentID,
+      standardID:standard._id,
+      visible:true },{
+      sort:{submitted:-1}
+    });
   },
   dateset: function() {
     var wayInTheFuture = moment(wayWayInTheFuture()).subtract(1,'days').toDate();
@@ -271,6 +262,59 @@ Template.standardItem.events({
     Session.set('completionDate', this);
   }
 });
+
+  /*************************************/
+ /**** LoM BADGE FOR STANDARD ITEM ****/
+/*************************************/
+
+Template.LoMbadgeForStandardItem.onRendered(function() {
+  instance = this;
+  instance.$('[data-toggle="tooltip"]').tooltip();
+})
+
+Template.LoMbadgeForStandardItem.helpers({
+  LoMAveragecolorcode: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var LoM = this;
+    if (!LoM) return '';
+    var standard = Standards.findOne(LoM.standardID);
+    if (!studentID || !standard)
+      return '';
+    return Meteor.LoMcolorcode(LoM.average['schoolyear'],standard.scale);
+    //update for grading period when available
+  },
+  LoMAveragetext: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var LoM = this;
+    if (!LoM) return '';
+    var standard = Standards.findOne(LoM.standardID);
+    if (!studentID || !standard)
+      return '';
+    if (_.isArray(standard.scale))
+      return LoM.average['schoolyear']; //update for grading period when available 
+    return +LoM.average['schoolyear'].toFixed(2) + ' out of ' + standard.scale;
+  },
+  latestComment: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    var LoM = this;
+    if (!LoM) return '';
+    var standard = Standards.findOne(LoM.standardID);
+    if (!studentID || !standard)
+      return '';
+    var justTheText = _.str.clean(
+      _.str.stripTags(
+        _.unescapeHTML(
+          LoM.comment.replace(/&nbsp;/g,'')
+    )));
+    if (justTheText) {
+      var comment = "<span class='h5'>Latest Comment:</span> " + LoM.comment;
+    } else {
+      var comment = "<span class='h5'>No Comment:</span> Teacher left no comment on most recent assessment.";
+    }
+    var humanizedScaleHelp = (_.isFinite(standard.scale)) ? '0 to ' + standard.scale : standard.scaleHelp;
+    return "<div class='text-left'>" + comment + "<hr class='no-margin no-pad'>" + humanizedScaleHelp + "</div>";
+  }
+})
 
   /********************************/
  /*** SET COMPLETION DATE  *******/

@@ -120,12 +120,18 @@
         {{>showHide collection='Standards' itemName='standard' item=this}}
         {{>plaintexteditor collection='Standards' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
-        <span class='badge badge-inverse {{LoMAveragecolorcode}}' title = '{{humanizedScaleHelp}}'>{{LoMAveragetext}}</span>
-        <a  href="{{pathFor 'standardPage' _id=_id}}">
+        {{#with latestLoM}}
+          {{>LoMbadgeForStandardItem}}
+        {{/with}}
+        <a  href="{{pathFor 'standardPage' _id=_id}}" data-toggle="tooltip" title="<div class='text-left'>{{description}}</div>" data-html=true>
         {{{title}}} 
         </a>        
       {{/if}}
     </p>
+</template>
+
+<template name='LoMbadgeForStandardItem'>
+  <span class='badge badge-inverse {{LoMAveragecolorcode}}' title = "{{latestComment}}" data-toggle="tooltip" data-html=true data-placement="right">{{LoMAveragetext}}</span>
 </template>
 
 <template name='setCompletionDate'>

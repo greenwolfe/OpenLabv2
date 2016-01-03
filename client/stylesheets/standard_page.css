@@ -21,6 +21,10 @@
   min-height: 32px;
   vertical-align: top;
 }
+#LoMlist div.LoMitem form.form-inline.LoMAssessmentVersion div.plaintexteditor {
+  width: 125px;
+  margin-bottom: 0;
+}
 #LoMlist div.LoMitem div.summernote {
   width: 500px;
   display: inline-block;
@@ -58,6 +62,12 @@
   border-style: solid;
   border-color: DeepSkyBlue;
   border-width: thin;
+}
+#LoMlist div.newLoM input.version {
+  background: inherit;
+  border-style: dashed;
+  border-color: #00BFFF;
+  border-width: thin;  
 }
 #LoMlist form.form-inline div.form-group input.form-control.level {
   width: 48px;

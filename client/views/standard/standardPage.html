@@ -45,7 +45,9 @@
 
     <div id="LoMlist">
       {{#if isTeacherViewingAsStudent}}
-        {{> newLoM}}
+        {{#unless editingMainPage}}
+          {{> newLoM}}
+        {{/unless}}
       {{/if}}
       {{#each LoMs}}
         {{> LoMitem}}
@@ -57,24 +59,28 @@
 <template name="LoMitem">
   <div class="LoMitem"><p>
       {{#if editingMainPage}}
-        {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
-        <a class="glyphicon glyphicon-remove deleteLoM" title="delete level of mastery"></a>
+        <form class="form-inline LoMAssessmentVersion" role="form">
+          {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
+          <a class="glyphicon glyphicon-remove deleteLoM" title="delete level of mastery"></a>
+          Edit level and comment (assessment version: 
+            {{>plaintexteditor collection='LevelsOfMastery' field='version' _id=_id editable=editingMainPageTFtext placeholder='enter version'}}
+          )
+        </form>
         {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingMainPageTFtext}}
         {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingMainPage options=summernoteOptions}} 
-        <!-- version ?? -->
       {{else}}
         <span class='badge badge-inverse {{LoMcolorcode}}'>{{LoMtext}}</span>
         {{#if onActivityPage}}
-          <!-- put LoMcomment in quotes// -->
-          <span class=LoMcomment data-toggle="tooltip" data-html=true title="graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}">{{{commentOrNote}}}</span>
+          <!-- put LoMcomment in quotes//-->
+          <span class=LoMcomment data-toggle="tooltip" data-html=true title="{{versionWithFormatting}}graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}">{{{commentOrNote}}}</span>
         {{else}}
           <span class=LoMcomment>{{{commentOrNote}}}</span>
           <div class='LoMitemInfo'>
             {{#with activity}}
-              <a href="{{pathFor 'activityPage' _id=pointsTo}}" tabindex=-1>{{title}}</a>
+              <a href="{{pathFor 'activityPage' _id=pointsTo query=studentOrSectionID}}" tabindex=-1>{{title}}</a>
             {{/with}} 
-            graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}     
-            <!-- show version to teacher -->   
+            {{versionWithFormatting}}
+            graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}      
           </div>
         {{/if}}
       {{/if}}
@@ -83,7 +89,13 @@
 
 <template name="newLoM">
   <div class="newLoM">
-    <span>New level and comment</span>
+    <form class="form-inline" role="form">
+      New level and comment (assessment version: 
+      <div class="form-group">
+        <input type="text" class="form-control version" tabindex=-1/>
+      </div>
+      )
+    </form>
     <form class="form-inline" role="form">
       <div class="form-group">
         <input type="text" class="form-control level"/>
