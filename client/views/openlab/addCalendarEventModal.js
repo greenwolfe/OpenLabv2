@@ -56,6 +56,8 @@ Template.addCalendarEventModal.onRendered(function() {
       instance.setCalendarEventFields({note:code});      
     }
   })
+  //handle updates to plaintext and summernote fields in an autorun here?
+  //troubles creating an additional update to summernote fields?
 })
 
 Template.addCalendarEventModal.events({
@@ -97,6 +99,11 @@ Template.addCalendarEventModal.helpers({
     var unitID = tmpl.activeUnit.get();
     return Units.findOne(unitID);
   },
+  unitBgPrimary: function() {
+    var tmpl = Template.instance();
+    var unitID = tmpl.activeUnit.get();
+    return (unitID == this._id) ? 'bg-primary' : '';  
+  },
   activeUnitActivities: function() {
     var tmpl = Template.instance();
     var unitID = tmpl.activeUnit.get();
@@ -108,25 +115,24 @@ Template.addCalendarEventModal.helpers({
   selectedActivity: function() {
     return Activities.findOne(this.activityID);
   },
-  activeActivity: function() {
-    var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
-    var calendarEvent =  CalendarEvents.findOne(calendarEventID);
-    if (!calendarEvent) return '';
-    return (calendarEvent.activityID == this._id) ? 'active' : '';
+  activityBgPrimary: function() {
+    var tmpl = Template.instance();
+    var calendarEvent = tmpl.calendarEvent.get();
+    return (calendarEvent.activityID == this._id) ? 'bg-primary' : '';
   },
-  dataValidated: function() {
+  dataValidated: function() { //revise!
     var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
     var calendarEvent =  CalendarEvents.findOne(calendarEventID);
     if (!calendarEvent) return false;
     return (calendarEvent.dataValidated)
   },
-  messageType: function() {
+  messageType: function() { //revise?
     var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
     var calendarEvent =  CalendarEvents.findOne(calendarEventID);
     if (!calendarEvent) return 'warning';
     return (calendarEvent.dataValidated) ? 'success' : 'warning';
   },
-  saveButtonDisabled: function() {
+  saveButtonDisabled: function() { //revise!!
     var calendarEventID = Session.get('eventIdForAddCalendarEventModal');
     var calendarEvent =  CalendarEvents.findOne(calendarEventID);
     if (!calendarEvent) return 'disabled';

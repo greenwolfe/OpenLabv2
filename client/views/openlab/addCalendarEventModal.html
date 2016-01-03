@@ -34,7 +34,7 @@
                     </button>
                     <ul class="dropdown-menu">
                       {{#each units}}
-                        <li class="unitTitle">
+                        <li class="unitTitle {{unitBgPrimary}}">
                           <a class='displayTitle' lang="en" href="#" title="{{longname}}"> 
                             {{{title}}}
                           </a>
@@ -57,8 +57,8 @@
                           <a href="#">none</a>
                         </li>
                         {{#each activeUnitActivities}}
-                          <li class="activityForChoosing">
-                            <a href="#">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
+                          <li class="activityForChoosing {{activityBgPrimary}}">
+                            <a href="#" class="">{{{title}}} {{#if tag}}({{{tag}}}){{/if}}</a>
                           </li>
                         {{/each}}                
                       </ul>
