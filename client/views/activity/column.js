@@ -104,7 +104,13 @@ Template.column.events({
   },
   'click .pasteBlock': function(event,tmpl) {
     ClipboardBlocks.find({},{sort:{order:-1}}).forEach(function(block) {
-      Meteor.call('pasteBlock',block._id,tmpl.data._id,alertOnError);
+      Meteor.call('pasteBlock',block._id,tmpl.data._id,function(error,blockID) {
+        if (error) {
+          alert(error.reason);
+        } else {
+          tmpl.subscribe('blockText',blockID);
+        }
+      });
     });
   },
   'click .addTextBlock': function(event,tmpl) {
