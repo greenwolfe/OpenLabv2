@@ -64,6 +64,10 @@ Template.assessmentPage.helpers({
     });
     return selectedStandards;
   },
+  validStudent: function() {
+    var studentID = Meteor.impersonatedOrUserId();
+    return Roles.userIsInRole(studentID,'student');
+  },
   LoMAveragecolorcode: function() {
     var studentID = Meteor.impersonatedOrUserId();
     var standardID = this._id;
