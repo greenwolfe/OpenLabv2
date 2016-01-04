@@ -269,7 +269,8 @@ Template.standardItem.events({
 
 Template.LoMbadgeForStandardItem.onRendered(function() {
   instance = this;
-  instance.$('[data-toggle="tooltip"]').tooltip();
+  var $tooltipElements = instance.$('[data-toggle="tooltip"]');
+  $tooltipElements.tooltip(); 
 })
 
 Template.LoMbadgeForStandardItem.helpers({
