@@ -57,22 +57,28 @@
 <template name="LoMitem">
   <div class="LoMitem"><p>
       {{#if editingThisLoM}}
-        <form class="form-inline LoMAssessmentVersion" role="form">
-          {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
-          <a class="glyphicon glyphicon-remove deleteLoM" title="delete level of mastery"></a>
-          (assessment version:
-            {{>plaintexteditor collection='LevelsOfMastery' field='version' _id=_id editable=editingThisLoMTFtext placeholder='enter version'}}
-          )
-        </form>
+        {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
+        <a class="glyphicon glyphicon-remove deleteLoM" title="delete level of mastery"></a>
         {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingThisLoMTFtext}}
         {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingThisLoM options=summernoteOptions}} 
-        <button class='btn btn-default btn-small doneEditingLoM' title = 'Click to return to adding new comments. Changes saved automatically.'>Done
-        </button>
+        <div class='LoMitemInfo'>
+          <form class="form-inline LoMAssessmentVersion" role="form">
+            {{#with activity}}
+              <a href="{{pathFor 'activityPage' _id=pointsTo query=studentOrSectionID}}" tabindex=-1>{{title}}</a>
+            {{/with}} 
+            (version: 
+              {{>plaintexteditor collection='LevelsOfMastery' field='version' _id=_id editable=editingThisLoMTFtext placeholder='enter version'}}
+            ) graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}
+            <button class='btn btn-default btn-small doneEditingLoM' title = 'Changes are saved as soon as you click outside any dotted blue edit box.  This button just exits edit mode.'>
+              Done
+            </button>
+          </form>
+        </div>
       {{else}}
         <span class='badge badge-inverse {{LoMcolorcode}}'>{{LoMtext}}</span>
         {{#if onActivityPage}}
           <!-- put LoMcomment in quotes//-->
-          <span class=LoMcomment data-toggle="tooltip" data-html=true title="{{versionWithFormatting}}graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}">{{{commentOrNote}}}</span>
+          <span class='LoMcomment' data-toggle="tooltip" data-html=true title="{{versionWithFormatting}}graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}">{{{commentOrNote}}}</span>
         {{else}}
           <span class=LoMcomment>{{{commentOrNote}}}</span>
           <div class='LoMitemInfo'>

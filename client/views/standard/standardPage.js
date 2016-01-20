@@ -120,7 +120,6 @@ Template.LoMitem.onCreated(function() {
 Template.LoMitem.onRendered(function() {
   instance = this;
   instance.$('[data-toggle="tooltip"]').tooltip();
-
 })
 
 var dateTimeFormat = "[at] h:mm a [on] MM[/]DD[/]YY";
@@ -211,10 +210,14 @@ Template.LoMitem.events({
   },
   'click .editLoM': function(event,tmpl) {
     var cU = Meteor.userId();
-    if (Roles.userIsInRole(cU,'teacher'))
+    if (Roles.userIsInRole(cU,'teacher')) 
       tmpl.editingThisLoM.set(true);
   },
   'click .doneEditingLoM': function(event,tmpl) {
+    //button is in inline form for appearance and layout purposes
+    //so must prevent it from causing a page refresh by trying to submit the form
+    event.preventDefault();
+    event.stopPropagation();
     tmpl.editingThisLoM.set(false);
   }
 });
