@@ -112,6 +112,11 @@ Template.standardPage.helpers({
  /******* LOM ITEM ******/
 /***********************/
 
+Template.LoMitem.onCreated(function() {
+  instance = this;
+  instance.editingThisLoM = new ReactiveVar(false);
+})
+
 Template.LoMitem.onRendered(function() {
   instance = this;
   instance.$('[data-toggle="tooltip"]').tooltip();
@@ -122,6 +127,14 @@ var dateTimeFormat = "[at] h:mm a [on] MM[/]DD[/]YY";
 var dateFormat = "ddd, MMM D YYYY";
 
 Template.LoMitem.helpers({
+  editingThisLoM: function() {
+    var instance = Template.instance();
+    return instance.editingThisLoM.get();
+  },
+  editingThisLoMTFtext: function() {
+    var instance = Template.instance();
+    return (instance.editingThisLoM.get()) ? 'true': 'false';
+  },
   LoMcolorcode: function() {
     var standard = Standards.findOne(this.standardID);
     return Meteor.LoMcolorcode(this.level,standard.scale);
@@ -195,6 +208,14 @@ Template.LoMitem.events({
     if (confirm('Are you sure you want to delete this grade and comment?')) {
       Meteor.call('deleteLoM', this._id,alertOnError);
     }
+  },
+  'click .editLoM': function(event,tmpl) {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher'))
+      tmpl.editingThisLoM.set(true);
+  },
+  'click .doneEditingLoM': function(event,tmpl) {
+    tmpl.editingThisLoM.set(false);
   }
 });
 

@@ -45,9 +45,7 @@
 
     <div id="LoMlist">
       {{#if isTeacherViewingAsStudent}}
-        {{#unless editingMainPage}}
-          {{> newLoM}}
-        {{/unless}}
+        {{> newLoM}}
       {{/if}}
       {{#each LoMs}}
         {{> LoMitem}}
@@ -58,16 +56,18 @@
 
 <template name="LoMitem">
   <div class="LoMitem"><p>
-      {{#if editingMainPage}}
+      {{#if editingThisLoM}}
         <form class="form-inline LoMAssessmentVersion" role="form">
           {{>showHide collection='LevelsOfMastery' itemName='score and feedback' item=this}}
           <a class="glyphicon glyphicon-remove deleteLoM" title="delete level of mastery"></a>
-          Edit level and comment (assessment version: 
-            {{>plaintexteditor collection='LevelsOfMastery' field='version' _id=_id editable=editingMainPageTFtext placeholder='enter version'}}
+          Edit level and comment (assessment version:
+            {{>plaintexteditor collection='LevelsOfMastery' field='version' _id=_id editable=editingThisLoMTFtext placeholder='enter version'}}
           )
         </form>
-        {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingMainPageTFtext}}
-        {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingMainPage options=summernoteOptions}} 
+        {{>plaintexteditor collection='LevelsOfMastery' field='level' _id=_id editable=editingThisLoMTFtext}}
+        {{>summernote collection='LevelsOfMastery' field='comment' _id=_id enabled=editingThisLoM options=summernoteOptions}} 
+        <button class='btn btn-default btn-small doneEditingLoM' title = 'Click to return to adding new comments. Changes saved automatically.'>Done
+        </button>
       {{else}}
         <span class='badge badge-inverse {{LoMcolorcode}}'>{{LoMtext}}</span>
         {{#if onActivityPage}}
@@ -80,7 +80,10 @@
               <a href="{{pathFor 'activityPage' _id=pointsTo query=studentOrSectionID}}" tabindex=-1>{{title}}</a>
             {{/with}} 
             {{versionWithFormatting}}
-            graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}      
+            graded by {{getname teacherID 'full'}}  {{formatDateTime submitted}}  
+            {{#if isInRole 'teacher'}} 
+              <a class="glyphicon glyphicon-edit editLoM" title="Edit this level of mastery and comment."></a> 
+            {{/if}} 
           </div>
         {{/if}}
       {{/if}}

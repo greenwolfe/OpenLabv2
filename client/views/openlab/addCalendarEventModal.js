@@ -30,6 +30,8 @@ Template.addCalendarEventModal.onCreated(function() {
   instance.setCalendarEventNull();
 });
 
+var timeFormat = "h:mm a";
+
 Template.addCalendarEventModal.onRendered(function() {
   var instance = this;
   instance.$calEventModalNote = instance.$('#calEventModalNote');
@@ -58,6 +60,41 @@ Template.addCalendarEventModal.onRendered(function() {
   })
   //handle updates to plaintext and summernote fields in an autorun here?
   //troubles creating an additional update to summernote fields?
+
+  this.$('#calEventModalFrom').datetimepicker({
+    showClose:  true,
+    showClear: true,
+    keepOpen: false,
+    format: timeFormat,
+    toolbarPlacement: 'top',
+    widgetPositioning: {vertical:'bottom',horizontal:'auto'},
+    keyBinds: {enter: function(widget) {
+      if (widget.find('.datepicker').is(':visible')) {
+        this.hide();
+      } else {
+        this.date(widget.find('.datepicker').val());
+      }
+    }}
+  });
+  this.$('#calEventModalTo').datetimepicker({
+    showClose: true,
+    showClear: true,
+    keepOpen: false,
+    format: timeFormat,  //bug in widgetPositioning: {vertial:'top'} so overriding default 'auto' and setting to 'bottom', which also means the picker does not cover the graphic
+    toolbarPlacement: 'top',
+    widgetPositioning: {vertical:'bottom',horizontal:'auto'},
+    keyBinds: {enter: function(widget) {
+      if (widget.find('.datepicker').is(':visible')) {
+        this.hide();
+      } else {
+        this.date(widget.find('.datepicker').val());
+      }
+    }}
+
+})
+
+
+
 })
 
 Template.addCalendarEventModal.events({

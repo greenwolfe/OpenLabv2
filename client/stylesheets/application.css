@@ -16,7 +16,7 @@ i.remove:hover, i.fa-check-square-o, i.fa-square-o {
 a.glyphicon.glyphicon-remove, a.glyphicon.glyphicon-asterisk, a.glyphicon.glyphicon-move {
     color: black;
 }
-a.glyphicon.glyphicon-remove:hover, a.glyphicon.glyphicon-asterisk:hover, a.glyphicon.glyphicon-copy:hover, a.glyphicon.glyphicon-paste:hover, a.glyphicon.glyphicon-move:hover,
+a.glyphicon.glyphicon-remove:hover, a.glyphicon.glyphicon-asterisk:hover, a.glyphicon.glyphicon-copy:hover, a.glyphicon.glyphicon-paste:hover, a.glyphicon.glyphicon-move:hover, a.glyphicon.glyphicon-edit:hover,
 i.fa.fa-download:hover, i.fa.fa-upload:hover {
     cursor: pointer;
     cursor: hand;

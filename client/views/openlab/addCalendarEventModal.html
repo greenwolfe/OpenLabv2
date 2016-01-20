@@ -20,6 +20,7 @@
         <div class="modal-body">
           {{#with calendarEvent}}
             <div class="container-fluid">
+
               <div class="row">
                 <div class="col-xs-12">
                   <span>Link With An Activity: </span>
@@ -66,6 +67,7 @@
                   </div>
                 </div>
               </div>
+
               <div class="row">
                 <div class="col-xs-1">
                   <span>Title:</span>
@@ -74,6 +76,42 @@
                   <div id="calEventModalTitle" class='plaintexteditor' contenteditable='true' placeholder='Add a title'></div>
                 </div>
               </div>
+
+              <div class="row">
+                <!--add namedTimePeriods collection with Mon: {from:Date,to:Date}, Tue: {from:Date,to:Date}, etc -->
+                <!-- make this a dropdown selector with a text entry -->
+                <!-- new text entries added to collection -->
+                <div class="col-xs-4">
+                  <div id="calEventModalTimeperiodName" class='plaintexteditor' contenteditable='true' placeholder='When: '></div>
+                </div>
+                <div class="col-xs-1">
+                  <span> From: </span>
+                </div>
+                <div class="col-xs-3">
+                  <div class="form-group">
+                    <div class='input-group date' id='calEventModalFrom'>
+                      <input type='text' class="form-control"  {{disabled}}/>
+                      <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xs-1">
+                  <span> To: </span>
+                </div>
+                <div class="col-xs-3">
+                  <div class="form-group">
+                    <div class='input-group date' id='calEventModalTo'>
+                      <input type='text' class="form-control"  {{disabled}}/>
+                      <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="row">
                 <div class="col-xs-1">
                   <span> Notes: </span>
