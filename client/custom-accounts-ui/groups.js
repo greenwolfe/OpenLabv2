@@ -95,7 +95,9 @@ Template.groups.helpers({
       if (pastGroupies == 'none') 
         pastGroupies = Meteor.groupies('final',groupID);
       if (pastGroupies == 'none')
-        return;
+        pastGroupies = Meteor.groupies('former',groupID);
+      if (pastGroupies == 'none')
+        return '';
       var membership = Memberships.findOne({
         memberID:studentID,
         collectionName:'Groups',

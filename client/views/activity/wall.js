@@ -25,6 +25,8 @@ Template.wall.helpers({
       var groupies = Meteor.groupies('current',this.createdFor);
       if (groupies == 'none')
         groupies = Meteor.groupies('final',this.createdFor);
+      if (groupies == 'none') 
+        groupies = Meteor.groupies('former',this.createdFor);
       return 'Group Wall for ' +  groupies;
     }
     if (this.type == 'section') {
@@ -367,25 +369,28 @@ Template.pastGroupSelector.helpers({
     if (!Roles.userIsInRole(studentID,'student'))
       return false;
     var currentGroupIds = Meteor.groupMemberIds('current',this._id);
-    var finalGroupIds = Meteor.groupMemberIds('final',this._id);
+    var finalGroupIds = Meteor.groupMemberIds('final',this._id);    
+    var formerGroupIds = Meteor.groupMemberIds('former',this._id);
     var groupIds = _.union(currentGroupIds,finalGroupIds);
-    console.log('isInGroup');
-    console.log(this);
-    console.log(groupIds);
-    console.log(studentID);
-    console.log(_.contains(groupIds,studentID))
+    if (!groupIds.length) 
+      groupIds = formerGroupIds;
     return (_.contains(groupIds,studentID));
   },
   groupMembers: function() {
     var currentGroupies = Meteor.groupies('current',this._id);
     var finalGroupies = Meteor.groupies('final',this._id);
-    if ((currentGroupies == 'none') && (finalGroupies == 'none'))
+    var formerGroupies = Meteor.groupies('former',this._id);
+    if ((currentGroupies == 'none') && (finalGroupies == 'none') && (formerGroupies == 'none'))
       return 'none';
-    var groupies = (currentGroupies != 'none') ? currentGroupies : '';
-    if (finalGroupies != 'none') {
-      if (currentGroupies != 'none')
-        groupies += ': ';
-      groupies += finalGroupies;
+    if ((currentGroupies == 'none') && (finalGroupies == 'none')) {
+      var groupies = formerGroupies;
+    } else {
+      var groupies = (currentGroupies != 'none') ? currentGroupies : '';
+      if (finalGroupies != 'none') {
+        if (currentGroupies != 'none')
+          groupies += ': ';
+        groupies += finalGroupies;
+      }
     }
     return groupies;
   }
@@ -393,6 +398,7 @@ Template.pastGroupSelector.helpers({
 
 Template.pastGroupSelector.events({
   'click .pastGroup': function(event,tmpl) {
+    event.preventDefault();
     wall = Template.parentData();
     var group = this;
     Meteor.call('wallChangeGroup',wall._id,group._id,Meteor.impersonatedOrUserId());

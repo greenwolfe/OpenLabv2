@@ -133,7 +133,7 @@
         {{>plaintexteditor collection='Activities' field='title' _id=_id editable=editingMainPageTFtext}} 
       {{else}}
         {{> workPeriodButton workPeriod}}
-        <i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>
+        <!--not useful here ... moving to calendar event and linking to todo list<i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>-->
         <i class="activityStatus {{status}}" title="{{statusTitle}}"></i>
         <i class="activityPunctual {{late}}" title="{{lateHoverText}}"></i>
         <a  href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}"> 

@@ -45,6 +45,11 @@
       </div>
       <div class="col-xs-4">
         <div class="pull-right">
+          {{#if isInRole 'teacher'}} {{#if editingActivity}}
+            <div class="pull-right">
+              <a class="glyphicon glyphicon-move wallSortableHandle {{editingActivity}}" title="move wall"></a>
+            </div>
+          {{/if}}{{/if}}
           {{#if canEditWall}}
             {{#if wallIsNotEmpty}}
               <button class="btn btn-default addGroupWall">Add Wall</button>
@@ -56,11 +61,6 @@
               {{>showHide collection='Walls' itemName='wall' item=this}}
             {{/if}}{{/if}}
           {{/if}}
-          {{#if isInRole 'teacher'}} {{#if editingActivity}}
-            <div class="pull-left">
-              <a class="glyphicon glyphicon-move wallSortableHandle {{editingActivity}}" title="move wall"></a>
-            </div>
-          {{/if}}{{/if}}
           <!--<ul class="nav navbar-nav">
             {{#if inStudentWall}}
               {{>viewAs}}

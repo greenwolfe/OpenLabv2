@@ -75,7 +75,6 @@ Template.calendarDay.helpers({
     return CalendarEvents.find({
         group: {$in: userToShow}, 
         visible: true,
-        dataValidated: true,
         date: {
           $gt: dateMin1h,
           $lt: datePlus1h
@@ -132,5 +131,22 @@ Template.calendarEvent.helpers({
   pointsToOrID: function() {
     var activity = Activities.findOne(this.activityID);
     return activity.pointsTo || activity._id;
+  },
+  studentOrSectionID: function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var studentID = Meteor.impersonatedId();
+      if (studentID)
+        return 'id=' + studentID;
+      var sectionID = Meteor.selectedSectionId();
+      if (sectionID)
+        return 'id=' + sectionID;
+      return '';
+    } else {
+      var studentID = Meteor.impersonatedOrUserId(); //in case is parent viewing as student
+      if (studentID)
+        return 'id=' + studentID; 
+      return '';     
+    }
   }
 });

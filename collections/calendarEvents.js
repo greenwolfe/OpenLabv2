@@ -8,26 +8,27 @@ Meteor.methods({
       //required fields to create the new calendar event
       date: Date,
       group: [Match.idString], //contains userIDs, sectionIDs, or siteID
-  
-      //fields required for validation
-      activityID: Match.Optional(Match.OneOf(Match.idString,null)), //or title
-      title: Match.Optional(String), //must be present if activityID is null, otherwise filled from activity
-      workplace: Match.Optional(Match.OneOf('OOC','FTF','HOM','')),
-      note: Match.Optional(String), 
-      //these three currently not required ... not yet implemented
-      startTime: Match.Optional(Date),
-      endTime: Match.Optional(Date),
-      nameOfTimePeriod: Match.Optional(String),
+      activityID: Match.OneOf(Match.idString,null), 
+      title: Match.stringWithContent, 
+      workplace: Match.OneOf('OOC','FTF','HOM'),
 
-      //fields whose value would have to be passed in, but are not required for validation
-      invite: Match.Optional([Match.idString])  
+      //optional fields
+      location: Match.Optional(String), //name of meeting place
+      note: Match.Optional(String), 
+      invite: Match.Optional([Match.idString]),  
           //contains only userIDs
           //only a teacher would invite the entire section or all students, in which case the event should 
           //show up in the calendar with no chance to decline and no need to accept an invitation
 
+      //currently not required ... not yet implemented
+      startTime: Match.Optional(Date),
+      endTime: Match.Optional(Date),
+      nameOfTimePeriod: Match.Optional(String),
+
       /*fields that will be initially filled based on the information passed in
-      dataValidated: Match.Optional(Boolean), //certain data required to be validated
       day: Match.Optional(Match.OneOf('Mon','Tue','Wed','Thu','Fri','Sat','Sun')),
+      numberOfTodoItems: Match.Optional(Number), //denormalized totals filled when adding, deleting or modifying todo items
+      numberTodosCompleted: Match.Optional(Number), //see above
       createdBy: Match.Optional(Match.idString),  //current user
       createdOn: Match.Optional(Date),            //today's date
       modifiedBy: Match.Optional(Match.idString), //current user
@@ -43,8 +44,8 @@ Meteor.methods({
       throw new Meteor.Error('parentNotAllowed', "Parents may only observe.  They cannot create new calendar events.");
     if (!Roles.userIsInRole(cU,['student','teacher']))
       throw new Meteor.Error('notStudentOrTeacher','Only teachers and students may post events to the calendar.'); 
+
     //group list contains valid users (students or teachers), sections or site
-    
     calendarEvent.group.forEach(function(ID) {
       var studentOrTeacher = Meteor.users.findOne(ID);
       if (studentOrTeacher) {
@@ -65,6 +66,8 @@ Meteor.methods({
      throw new Meteor.Error('noGroup', 'Cannot create calendar event without at least one individual in the group.');      
 
     calendarEvent.day = moment(calendarEvent.date).format('ddd');
+    calendarEvent.numberOfTodoItems = 0; //denormalized values only manipulated by todos
+    calendarEvent.numberTodosCompleted = 0; //denormalized values only mnaipulated by todos
     calendarEvent.createdBy = cU._id;
     calendarEvent.modifiedBy = cU._id;
     var today = new Date();
@@ -72,54 +75,20 @@ Meteor.methods({
     calendarEvent.modifiedOn = today;
     calendarEvent.visible = true;
 
-    calendarEvent.dataValidated = true; //but set false if certain things don't check out below
-    //activityID and title
-    var justTheText = '';
-    if (calendarEvent.title) {
-      justTheText = _.str.clean(
-        _.str.stripTags(
-          _.unescapeHTML(
-            calendarEvent.title.replace(/&nbsp;/g,'')
-      )));
-      if (!justTheText)
-        calendarEvent.title = '';
-    }
     if (calendarEvent.activityID) {
       var activity = Activities.findOne(calendarEvent.activityID);
       if (!activity)
         throw new Meteor.Error('invalidActivity','Cannot post calendar event.  Invalid activity ID.');
-      calendarEvent.title = '';
-    } else if (calendarEvent.title) {
-      calendarEvent.activityID == null;
-    } else {
-      calendarEvent.title = '';
-      calendarEvent.activityID = null;
-      calendarEvent.dataValidated = false;
-    }
+    } 
 
-    //workplace
-    if (!('workplace' in calendarEvent))
-      calendarEvent.workplace = '';
-    if (!calendarEvent.workplace)
-      calendarEvent.dataValidated = false;
-    //note
+    //optional fields
     if (!('note' in calendarEvent)) 
       calendarEvent.note = '';
-    if (calendarEvent.note) {
-      justTheText = _.str.clean(
-        _.str.stripTags(
-          _.unescapeHTML(
-            calendarEvent.note.replace(/&nbsp;/g,'')
-      )));
-      if (!justTheText)
-        calendarEvent.note = '';
-    }
-    if (!calendarEvent.note)
-      calendarEvent.dataValidated = false;
+    if (!('location' in calendarEvent))
+      calendarEvent.location = '';
 
-    //time period - name, startTime, endTiime
-    //currently not used ... will be filled in later
-    //therefore dataValidated not set to false
+
+    //fields not yet implemented ... will need handling
     if (!('nameOfTimePeriod' in calendarEvent))
       calendarEvent.nameOfTimePeriod = '';
     if (!'startTime' in calendarEvent)
@@ -258,10 +227,10 @@ Meteor.methods({
   updateCalendarEvent: function(calendarEvent) {
     check(calendarEvent,{
       _id: Match.idString,
-      date: Match.Optional(Date),
-      activityID: Match.Optional(Match.OneOf(Match.idString,null)),      
+      activityID: Match.Optional(Match.OneOf(Match.idString,null)),           
+      title: Match.Optional(Match.stringWithContent), 
       workplace: Match.Optional(Match.OneOf('OOC','FTF','HOM')),
-      title: Match.Optional(Match.nonEmptyString), //can only change if activityID is null
+      location: Match.Optional(String),
       note: Match.Optional(String), 
       startTime: Match.Optional(Date),
       endTime: Match.Optional(Date),
@@ -269,67 +238,47 @@ Meteor.methods({
 
       //fields that will be filled based on the information passed in.  
       //values passed in will be ignored
-      modifiedBy: Match.Optional(Match.idString), //current user
-      modifiedOn: Match.Optional(Date),           //current date
-      day: Match.Optional(Match.OneOf('Mon','Tue','Wed','Thu','Fri','Sat','Sun')),
-      dataValidated: Match.Optional(Boolean),
+      modifiedBy: Match.Optional(Match.idString), //will be set tocurrent user
+      modifiedOn: Match.Optional(Date),           //will be set to current date
 
-      // fields that should not be changed.  Can be passed in, but will be replaced with values from event
-      group: Match.Optional([Match.idString]), //Only changed by accepting invite
-      invite: Match.Optional([Match.idString]), //Only changed by add to invite
-      createdBy: Match.Optional(Match.idString),              //current user
-      createdOn: Match.Optional(Date),            
+      // fields that should not be changed.  Can be passed in, but will be ignored
+      date: Match.Optional(Date), //handled by drag/drop sortable1C
+      day:  Match.Optional(Match.OneOf('Mon','Tue','Wed','Thu','Fri','Sat','Sun')), //handled in after hook to catch when date is changed by sortable 1C 
+                                                                             //NOT YET WRITTEN!
+      group: Match.Optional([Match.idString]), //Only changed by accepting invite, or teacher directlyl adding
+      invite: Match.Optional([Match.idString]), //Only changed by add to invite or accept/decline invite
+      numberOfTodoItems: Match.Optional(Number),  //handled by todo methods
+      numberTodosCompleted: Match.Optional(Number), //handled by todo methods
+      createdBy: Match.Optional(Match.idString),  //set once and not changed            
+      createdOn: Match.Optional(Date),  //set once and not changed          
       visible: Match.Optional(Boolean) //set in showHideMethod.js          
     });
     var originalCE = CalendarEvents.findOne(calendarEvent._id); //calendarEvent
-    var cU = Meteor.user(); //currentUser
+    if (!originalCE)
+      throw new Meteor.Error('invalidCalendarEvent', "Cannot accept invite.  Invalid event ID.");
 
+    var cU = Meteor.user(); //currentUser
     if (!cU)  
       throw new Meteor.Error('notLoggedIn', "You must be logged in to update a calendar event.");
     if (!Roles.userIsInRole(cU,['teacher','student']))
       throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to update a calendar event.') 
-
-    if (!originalCE)
-      throw new Meteor.Error('invalidCalendarEvent', "Cannot accept invite.  Invalid event ID.");
-
     if (Roles.userIsInRole(cU,'student') && !_.contains(originalCE.group,cU._id))
       throw new Meteor.Error('canOnlyUpdateOwnEvent','Students cannot change a calendar event unless they are part of the event group.');
-
     //if student, check if frozen
 
     calendarEvent.modifiedBy = cU._id;
     calendarEvent.modifiedOn = new Date();
-    if (calendarEvent.date) 
-      calendarEvent.day = moment(calendarEvent.date).format('ddd');
 
-    if (calendarEvent.title) {
-      var justTheText = _.str.clean(
-        _.str.stripTags(
-          _.unescapeHTML(
-            calendarEvent.title.replace(/&nbsp;/g,'')
-      )));
-      if (!justTheText)
-        calendarEvent.title = '';
-    }
-    if (calendarEvent.activityID) {
+    if (('activityID' in calendarEvent) && calendarEvent.activityID) {
       var activity = Activities.findOne(calendarEvent.activityID);
-      if (activity)
-        calendarEvent.title = '';
-    } else if (calendarEvent.title) {
-      calendarEvent.activityID == null;
-    }
+      if (!activity)
+        throw new Meteor.Error('invalidActivity','Cannot update calendar event.  Invalid activity ID.');
+    } 
 
-    if (calendarEvent.note) {
-      justTheText = _.str.clean(
-        _.str.stripTags(
-          _.unescapeHTML(
-            calendarEvent.note.replace(/&nbsp;/g,'')
-      )));
-      if (!justTheText)
-        calendarEvent.note = '';
-    }
+    //validation for startTime, endTime, nameOfTimePeriod?
+    //handling for nameOfTimePeriod to update list of named periods?
 
-    var fields = ['date','activityID','workplace','title','note','startTime','endTime','nameOfTimePeriod','modifiedBy','modifiedOn','day','dataValidated'];
+    var fields = ['activityID','workplace',,'location','title','note','startTime','endTime','nameOfTimePeriod','modifiedBy','modifiedOn'];
     fields.forEach(function(field) {
       if ((field in calendarEvent) && (calendarEvent[field] != originalCE[field])) {
         var set = {};
@@ -337,21 +286,6 @@ Meteor.methods({
         CalendarEvents.update(calendarEvent._id,{$set: set});
       }
     });
-
-    var updatedCE = CalendarEvents.findOne(calendarEvent._id); //calendarEvent
-    updatedCE.dataValidated = true; //but set false if certain things don't check out below
-    if (!updatedCE.activityID && !updatedCE.title)
-      updatedCE.dataValidated = false;
-    if (!updatedCE.workplace)
-      updatedCE.dataValidated = false;
-    if (!updatedCE.note) 
-      updatedCE.dataValidated = false;
-
-    //time period - name, startTime, endTiime
-    //currently not used ... will be filled in later
-    //therefore not checked and dataValidated not set to false
-    if (updatedCE.dataValidated != originalCE.dataValidated)
-      CalendarEvents.update(calendarEvent._id,{$set: {dataValidated:updatedCE.dataValidated}});
 
     return calendarEvent._id; 
   },

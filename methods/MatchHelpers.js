@@ -16,6 +16,17 @@ Match.nonEmptyString = Match.Where(function (x) {
   return x.length > 0;
 });
 
+//my best attempt to strip all html tags and spaces to see if
+//there is actual text content
+Match.stringWithContent = Match.Where(function(x) {
+  var justTheText = _.str.clean(
+  _.str.stripTags(
+    _.unescapeHTML(
+      x.replace(/&nbsp;/g,'')
+  )));
+  return !!justTheText;
+})
+
 Match.email = Match.Where(function (e) {
   var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
   return (Match.test(e,String) && filter.test(e))

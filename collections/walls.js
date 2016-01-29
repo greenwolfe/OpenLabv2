@@ -69,13 +69,18 @@ Meteor.methods({
 
     var currentGroupMemberIds = Meteor.groupMemberIds('current',wall.createdFor);
     var finalGroupMemberIds = Meteor.groupMemberIds('final',wall.createdFor);
+    var formerGroupMemberIds = Meteor.groupMemberIds('former',wall.createdFor);
     var groupMemberIds = _.union(currentGroupMemberIds,finalGroupMemberIds);
+    if (!_.contains(groupMemberIds,studentID))
+      groupMemberIds = formerGroupMemberIds;
     if (!_.contains(groupMemberIds,studentID))
       throw new Meteor.Error('studentNotInGroup','A student can only change the group for a wall if they are in the group to begin with.');
     var currentNewGroupMemberIds = Meteor.groupMemberIds('current',newGroupID);
     var finalNewGroupMemberIds = Meteor.groupMemberIds('final',newGroupID);
+    var formerNewGroupMemberIds = Meteor.groupMemberIds('former',newGroupID);
     var newGroupMemberIds = _.union(currentNewGroupMemberIds,finalNewGroupMemberIds);
-    console.log(newGroupMemberIds);
+    if (!_.contains(newGroupMemberIds,studentID))
+      newGroupMemberIds = formerNewGroupMemberIds;
     if (!_.contains(newGroupMemberIds,studentID))
       throw new Meteor.Error('studentNotInNewGroup','A student can only change the group for a wall if they are in the new group.');
 

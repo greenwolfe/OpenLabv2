@@ -55,9 +55,10 @@
 </template>
 
 <template name = 'calendarEvent'>
-  <p class='calendarEvent'>
-    <!-- need pointsToOrID helper, copy from activity item and group members names-->
-    <a href="{{pathFor 'activityPage' _id=pointsToOrID}}" title="group members">
+  <p class='calendarEvent text-left'>
+    <!-- need helper for progress level and title -->
+    <i class="calendarEventProgress icon-twoBars float-right" title="progress indicator stub"></i>
+    <a href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}" title="group members">
       {{title}} {{#if tag}}({{{tag}}}){{/if}} {{#if statusTag}} <strong>({{{statusTag}}})</strong>{{/if}}
     </a>
     <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}

@@ -81,6 +81,7 @@
                 <!--add namedTimePeriods collection with Mon: {from:Date,to:Date}, Tue: {from:Date,to:Date}, etc -->
                 <!-- make this a dropdown selector with a text entry -->
                 <!-- new text entries added to collection -->
+                <!--show conflicting appointments -->
                 <div class="col-xs-4">
                   <div id="calEventModalTimeperiodName" class='plaintexteditor' contenteditable='true' placeholder='When: '></div>
                 </div>
@@ -111,6 +112,11 @@
                   </div>
                 </div>
               </div>
+              <!--
+              with ... select group or members or section (if teacher)
+              where ... OOC, FTF, HOM and location name
+              todos ... and numberOfTodoItems, numberTodosCompleted
+              -->
 
               <div class="row">
                 <div class="col-xs-1">
@@ -124,12 +130,13 @@
           {{/with}}
         </div>
         <div class="modal-footer bg-{{messageType}}">
-          {{#unless dataValidated}}
-            <p>Please fill in missing fields.</p>
-          {{/unless}}
-          <button class="btn btn-primary"  id="saveCalendarEvent">
+          {{#if dataValidated}}
+            <button class="btn btn-primary"  id="saveCalendarEvent">
               Save
-          </button>
+            </button>
+          {{else}}
+            <p>Please fill in missing fields.</p>
+          {{/if}}
         </div>
       </div>
     </div>
