@@ -74,7 +74,7 @@ Template.groups.helpers({
       return 0;
     var groupIDs = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1}}).fetch(),'itemID');
     groupIDs = _.unique(groupIDs);
-    groupIDs = _.without(groupIDs,Meteor.currentGroupId());
+    //groupIDs = _.without(groupIDs,Meteor.currentGroupId());
     return groupIDs.length;
   },
   pastGroups: function() {
@@ -86,7 +86,7 @@ Template.groups.helpers({
       return '';
     var groupIDs = _.pluck(Memberships.find({memberID:studentID,collectionName:'Groups'},{fields:{itemID:1},sort:{startDate:-1}}).fetch(),'itemID');
     groupIDs = _.unique(groupIDs);
-    groupIDs = _.without(groupIDs,Meteor.currentGroupId());
+    //groupIDs = _.without(groupIDs,Meteor.currentGroupId());
     if (!groupIDs.length)
       return '';
     var pastGroups = [];
@@ -106,7 +106,9 @@ Template.groups.helpers({
       if (membership.status == 'former')
         pastGroupies = 'with ' + pastGroupies;
       var preposition = (membership.status == 'former') ? ' left on ' : ' to ';
-      pastGroupies += ' from ' + moment(membership.startDate).format("MMM D, YYYY") + preposition + moment(membership.endDate).format("MMM D, YYYY");
+      var today = new Date();
+      var endDate = (membership.endDate > today) ? 'present' : moment(membership.endDate).format("MMM D, YYYY");
+      pastGroupies += ' from ' + moment(membership.startDate).format("MMM D, YYYY") + preposition + endDate;
       pastGroups.push({names:pastGroupies});
     })
     return pastGroups;
