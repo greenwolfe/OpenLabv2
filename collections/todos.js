@@ -177,14 +177,16 @@ Meteor.methods({
         throw new Meteor.Error('studentNotInGroup',"A student cannot delete a todo item unless they are part of that group.");
     }
 
-    //re-order remaining todos
-    Todos.remove(todoID,function(error,id) {
+    var ids = _.pluck(Todos.find({calendarEventID:todo.calendarEventID,order:{$gt: todo.order}},{fields: {_id: 1}}).fetch(), '_id');
+    var numberRemoved = Todos.remove(todoID,function(error,id) {
       if (error) return;
       if (calendarEvent.numberOfTodoItems > 1)
         CalendarEvents.update(calendarEvent._id,{$inc:{numberOfTodoItems:-1}});
       if (todo.completed && (calendarEvent.numberTodosCompleted > 0)) {
         CalendarEvents.update(calendarEvent._id,{$inc:{numberTodosCompleted:-1}});
       }
-    })
+    }) 
+    Todos.update({_id: {$in: ids}}, {$inc: {order:-1}}, {multi: true});
+    return numberRemoved; 
   }
 })

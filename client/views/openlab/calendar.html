@@ -58,11 +58,11 @@
   <p class='calendarEvent text-left'>
     <!-- need helper for progress level and title -->
     <i class="calendarEventProgress icon-twoBars float-right" title="progress indicator stub"></i>
-    <a href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}" title="group members">
-      {{title}} {{#if tag}}({{{tag}}}){{/if}} {{#if statusTag}} <strong>({{{statusTag}}})</strong>{{/if}}
-    </a>
+     <a href="#" class="editCalendarEvent">{{title}}</a>
     <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}
     <a class="glyphicon glyphicon-remove deleteCalendarEvent" title="Delete Event"></a>-->
-    <a href="#" class="glyphicon glyphicon-edit editCalendarEvent" title="Edit Event"></a>
+    {{#with activity}}
+      <a href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}" class="glyphicon glyphicon-link editCalendarEvent" title="{{titleWithTags}}"></a>
+    {{/with}}
   </p>
 </template>

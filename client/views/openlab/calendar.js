@@ -2,10 +2,7 @@
  /***** CALENDAR  *********/
 /*************************/
 Template.calendar.onCreated(function() {
-  instance = this;
-  instance.autorun(function() {
-    instance.subscribe('calendarEvents',Meteor.impersonatedOrUserId());
-  })
+
 })
 
 Template.calendar.onRendered(function(){
@@ -13,7 +10,10 @@ Template.calendar.onRendered(function(){
   var MonNextWeek = moment().day("Monday").add(1,'weeks').format('ddd[,] MMM D YYYY');
   Session.setDefault('calStartDate',MonThisWeek);
   Session.setDefault('calEndDate',MonNextWeek);
-
+  instance = this;
+  instance.autorun(function() {
+    instance.subscribe('calendarEvents',Meteor.impersonatedOrUserId());
+  })
   //initialize date-pickers
 });
 
@@ -69,7 +69,23 @@ Template.calendarWeek.helpers({
 
 Template.calendarDay.helpers({ 
   daysEvents : function() { 
-    var userToShow = [Meteor.impersonatedOrUserId(),Meteor.selectedSection(),Site.findOne()._id];
+    var cU = Meteor.userId();
+    var userToShow = [Site.findOne()._id]; 
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var studentID = Meteor.impersonatedId();
+      var sectionID = Meteor.selectedSectionId();
+      if (studentID) {
+        userToShow.push(studentID);
+      } else if (sectionID) {
+        userToShow.push(sectionID);
+        userToShow = _.union(userToShow,Meteor.sectionMemberIds(sectionID));
+      } else {
+        userToShow.push(cU);
+      }
+    } else {
+      userToShow.push(Meteor.impersonatedOrUserId());  //impersonatedOrUser to include parent impersonating student
+      userToShow.push(Meteor.selectedSectionId());
+    }
     var dateMin1h = moment(this.date,'MM/DD/YYYY').subtract(1,'hours').toDate();
     var datePlus1h = moment(this.date,'MM/DD/YYYY').add(1,'hours').toDate();
     return CalendarEvents.find({
@@ -88,8 +104,8 @@ Template.calendarDay.events({
     var cU = Meteor.userId();
     if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
       return;
-    Session.set('dateOrIDForAddCalendarEventModal',new Date(tmpl.data.date));
-    $('#addCalendarEventModal').modal();
+    Session.set('dateOrIDForCalendarEventModal',new Date(tmpl.data.date));
+    $('#calendarEventModal').modal();
   },
   'click div.daysEvents p.calendarEvent': function(event,tmpl) {
     //don't open modal if click on an existing calendar event
@@ -108,29 +124,29 @@ Template.calendarEvent.events({
     var cU = Meteor.userId();
     if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
       return;
-    Session.set('dateOrIDForAddCalendarEventModal',this._id);
-    $('#addCalendarEventModal').modal();    
+    Session.set('dateOrIDForCalendarEventModal',this._id);
+    $('#calendarEventModal').modal();    
   }
 });
 
 Template.calendarEvent.helpers({
-  title: function() {
-    return (this.activityID) ? Activities.findOne(this.activityID).title : this.title;
+  activity: function() {
+    return Activities.findOne(this.activityID);
   },
-  tag: function() {
-    return (this.activityID) ? Activities.findOne(this.activityID).tag : '';
-  },
-  statusTag: function() {
+  titleWithTags: function() {
     var studentID = Meteor.impersonatedOrUserId();
-    var activity = (this.activityID) ? Activities.findOne(this.activityID) : null;
-    if (!studentID || !activity)
-      return '';
-    var status = ActivityStatuses.findOne({studentID: studentID,activityID: this.activityID});
-    return (status) ? status.tag : '';
+    var activityID = this._id;
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
+    var tags = '';
+    if (this.tag) 
+      tags += ' (' + this.tag + ')';
+    if ((status) && (status.tag))
+      tags += '<strong> (' + status.tag + ')</strong>';
+    var unit = Units.findOne(this.unitID);
+    return unit.title + ': ' + this.title + ' ' + tags;  
   },
   pointsToOrID: function() {
-    var activity = Activities.findOne(this.activityID);
-    return activity.pointsTo || activity._id;
+    return this.pointsTo || this._id;
   },
   studentOrSectionID: function() {
     var cU = Meteor.userId();

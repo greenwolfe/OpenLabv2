@@ -1,26 +1,63 @@
-  /**********************************/
- /**** ADD CALENDAR EVENT MODAL ****/
-/**********************************/
+  /******************************/
+ /**** CALENDAR EVENT MODAL ****/
+/******************************/
 
 //modify setCalendarEventFields so that
 //if there is an existing calendar event, it calls
 //the method and updates
 //message in footer says changes automatically saved
-Template.addCalendarEventModal.onCreated(function() {
+Template.calendarEventModal.onCreated(function() {
   var instance = this;
   instance.activeUnit = new ReactiveVar(openlabSession.get('activeUnit'));
+
   instance.calendarEvent = new ReactiveVar({});
   instance.setCalendarEventFields = function(newFields) {
     var cE = instance.calendarEvent.get();
     if (('_id' in cE) && Match.test(cE._id,Match.idString)) {
       newFields._id = cE._id;
-      Meteor.call('updateCalendarEvent',newFields,alertOnError);
+      Meteor.call('updateCalendarEvent',newFields,function(error,id){
+        if (error) {
+          instance.backgroundColor.set('warning');
+          instance.message.set('Invalid value.  Changes will be saved whan a valid value is entered.'); 
+        } else {
+          instance.backgroundColor.set('info');
+          instance.message.set('Editing existing calendar event. <br>Changes are saved as they are made, or for a text field when you click outside its blue box after editing.');
+        }
+      });
     }
+    
     _.forEach(newFields,function(value,key) {
       cE[key] = value;
     });
     instance.calendarEvent.set(cE);
   }
+
+  instance.Todos = new ReactiveVar([]); //only used if there is not yet a calendar Event
+  instance.insertTodo = function(text) {
+    if (Match.test(text,Match.nonEmptyString)) {
+      var Todos = instance.Todos.get();
+      var todo = {text:text,
+                  order: Todos.length}
+      Todos.push(todo);
+      instance.Todos.set(Todos);
+    }
+  }
+  instance.updateTodo = function(text,order) {
+    var Todos = instance.Todos.get();
+    if (Match.test(text,Match.nonEmptyString)) {
+      Todos[order].text = text;
+    } else {
+      for (o = order + 1;o < Todos.length;o++) {
+        Todos[o].order--;
+      }
+      Todos.splice(order,1);
+    }
+    instance.Todos.set(Todos);
+  }
+
+  instance.backgroundColor = new ReactiveVar('');
+  instance.message = new ReactiveVar('');
+
   instance.setCalendarEventNull = function() {
     instance.calendarEvent.set({
       date: new Date(0),
@@ -34,23 +71,15 @@ Template.addCalendarEventModal.onCreated(function() {
       nameOfTimePeriod: '',
       invite: []
     });
+    instance.backgroundColor.set('warning');
+    instance.message.set('Required fields: title')
   }
   instance.setCalendarEventNull();
-  instance.Todos = []; //only used if there is not yet a calendar Event
-  instance.insertTodo = function(todo) {
-    //check for instance.calendarEvent._id
-    //if id, then editing an existing calendar event
-      //go ahead and add todo on server using method
-    //else
-      //add to instance.Todos array
-    todo.order = instance.Todos.length;
-
-  }
 });
 
 var timeFormat = "h:mm a";
 
-Template.addCalendarEventModal.onRendered(function() {
+Template.calendarEventModal.onRendered(function() {
   var instance = this;
   instance.$calEventModalNote = instance.$('#calEventModalNote');
   instance.$calEventModalNote.summernote({ //default/standard air popover toolbar
@@ -111,17 +140,19 @@ Template.addCalendarEventModal.onRendered(function() {
   })
 })
 
-Template.addCalendarEventModal.events({
-  'show.bs.modal #addCalendarEventModal': function(event,tmpl) {
+Template.calendarEventModal.events({
+  'show.bs.modal #calendarEventModal': function(event,tmpl) {
     tmpl.activeUnit.set(openlabSession.get('activeUnit'));
-    var dateOrID = Session.get('dateOrIDForAddCalendarEventModal');
-    var calendarEvent =  CalendarEvents.findOne(dateOrID);
-    if (calendarEvent) {
-      tmpl.calendarEvent.set(calendarEvent);
-    } else {
+    var dateOrID = Session.get('dateOrIDForCalendarEventModal');
+    if (dateOrID instanceof Date) {
       tmpl.setCalendarEventNull();
       tmpl.setCalendarEventFields({date:dateOrID});
-      calendarEvent = tmpl.calendarEvent.get();
+      var calendarEvent = tmpl.calendarEvent.get();
+      tmpl.Todos.set([]);
+    } else {
+      var calendarEvent =  CalendarEvents.findOne(dateOrID);
+      tmpl.calendarEvent.set(calendarEvent);
+      tmpl.Todos.set([]);
     }
     tmpl.$calEventModalNote.code(calendarEvent.note);  
     tmpl.$('#calEventModalTitle').text(calendarEvent.title);
@@ -165,7 +196,7 @@ var dataValidated = function() {
   })
 }
 
-Template.addCalendarEventModal.helpers({
+Template.calendarEventModal.helpers({
   calendarEvent: function() {
     var tmpl = Template.instance();
     return tmpl.calendarEvent.get();
@@ -176,6 +207,7 @@ Template.addCalendarEventModal.helpers({
   formatDateTime: function(date) {
     return ((Match.test(date,Date)) && !dateIsNull(date)) ? moment(date).format(dateTimeFormat) : '_____';
   },
+  //link with activity
   units: function() {
     return Units.find({visible:true});
   },
@@ -200,20 +232,50 @@ Template.addCalendarEventModal.helpers({
   selectedActivity: function() {
     return Activities.findOne(this.activityID);
   },
+  //title
+  //time period
+  //todo list
+  temporaryTodos: function() {
+    var instance = Template.instance();
+    console.log(instance.Todos.get());
+    return instance.Todos.get();
+  },
+  //note
+  //footer
   activityBgPrimary: function() {
-    var tmpl = Template.instance();
-    var calendarEvent = tmpl.calendarEvent.get();
+    var instance = Template.instance();
+    var calendarEvent = instance.calendarEvent.get();
     return (calendarEvent.activityID == this._id) ? 'bg-primary' : '';
   },
-  dataValidated: function() { 
-    return dataValidated();
+  showSaveButton: function() { 
+    var instance = Template.instance();
+    var requiredFieldsFilled = dataValidated();
+    if (requiredFieldsFilled) {
+      var cE = instance.calendarEvent.get();
+      if (('_id' in cE) && (Match.test(cE._id,Match.idString))) {
+        instance.backgroundColor.set('info');
+        instance.message.set('Editing existing calendar event. <br>Changes are saved as they are made, or for a text field when you click outside its blue box after editing.');
+        return false;
+      } else {
+        instance.backgroundColor.set('info');
+        instance.message.set('All required fields filled.  <br>New calendar event not yet saved.');
+        return true;
+      }
+    }
+    return false;
   },
-  messageType: function() { 
-    return (dataValidated()) ? 'success' : 'warning';
+  backgroundColor: function() {
+    var instance = Template.instance();
+    return instance.backgroundColor.get();
+  },
+  message: function() {
+    var instance = Template.instance();
+    return instance.message.get();
   }
 })
 
-Template.addCalendarEventModal.events({
+Template.calendarEventModal.events({
+  //title
   'click .unitTitle' : function(event,tmpl) {
     tmpl.activeUnit.set(this._id);
     event.preventDefault();
@@ -234,28 +296,45 @@ Template.addCalendarEventModal.events({
     tmpl.setCalendarEventFields({activityID:null});
     event.preventDefault();    
   },
+  //title
   'blur #calEventModalTitle' : function(event,tmpl) {
     var $element = $(event.target);
     var text = _.trim(_.stripTags($element.text()));
     tmpl.setCalendarEventFields({title:text});
   },
+  //time period
+  //todo list
+  'blur #calEventModalNewTempTodo': function(event,tmpl) {
+    var $element = $(event.target);
+    var text = _.trim(_.stripTags($element.text())); 
+    tmpl.insertTodo(text);  
+    $element.text(''); 
+  },
+  'blur .calEventModalTempTodo': function(event,tmpl) {
+    var $element = $(event.target);
+    var text = _.trim(_.stripTags($element.text()));
+    tmpl.updateTodo(text,this.order);     
+  },
+  //note
+  //footer
   'click .close': function(event,tmpl) {
     tmpl.setCalendarEventNull();
   },
   'click #saveCalendarEvent' : function(event,tmpl) {;
     if (dataValidated()) {
       var calendarEvent = tmpl.calendarEvent.get()
-      //shifting to new protocol - if editing existing calendar event
-      //each field is saved to the server as soon as it is edited
       if (('_id' in calendarEvent) && Match.test(calendarEvent._id,Match.idString)) {
-        //Meteor.call('updateCalendarEvent',calendarEvent)
+        //editing existing calendar event ... save button should not have been clicked
+        //but regardless, do nothing because once calendar event is saved to the server, edits are saved one at a time as each change is made
       } else {
-        Meteor.call('insertCalendarEvent',calendarEvent);
+        Meteor.call('insertCalendarEvent',calendarEvent,function(error,id) {
+          if (error) { 
+            return alert(error.reason);
+          } else {
+            tmpl.setCalendarEventFields({_id:id});
+          }
+        });
       }
-      //alternative ... put in full message system and give
-      //success message with close button
-      //tmpl.setCalendarEventNull();
-      //$('#addCalendarEventModal').modal('hide');  
     } 
   }
 })

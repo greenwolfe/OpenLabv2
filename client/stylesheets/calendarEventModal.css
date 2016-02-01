@@ -1,0 +1,9 @@
+#calendarEventModal div.row {
+  margin-bottom: 3px;
+}
+#calendarEventModal form.form-inline {
+  margin-bottom: 3px;
+}
+#calEventModalTimeperiodName {
+  width: 200px;
+}
