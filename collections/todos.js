@@ -88,7 +88,7 @@ Meteor.methods({
     }
 
     if (_.trim(_.stripTags(newTodo.text))) {
-      return Todos.update(todoID,{$set:{
+      return Todos.update(newTodo._id,{$set:{
         text:newTodo.text,
         modifiedBy: cU._id,
         modifiedOn: new Date()
