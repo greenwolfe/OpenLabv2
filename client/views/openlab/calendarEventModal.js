@@ -2,10 +2,6 @@
  /**** CALENDAR EVENT MODAL ****/
 /******************************/
 
-//modify setCalendarEventFields so that
-//if there is an existing calendar event, it calls
-//the method and updates
-//message in footer says changes automatically saved
 Template.calendarEventModal.onCreated(function() {
   var instance = this;
   instance.activeUnit = new ReactiveVar(openlabSession.get('activeUnit'));
@@ -108,7 +104,7 @@ Template.calendarEventModal.onRendered(function() {
   //handle updates to plaintext and summernote fields in an autorun here?
   //troubles creating an additional update to summernote fields?
 
-  this.$('#calEventModalFrom').datetimepicker({
+  instance.$('#calEventModalFrom').datetimepicker({
     showClose:  true,
     showClear: true,
     keepOpen: false,
@@ -123,7 +119,7 @@ Template.calendarEventModal.onRendered(function() {
       }
     }}
   });
-  this.$('#calEventModalTo').datetimepicker({
+  instance.$('#calEventModalTo').datetimepicker({
     showClose: true,
     showClear: true,
     keepOpen: false,
@@ -153,6 +149,7 @@ Template.calendarEventModal.events({
       var calendarEvent =  CalendarEvents.findOne(dateOrID);
       tmpl.calendarEvent.set(calendarEvent);
       tmpl.Todos.set([]);
+      instance.subscribe('todos',calendarEvent._id);
     }
     tmpl.$calEventModalNote.code(calendarEvent.note);  
     tmpl.$('#calEventModalTitle').text(calendarEvent.title);
@@ -237,8 +234,22 @@ Template.calendarEventModal.helpers({
   //todo list
   temporaryTodos: function() {
     var instance = Template.instance();
-    console.log(instance.Todos.get());
     return instance.Todos.get();
+  },
+  todoCount: function() {
+    return Todos.find({calendarEventID:this._id}).count();
+  },
+  todos: function() {
+    return Todos.find({calendarEventID:this._id},{sort: {order:1}});
+  },
+  sortableOpts: function() {
+    return {
+      draggable:'.todoItem',
+      handle: '.todoSortableHandle',
+      collection: 'Todos',
+      selectField: 'calendarEventID',
+      selectValue: this._id
+    }
   },
   //note
   //footer
@@ -304,17 +315,6 @@ Template.calendarEventModal.events({
   },
   //time period
   //todo list
-  'blur #calEventModalNewTempTodo': function(event,tmpl) {
-    var $element = $(event.target);
-    var text = _.trim(_.stripTags($element.text())); 
-    tmpl.insertTodo(text);  
-    $element.text(''); 
-  },
-  'blur .calEventModalTempTodo': function(event,tmpl) {
-    var $element = $(event.target);
-    var text = _.trim(_.stripTags($element.text()));
-    tmpl.updateTodo(text,this.order);     
-  },
   //note
   //footer
   'click .close': function(event,tmpl) {
@@ -324,7 +324,7 @@ Template.calendarEventModal.events({
     if (dataValidated()) {
       var calendarEvent = tmpl.calendarEvent.get()
       if (('_id' in calendarEvent) && Match.test(calendarEvent._id,Match.idString)) {
-        //editing existing calendar event ... save button should not have been clicked
+        //editing existing calendar event ... save button should not have been clicked (or even visible)
         //but regardless, do nothing because once calendar event is saved to the server, edits are saved one at a time as each change is made
       } else {
         Meteor.call('insertCalendarEvent',calendarEvent,function(error,id) {
@@ -332,10 +332,80 @@ Template.calendarEventModal.events({
             return alert(error.reason);
           } else {
             tmpl.setCalendarEventFields({_id:id});
+            var todos = tmpl.Todos.get();
+            todos.forEach(function(todo){
+              todo.calendarEventID = id;
+              delete todo.order;
+              Meteor.call('insertTodo',todo,alertOnError);
+            })
+            tmpl.Todos.set([]);
+            Meteor.subscribe('todos',id);
           }
         });
       }
     } 
+  }
+})
+
+  /*******************/
+ /**** TEMP TODO ****/
+/*******************/
+
+Template.tempTodo.events({
+  'blur .calEventModalTempTodo': function(event,tmpl) {
+    var $element = $(event.target);
+    var text = _.trim(_.stripTags($element.text()));
+    if (!text) //prevents ghost remnant that combines with next element afer template is destroyed
+      $element.empty();
+    tmpl.parent().updateTodo(text,this.order);     
+  }
+})
+
+  /***********************/
+ /**** NEW TEMP TODO ****/
+/***********************/
+
+Template.newTempTodo.events({
+  'blur #calEventModalNewTempTodo': function(event,tmpl) {
+    var $element = $(event.target);
+    var text = _.trim(_.stripTags($element.text())); 
+    tmpl.parent().insertTodo(text);  
+    $element.text(''); 
+  }
+})
+
+  /*******************/
+ /**** TODO ITEM ****/
+/*******************/
+
+Template.todoItem.helpers({
+  checked: function() {
+    return (this.completed) ? 'check' : 'unchecked';
+  }
+})
+
+Template.todoItem.events({
+  'click .glyphicon-check': function(event,instance) {
+    Meteor.call('markTodoIncomplete',this._id);
+  },
+  'click .glyphicon-unchecked': function(event,instance) {
+    Meteor.call('markTodoComplete',this._id);
+  }
+})
+
+  /******************/
+ /**** NEW TODO ****/
+/******************/
+
+Template.newTodo.events({
+  'blur #calEventModalNewTodo': function(event,tmpl) {
+    var $element = $(event.target);
+    var text = _.trim(_.stripTags($element.text()));
+    Meteor.call('insertTodo',{
+      text:text,
+      calendarEventID: this._id
+    },alertOnError);
+    $element.text(''); 
   }
 })
 

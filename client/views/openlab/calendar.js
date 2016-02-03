@@ -133,6 +133,27 @@ Template.calendarEvent.helpers({
   activity: function() {
     return Activities.findOne(this.activityID);
   },
+  progressIcon: function() {
+    if (this.numberTodosCompleted == this.numberOfTodoItems)
+      return 'icon-fiveBars';
+    if (this.numberOfTodoItems == 0)
+      return 'icon-notStarted';
+    var fractionComplete = Math.round(5*this.numberTodosCompleted/this.numberOfTodoItems);
+    if (fractionComplete == 0)
+      return 'icon-notStarted';
+    if (fractionComplete == 1)
+      return 'icon-oneBar';
+    if (fractionComplete == 2)
+      return 'icon-twoBars';
+    if (fractionComplete == 3)
+      return 'icon-threeBars';
+    if (fractionComplete == 4)
+      return 'icon-fourBars'
+    return 'icon-fiveBars';
+  },
+  progressMessage: function() {
+    return this.numberTodosCompleted + ' out of ' + this.numberOfTodoItems + ' tasks complete.';
+  },
   titleWithTags: function() {
     var studentID = Meteor.impersonatedOrUserId();
     var activityID = this._id;

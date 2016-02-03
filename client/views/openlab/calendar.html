@@ -57,7 +57,7 @@
 <template name = 'calendarEvent'>
   <p class='calendarEvent text-left'>
     <!-- need helper for progress level and title -->
-    <i class="calendarEventProgress icon-twoBars float-right" title="progress indicator stub"></i>
+    <i class="calendarEventProgress {{progressIcon}} float-right" title="{{progressMessage}}"></i>
      <a href="#" class="editCalendarEvent">{{title}}</a>
     <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}
     <a class="glyphicon glyphicon-remove deleteCalendarEvent" title="Delete Event"></a>-->

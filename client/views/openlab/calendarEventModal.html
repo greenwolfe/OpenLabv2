@@ -144,26 +144,16 @@
 
               <div class="row"><!--todo list-->
                 <h5 class="hr centered"><span>Todo List</span></h5>
-                {{#if todos}}
-                  {{#sortable1c items=activities2 options=sortableOpts2}}
+                {{#if todoCount}}
+                  {{#sortable1c items=todos options=sortableOpts}}
                     {{>todoItem}}
                   {{/sortable1c}}
                   {{>newTodo}}
                 {{else}}
                   {{#each temporaryTodos}}
-                    <div class="col-xs-1">
-                      <span class="glyphicon glyphicon-unchecked"></span>
-                    </div>
-                    <div class="col-xs-11">
-                      <div  class='calEventModalTempTodo plaintexteditor' contenteditable='true' placeholder='Saving now will delete this item.'>{{text}}</div>
-                    </div>
+                    {{>tempTodo}}
                   {{/each}}
-                  <div class="col-xs-1">
-                    <span class="glyphicon glyphicon-unchecked"></span>
-                  </div>
-                  <div class="col-xs-11">
-                    <div id="calEventModalNewTempTodo" class='plaintexteditor' contenteditable='true' placeholder='Enter a new todo item.'></div>
-                  </div>
+                  {{>newTempTodo}}
                 {{/if}}
               </div>
 
@@ -187,10 +177,40 @@
   </div>
 </template>
 
+<template name="tempTodo">
+  <div class="col-xs-1">
+    <span class="glyphicon glyphicon-unchecked"></span>
+  </div>
+  <div class="col-xs-11">
+    <div  class='calEventModalTempTodo plaintexteditor' contenteditable='true' placeholder='Saving now will delete this item.'>{{text}}</div>
+  </div>
+</template>
+
+<template name="newTempTodo">
+  <div class="col-xs-1">
+    <span class="glyphicon glyphicon-unchecked"></span>
+  </div>
+  <div class="col-xs-11">
+    <div id="calEventModalNewTempTodo" class='plaintexteditor' contenteditable='true' placeholder='Enter a new todo item.'></div>
+  </div>
+</template>
+
 <template name="todoItem">
-  todo item
+  <div class="todoItem">
+    <div class="col-xs-1">
+      <span class="glyphicon glyphicon-{{checked}} todoSortableHandle" title="Click to check/uncheck.  Drag to reorder."></span>
+    </div>
+    <div class="col-xs-11">
+      {{>plaintexteditor collection='Todos' field='text' _id=_id editable='true'}}
+    </div>
+  </div>
 </template>
 
 <template name="newTodo">
-  new todo item
+  <div class="col-xs-1">
+    <span class="glyphicon glyphicon-unchecked"></span>
+  </div>
+  <div class="col-xs-11">
+    <div id="calEventModalNewTodo" class='plaintexteditor' contenteditable='true' placeholder='Enter a new todo item.'></div>
+  </div>
 </template>

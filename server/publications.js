@@ -17,6 +17,11 @@ Meteor.publish('calendarEvents',function(userID) {
   return CalendarEvents.find({group: {$in: [userID]}});
 })
 
+Meteor.publish('todos',function(calendarEventID) {
+  check(calendarEventID,Match.idString);
+  return Todos.find({calendarEventID:calendarEventID});
+})
+
 Meteor.publish('levelsOfMastery',function(standardOrCategoryID,studentID,activityID) {
   check(standardOrCategoryID,Match.OneOf(Match.idString,[Match.idString],null));
   check(studentID,Match.OneOf(Match.idString,null));
