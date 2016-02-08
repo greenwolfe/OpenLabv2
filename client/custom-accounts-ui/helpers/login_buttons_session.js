@@ -228,6 +228,19 @@ Meteor.getname = function(userOrId,full) {
   }
   return name;
 }
+Meteor.getUserOrSectionName = function(userOrSectionId) {
+  var student = Meteor.users.findOne(userOrSectionId);
+  var section = Sections.findOne(userOrSectionId);
+  var cU = Meteor.userId();
+  if (student) {
+    return Meteor.getname(userOrSectionId,'full');
+  } else if (section) {
+    return section.name;
+  } else if (cU) {
+    return Meteor.getname(cU,'full')
+  }
+  return '';
+}
 Template.registerHelper('getname',function(userOrId,full) {
   return Meteor.getname(userOrId,full);
 });

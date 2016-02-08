@@ -1,7 +1,8 @@
 <template name = 'calendar'>
-<!--  <p id='startEndDates' class='date-range text-center'>
-    Show from:
+  <div id='startEndDates' class='form form-inline date-range col-xs-7'>
     <div class="form-group">
+      <label for="calendarStartDate">Show:</label>
+      <label for="calendarStartDate">from</label>
       <div class='input-group date' id='calendarStartDate'>
         <input type='text' class="form-control"/>
         <span class="input-group-addon">
@@ -9,8 +10,8 @@
         </span>
       </div>
     </div>
-    to 
     <div class="form-group">
+      <label for="calendarEndDate">to</label>
       <div class='input-group date' id='calendarEndDate'>
         <input type='text' class="form-control"/>
         <span class="input-group-addon">
@@ -18,7 +19,8 @@
         </span>
       </div>
     </div>
-  </p>-->
+  </div>
+
   <table id='calendar'>
     {{#each calendarWeeks}}
       {{> calendarWeek}}

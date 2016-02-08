@@ -290,10 +290,10 @@ Meteor.methods({
     return calendarEvent._id; 
   },
 
-  /**** DELETE EVENT ****/
-  deleteEvent: function(eventID,ID) {
+  /**** DELETE CALENDAR EVENT ****/
+  deleteCalendarEvent: function(eventID,ID) {
     check(eventID,Match.idString);
-    check(userID,Match.OneOf(Match.idString,null));
+    check(ID,Match.OneOf(Match.idString,null));
     var cU = Meteor.user(); //currentUser
     if (!cU)  
       throw new Meteor.Error('notLoggedIn', "You must be logged in to decline an invitation.");
@@ -340,6 +340,9 @@ Meteor.methods({
     cE = CalendarEvents.findOne(eventID);
     if (cE.group.length == 0) {
       CalendarEvents.remove(eventID);
+      Todos.find({calendarEventID:eventID}).forEach(function(todo) {
+        Todos.remove(todo._id);
+      })
       return null;
     } else {
       return eventID;

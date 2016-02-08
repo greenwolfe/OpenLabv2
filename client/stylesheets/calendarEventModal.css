@@ -7,3 +7,10 @@
 #calEventModalTimeperiodName {
   width: 200px;
 }
+.todoItem span.glyphicon.glyphicon-move:hover {
+  cursor: move;
+}
+.todoItem span.glyphicon.glyphicon-check:hover,
+.todoItem span.glyphicon.glyphicon-unchecked:hover {
+  cursor: pointer;
+}

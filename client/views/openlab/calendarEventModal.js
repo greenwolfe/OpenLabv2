@@ -68,7 +68,7 @@ Template.calendarEventModal.onCreated(function() {
       invite: []
     });
     instance.backgroundColor.set('warning');
-    instance.message.set('Required fields: title')
+    instance.message.set('Required fields: title, and at least one to do item.')
   }
   instance.setCalendarEventNull();
 });
@@ -162,7 +162,12 @@ var dataValidated = function() {
   var tmpl = Template.instance();
   var calendarEvent = tmpl.calendarEvent.get();
   if (!calendarEvent) return false;
-  //make sure there's at least one valid todo
+  var temporaryTodos = tmpl.Todos.get();
+  var todos = 0;
+  if (('_id' in calendarEvent) && Match.test(calendarEvent._id,Match.idString)) {
+    todos = Todos.find({calendarEventID:calendarEvent._id}).count();
+  }
+  if ((!temporaryTodos.length) && !todos) return false;
   return Match.test(calendarEvent,{
     //required
     date: Date, 
@@ -275,6 +280,11 @@ Template.calendarEventModal.helpers({
     }
     return false;
   },
+  showDeleteButton: function() {
+    var instance = Template.instance();
+    var cE = instance.calendarEvent.get();
+    return (('_id' in cE) && (Match.test(cE._id,Match.idString)));
+  },
   backgroundColor: function() {
     var instance = Template.instance();
     return instance.backgroundColor.get();
@@ -317,8 +327,9 @@ Template.calendarEventModal.events({
   //todo list
   //note
   //footer
-  'click .close': function(event,tmpl) {
-    tmpl.setCalendarEventNull();
+  'click .close': function(event,instance) {
+    instance.setCalendarEventNull();
+    instance.Todos.set([]);
   },
   'click #saveCalendarEvent' : function(event,tmpl) {;
     if (dataValidated()) {
@@ -344,6 +355,38 @@ Template.calendarEventModal.events({
         });
       }
     } 
+  },
+  'click #deleteCalendarEvent' : function(event,instance) {
+      var calendarEvent = instance.calendarEvent.get()
+      if (('_id' in calendarEvent) && Match.test(calendarEvent._id,Match.idString)) {
+        var cU = Meteor.userId();
+        if (!Roles.userIsInRole(cU,['teacher','student'])) 
+          alert('Only a teacher or student can delete a calendar event.');
+        if (Roles.userIsInRole(cU,'student')) {
+          var userToRemove = cU;
+        }
+        if (Roles.userIsInRole(cU,'teacher')) {
+          var studentID = Meteor.impersonatedId();
+          if (!Roles.userIsInRole(studentID,'student')) //could be selected self or a whole section, or could be impersonating a parent
+            studentID = null;
+          var sectionID = Meteor.selectedSectionId();
+          var userToRemove = studentID || sectionID || cU;
+        }
+        if (confirm('This will remove this calendar event from ' + Meteor.getUserOrSectionName(userToRemove) + "'s calendar.  Are you sure you want to proceed?"))
+          Meteor.call('deleteCalendarEvent',calendarEvent._id,userToRemove,function(error,id) {
+            if (error) {
+              alert(error.reason);
+            } else {
+              instance.setCalendarEventNull();
+              instance.Todos.set([]);
+              $('#calendarEventModal').modal('hide');
+            }
+
+          });
+      
+      } else {
+        alert('Error:  Could not find calendar event to delete.')
+      }    
   }
 })
 

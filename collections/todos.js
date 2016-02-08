@@ -41,11 +41,17 @@ Meteor.methods({
       if (!_.contains(calendarEvent.group,cU._id))
         throw new Meteor.Error('studentNotInGroup',"A student cannot insert a new todo item unless they are part of that group.");
     }
-    todo.order = calendarEvent.numberOfTodoItems;
+    var lastTodo = Todos.findOne({calendarEventID: todo.calendarEventID},{
+      fields:{order:1},
+      sort:{order:-1},
+      limit:1
+    });
+    todo.order = (lastTodo) ? lastTodo.order + 1 : 0;
+    var numberOfTodoItems =  Todos.find({calendarEventID: todo.calendarEventID}).count() + 1;
 
     var todoID = Todos.insert(todo,function(error,id){
       if (error) return;
-      CalendarEvents.update(calendarEvent._id,{$inc:{numberOfTodoItems:1}});
+      CalendarEvents.update(calendarEvent._id,{$set:{numberOfTodoItems:numberOfTodoItems}});
     })
 
     return todoID;

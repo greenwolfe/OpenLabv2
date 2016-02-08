@@ -5,16 +5,49 @@ Template.calendar.onCreated(function() {
 
 })
 
+var dateFormat = "ddd, MMM D YYYY";
 Template.calendar.onRendered(function(){
-  var MonThisWeek = moment().day("Monday").format('ddd[,] MMM D YYYY');
-  var MonNextWeek = moment().day("Monday").add(1,'weeks').format('ddd[,] MMM D YYYY');
+  var MonThisWeek = moment().day("Monday").format(dateFormat);
+  var MonNextWeek = moment().day("Monday").add(1,'weeks').format(dateFormat);
   Session.setDefault('calStartDate',MonThisWeek);
   Session.setDefault('calEndDate',MonNextWeek);
   instance = this;
+  //need to subscribe to section and course events
   instance.autorun(function() {
     instance.subscribe('calendarEvents',Meteor.impersonatedOrUserId());
   })
-  //initialize date-pickers
+  instance.$('#calendarStartDate').datetimepicker({
+    showClose:  true,
+    showClear: true,
+    keepOpen: false,
+    format: dateFormat,
+    toolbarPlacement: 'top',
+    widgetPositioning: {vertical:'bottom',horizontal:'auto'},
+    keyBinds: {enter: function(widget) {
+      if (widget.find('.datepicker').is(':visible')) {
+        this.hide();
+      } else {
+        this.date(widget.find('.datepicker').val());
+      }
+    }}
+  });
+  instance.$('#calendarStartDate').data('DateTimePicker').date(MonThisWeek);
+  instance.$('#calendarEndDate').datetimepicker({
+    showClose:  true,
+    showClear: true,
+    keepOpen: false,
+    format: dateFormat,
+    toolbarPlacement: 'top',
+    widgetPositioning: {vertical:'bottom',horizontal:'auto'},
+    keyBinds: {enter: function(widget) {
+      if (widget.find('.datepicker').is(':visible')) {
+        this.hide();
+      } else {
+        this.date(widget.find('.datepicker').val());
+      }
+    }}
+  });
+  instance.$('#calendarEndDate').data('DateTimePicker').date(MonNextWeek);
 });
 
 Template.calendar.helpers({
@@ -30,6 +63,37 @@ Template.calendar.helpers({
     return calendarWeeks;
   }
 });
+
+Template.calendar.events({
+  'dp.change #calendarStartDate': function(event,instance) {
+    //link the pickers to ensure startDate < endDate
+    //reset session variable based on change
+    if (event.date) {
+      var monOfWeek = event.date.day("Monday").format(dateFormat);
+      if (monOfWeek != Session.get('calStartDate')) {
+        var monNextWeek = event.date.day("Monday").add(1,'weeks').format(dateFormat);
+        instance.$('#calendarEndDate').data("DateTimePicker").minDate(monNextWeek);
+        Session.set('calStartDate',monOfWeek);
+      }
+    } else {
+
+    }
+  },
+  'dp.change #calendarEndDate': function(event,instance) {
+   //link the pickers to ensure startDate < endDate
+    //reset session variable based on change
+    if (event.date) {
+      var monOfWeek = event.date.day("Monday").format(dateFormat);
+      if (monOfWeek != Session.get('calEndDate')) {
+        var monLastWeek = event.date.day("Monday").subtract(1,'weeks').format(dateFormat);
+        instance.$('#calendarStartDate').data("DateTimePicker").maxDate(monLastWeek);
+        Session.set('calEndDate',monOfWeek);
+      }
+    } else {
+
+    }
+  },
+})
 
 
 
@@ -134,22 +198,11 @@ Template.calendarEvent.helpers({
     return Activities.findOne(this.activityID);
   },
   progressIcon: function() {
-    if (this.numberTodosCompleted == this.numberOfTodoItems)
-      return 'icon-fiveBars';
     if (this.numberOfTodoItems == 0)
       return 'icon-notStarted';
+    var icons = ['icon-notStarted','icon-oneBar','icon-twoBars','icon-threeBars','icon-fourBars','icon-fiveBars'];
     var fractionComplete = Math.round(5*this.numberTodosCompleted/this.numberOfTodoItems);
-    if (fractionComplete == 0)
-      return 'icon-notStarted';
-    if (fractionComplete == 1)
-      return 'icon-oneBar';
-    if (fractionComplete == 2)
-      return 'icon-twoBars';
-    if (fractionComplete == 3)
-      return 'icon-threeBars';
-    if (fractionComplete == 4)
-      return 'icon-fourBars'
-    return 'icon-fiveBars';
+    return icons[fractionComplete];
   },
   progressMessage: function() {
     return this.numberTodosCompleted + ' out of ' + this.numberOfTodoItems + ' tasks complete.';
