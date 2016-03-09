@@ -2,7 +2,22 @@
  /***** CALENDAR  *********/
 /*************************/
 Template.calendar.onCreated(function() {
-
+  var instance = this;
+  instance.autorun(function() {
+    var iU = Meteor.impersonatedId();
+    var cU = Meteor.userId();
+    var selectedSectionId = Meteor.selectedSectionId();
+    if (iU) {
+      instance.eventSubscription = instance.subscribe('calendarEvents',iU);
+      instance.inviteSubscription = instance.subscribe('calendarInvitations',iU);
+    } else if (Roles.userIsInRole(cU,'teacher') && (selectedSectionId)) {
+      instance.eventSubscription = instance.subscribe('calendarEvents',selectedSectionId);
+      instance.inviteSubscription = instance.subscribe('calendarInvitations',cU); //none of these will be shown, but provides a handle to stop on onDestroyed
+    } else if (cU) {
+      instance.eventSubscription = instance.subscribe('calendarEvents',cU);
+      instance.inviteSubscription = instance.subscribe('calendarInvitations',cU);    
+    }
+  })
 })
 
 var dateFormat = "ddd, MMM D YYYY";
@@ -11,11 +26,7 @@ Template.calendar.onRendered(function(){
   var MonNextWeek = moment().day("Monday").add(1,'weeks').format(dateFormat);
   Session.setDefault('calStartDate',MonThisWeek);
   Session.setDefault('calEndDate',MonNextWeek);
-  instance = this;
-  //need to subscribe to section and course events
-  instance.autorun(function() {
-    instance.subscribe('calendarEvents',Meteor.impersonatedOrUserId());
-  })
+  var instance = this;
   instance.$('#calendarStartDate').datetimepicker({
     showClose:  true,
     showClear: true,
@@ -132,28 +143,46 @@ Template.calendarWeek.helpers({
 /*************************/
 
 Template.calendarDay.helpers({ 
+  daysInvitations: function() {
+    var dateMin1h = moment(this.date,'MM/DD/YYYY').subtract(1,'hours').toDate();
+    var datePlus1h = moment(this.date,'MM/DD/YYYY').add(1,'hours').toDate();
+    var cU = Meteor.impersonatedOrUserId();
+    if (cU) {
+      return CalendarEvents.find({
+          invite: {$in: [cU]}, 
+          visible: true,
+          date: {
+            $gt: dateMin1h,
+            $lt: datePlus1h
+          }
+      });
+    }
+  },
   daysEvents : function() { 
     var cU = Meteor.userId();
-    var userToShow = [Site.findOne()._id]; 
+    var participantList = [Site.findOne()._id]; 
     if (Roles.userIsInRole(cU,'teacher')) {
       var studentID = Meteor.impersonatedId();
       var sectionID = Meteor.selectedSectionId();
       if (studentID) {
-        userToShow.push(studentID);
+        participantList.push(studentID);
+        participantList.push(sectionID);
       } else if (sectionID) {
-        userToShow.push(sectionID);
-        userToShow = _.union(userToShow,Meteor.sectionMemberIds(sectionID));
+        participantList.push(sectionID);
+        participantList = _.union(participantList,Meteor.sectionMemberIds(sectionID));
       } else {
-        userToShow.push(cU);
+        participantList.push(cU);
+        var sectionIds = _.pluck(Sections.find({},{fields:{_id:1}}).fetch(),'_id');
+        participantList = _.union(participantList,sectionIds);
       }
     } else {
-      userToShow.push(Meteor.impersonatedOrUserId());  //impersonatedOrUser to include parent impersonating student
-      userToShow.push(Meteor.selectedSectionId());
+      participantList.push(Meteor.impersonatedOrUserId());  //impersonatedOrUser to include parent impersonating student
+      participantList.push(Meteor.selectedSectionId());
     }
     var dateMin1h = moment(this.date,'MM/DD/YYYY').subtract(1,'hours').toDate();
     var datePlus1h = moment(this.date,'MM/DD/YYYY').add(1,'hours').toDate();
     return CalendarEvents.find({
-        group: {$in: userToShow}, 
+        participants: {$in: participantList}, 
         visible: true,
         date: {
           $gt: dateMin1h,
@@ -172,6 +201,10 @@ Template.calendarDay.events({
     $('#calendarEventModal').modal();
   },
   'click div.daysEvents p.calendarEvent': function(event,tmpl) {
+    //don't open modal if click on an existing calendar event
+    event.stopPropagation();
+  },
+  'click div.daysEvents p.calendarInvite': function(event,tmpl) {
     //don't open modal if click on an existing calendar event
     event.stopPropagation();
   }
@@ -194,6 +227,10 @@ Template.calendarEvent.events({
 });
 
 Template.calendarEvent.helpers({
+  isInvite: function() {
+    var cU = Meteor.impersonatedOrUserId();
+    return (_.contains(this.invite,cU))
+  },
   activity: function() {
     return Activities.findOne(this.activityID);
   },

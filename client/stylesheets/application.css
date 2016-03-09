@@ -59,6 +59,9 @@ hr.no-padding {
 .text-black {
   color: black;
 }
+.dropdown-menu > .disabled.text-black > a {
+  color: black;
+}
 .text-grey {
   color: #333;
 }

@@ -94,19 +94,21 @@
                     </ul>
                   </div>
                 </div>
-                <div class="btn-group">
-                  <div class="input-group-btn">
-                    <button class="btn btn-primary"  id="addNewTimePeriod">
-                      Add New
-                    </button>
-                    <button class="btn btn-primary"  id="addNewTimePeriod">
-                      Change
-                    </button>
-                    <button class="btn btn-primary"  id="addNewTimePeriod">
-                      Remove
-                    </button>                  
+                {{#if isInRole 'teacher'}}
+                  <div class="btn-group">
+                    <div class="input-group-btn">
+                      <button class="btn btn-primary"  id="addNewTimePeriod">
+                        Add New
+                      </button>
+                      <button class="btn btn-primary"  id="addNewTimePeriod">
+                        Change
+                      </button>
+                      <button class="btn btn-primary"  id="addNewTimePeriod">
+                        Remove
+                      </button>                  
+                    </div>
                   </div>
-                </div>
+                {{/if}}
               </form>
               <div class="row">
                 <div class="col-xs-1">
@@ -139,9 +141,92 @@
               <!--
               with ... select group or members or section (if teacher)
               where ... OOC, FTF, HOM and location name
-              todos ... and numberOfTodoItems, numberTodosCompleted
               -->
 
+              <div class="row"><!-- participants -->
+                {{{participants}}} 
+                {{{invitees}}}
+              </div>
+              <div class="row">
+                <div class="col-xs-12">
+                  <span>Invite Participants</span>
+                  <div class="btn-group"> 
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      <span>from</span>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li class="chooseTeachers {{choseTeachersBgPrimary}}">
+                        <a href="#">Teachers</a>
+                      </li>
+                      <!-- parents in calendar events not yet implemented
+                      {{#if isInRole 'teacher'}}
+                        <li class="chooseParents {{choseParentsBgPrimary}}">
+                        <a href="#">Parents or Advisors</a>
+                        </li>
+                      {{/if}}
+                      -->
+                      <li role="separator" class="divider"></li>
+                      <li class="chooseNoSection {{sectionBgPrimary}}">
+                        <a href="#">no section</a>
+                      </li>
+                      {{#each sections}}
+                        <li class="sectionName {{sectionBgPrimary}}">
+                          <a class='displayTitle' lang="en" href="#"> 
+                            {{{name}}}
+                          </a>
+                        </li>
+                      {{/each}}
+                      <li role="separator" class="divider"></li>  
+                      <li class="chooseNoGroup {{groupBgPrimary}}">
+                        <a href="#">no group</a>
+                      </li>
+                      {{#each groups}}
+                        <li class="groupNames {{groupBgPrimary}}">
+                          <a class='displayTitle' lang="en" href="#"> 
+                            {{{names}}}
+                          </a>
+                        </li>
+                      {{/each}}                 
+                    </ul>
+                  </div>
+                  <div class="btn-group"> 
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      <span>select</span>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      {{#if isInRole 'teacher'}}
+                        {{#with activeSection}}
+                          <li class="chooseSection {{sectionBg}}">
+                            <a href="#">{{name}}</a>
+                          </li>
+                          <li role="separator" class="divider"></li>
+                        {{/with}}
+                      {{/if}}
+                      <li class="inviteAllParticipants">
+                        <a href="#">invite all</a>
+                      </li> 
+                      {{#if isInRole 'teacher'}}
+                        <li class="chooseAllParticipants">
+                          <a href="#">choose all</a>
+                        </li>                       
+                      {{/if}}
+                      <li class="unselectParticipants">
+                        <a href="#">unselect all</a>
+                      </li>
+                      {{#each potentialParticipants}}
+                        <li class="participantName {{participantBg}} {{participantSelectionDisabled}}">
+                          <a class='displayTitle' lang="en" href="#"> 
+                            {{getname _id 'full'}}
+                          </a>
+                        </li>
+                      {{/each}}                 
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
               <div class="row"><!--todo list-->
                 <h5 class="hr centered"><span>Todo List</span></h5>               
                 {{#sortable1c items=todos options=sortableOpts}}
@@ -171,9 +256,18 @@
               Save
             </button>
           {{/if}}
+          <!--only activite edit fields if user is teacher or a participant in the event ?-->
+          {{#if showAcceptInviteButton}}
+            <button class="btn btn-primary" id="acceptCalendarInvite">
+              Accept Invitation
+            </button>
+            <button class="btn btn-primary" id="declineCalendarInvite">
+              Decline Invitation
+            </button>
+          {{/if}}          
           {{#if showDeleteButton}}
-            <button class="btn btn-primary" id="deleteCalendarEvent">
-              Delete
+            <button class="btn btn-danger" id="deleteCalendarEvent">
+              {{deleteButtonText}}
             </button>
           {{/if}}
         </div>
@@ -205,7 +299,6 @@
     <div class="col-xs-2">
       <span class="glyphicon glyphicon-{{checked}}" title="Click to check/uncheck.  Drag to reorder."></span>
       <span class="glyphicon glyphicon-move todoSortableHandle"></span>
-      {{order}}
     </div>
     <div class="col-xs-10">
       {{>plaintexteditor collection='Todos' field='text' _id=_id editable='true'}}

@@ -146,6 +146,10 @@
                 <a href="#" class="glyphicon glyphicon-send send-enrollment-email" title="Send validation e-mail."></a>
               {{/if}}
             {{/if}}
+        {{else}}
+          {{#if isInRole 'teacher'}}
+            <a href="#" class="glyphicon glyphicon-remove remove-email" title="Remove email."></a>
+          {{/if}}
         {{/unless}}
       </p>
     {{/each}}

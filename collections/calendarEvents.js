@@ -7,7 +7,7 @@ Meteor.methods({
     check(calendarEvent,{
       //required fields to create the new calendar event
       date: Date,
-      group: [Match.idString], //contains userIDs, sectionIDs, or siteID
+      participants: [Match.idString], //contains userIDs, sectionIDs, or siteID
       activityID: Match.OneOf(Match.idString,null), 
       title: Match.stringWithContent, 
       workplace: Match.OneOf('OOC','FTF','HOM'),
@@ -45,25 +45,25 @@ Meteor.methods({
     if (!Roles.userIsInRole(cU,['student','teacher']))
       throw new Meteor.Error('notStudentOrTeacher','Only teachers and students may post events to the calendar.'); 
 
-    //group list contains valid users (students or teachers), sections or site
-    calendarEvent.group.forEach(function(ID) {
+    //participant list contains valid users (students or teachers), sections or site
+    calendarEvent.participants.forEach(function(ID) {
       var studentOrTeacher = Meteor.users.findOne(ID);
       if (studentOrTeacher) {
         if (!Roles.userIsInRole(studentOrTeacher,['student','teacher'])) 
-          throw new Meteor.Error('notStudentOrTeacher','Only students and teachers may be included in calendar events.')
+          throw new Meteor.Error('notStudentOrTeacher','Only students and teachers may participate in calendar events.')
       } else {
         if (!Roles.userIsInRole(cU,'teacher'))
-          throw new Meteor.Error('invalidGroupMember', "Cannot create calendar event.  Group members must be valid users.");
+          throw new Meteor.Error('invalidParticipant', "Cannot create calendar event.  Participants must be valid users.");
         //teachers can also create events for an entire section or for all students
         if (!Sections.findOne(ID) && !Site.findOne(ID)) 
-          throw new Meteor.Error('invalidGroupMember', "Cannot create calendar event.  Group members must be valid users, or section or site.");
+          throw new Meteor.Error('invalidParticipant', "Cannot create calendar event.  Participants must be valid users, or section or site.");
       }
     });
-    if (Roles.userIsInRole(cU,'student') && !_.contains(calendarEvent.group,cU._id))
-      throw new Meteor.Error('notPartOfGroup', 'Cannot create calendar event unless you are part of the group.');      
+    if (Roles.userIsInRole(cU,'student') && !_.contains(calendarEvent.participants,cU._id))
+      throw new Meteor.Error('notParticipant', 'Cannot create calendar event unless you are in the list of participants.');      
       //if student, check if frozen
-    if (Roles.userIsInRole(cU,'teacher') && calendarEvent.group.length == 0)
-     throw new Meteor.Error('noGroup', 'Cannot create calendar event without at least one individual in the group.');      
+    if (Roles.userIsInRole(cU,'teacher') && calendarEvent.participants.length == 0)
+     throw new Meteor.Error('noParticipants', 'Cannot create calendar event without at least one participant.');      
 
     calendarEvent.day = moment(calendarEvent.date).format('ddd');
     calendarEvent.numberOfTodoItems = 0; //denormalized values only manipulated by todos
@@ -126,12 +126,12 @@ Meteor.methods({
     if (!cE)
       throw new Meteor.Error('invalidCalendarEvent', "Cannot accept invite.  Invalid event ID.");
 
-    if (_.contains(cE.group,cU._id) || !_.contains(cE.invite,cU._id))
-      throw new Meteor.Error('notInvitedOrAlreadyInGroup', "You must be in the invitation list, and not yet part of the group in order to accept an invitation.")
+    if (_.contains(cE.participants,cU._id) || !_.contains(cE.invite,cU._id))
+      throw new Meteor.Error('notInvitedOrAlreadyAParticipant', "You must be in the invitation list, and not yet a participant in order to accept an invitation.")
 
     //if student, check if frozen
 
-    CalendarEvents.update(eventID,{$addToSet: {group : cU._id} });
+    CalendarEvents.update(eventID,{$addToSet: {participants : cU._id} });
     CalendarEvents.update(eventID,{$pull: {invite : cU._id}});
     return eventID;
   },
@@ -144,7 +144,7 @@ Meteor.methods({
     if (!cU)  
       throw new Meteor.Error('notLoggedIn', "You must be logged in to decline an invitation.");
     if (!Roles.userIsInRole(cU,['teacher','student']))
-      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to invite others to collaborate.');
+      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to decline an invitation.');
 
     //A teacher can decline on behalf of a student, otherwise throw error
     if (!userID) {
@@ -168,59 +168,148 @@ Meteor.methods({
   },
 
   /***** INVITE ANOTHER ****/
-  addToCalendarInviteList: function(eventID,userID) {
+  addToCalendarInviteList: function(eventID,userIDs) {
     check(eventID,Match.idString);
-    check(userID,Match.idString);
+    check(userIDs,Match.Optional([Match.idString],Match.idString));
     var cU = Meteor.user(); //currentUser
     if (!cU)  
-      throw new Meteor.Error('notLoggedIn', "You must be logged in to decline an invitation.");
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to invite users to a calendar event.");
     if (!Roles.userIsInRole(cU,['teacher','student']))
-      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to invite others to collaborate.');
-
+      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to invite others to a calendar event.');
     //if student, check if frozen
 
-    var user = Meteor.users.findOne(userID);
-    if (!user)
-      throw new Meteor.Error('invaliduserId','Cannot invite user to calendar event.  Invalid user ID.');
-    if (!Roles.userIsInRole(user,['teacher','student']))
-      throw new Meteor.Error('notTeacherOrStudent','Only teachers and students may be invited to calendar events.');
+    userIDs = (_.isArray(userIDs)) ? userIDs : [userIDs];
+    if (!userIDs.length)
+      throw new Meteor.Error('emptyList', "Cannot add users to calendar invite list.  Empty list.");
 
     var cE = CalendarEvents.findOne(eventID); //calendarEvent
     if (!cE)
-      throw new Meteor.Error('invalidEventID', "Cannot decline invite.  Invalid event ID.");
+      throw new Meteor.Error('invalidEventID', "Cannot sdd users to calendar invite list.  Invalid event ID.");
     if (Roles.userIsInRole(cU,'student')) {
-      if (!_.contains(cE.group,cU._id))
-        throw new Meteor.Error('mustBeInGroup','Cannot invite another user to this event unless you are already in the group.');
+      if (!_.contains(cE.participants,cU._id))
+        throw new Meteor.Error('mustBeParticipant','Cannot invite another user to this event unless you are already a participant.');
     }
-    if (_.contains(cE.invite,user._id))
-      throw new Meteor.Error('alreadyInvited', "This user is already on the invite list.  No need to invite again.");
 
-    CalendarEvents.update(eventID,{$addToSet: {invite : user._id} });
+    var userIDsMinusParticipants = userIDs.filter(function(userID) {
+      var user = Meteor.users.findOne(userID);
+      if (!user)
+        throw new Meteor.Error('invaliduserId','Cannot invite user to calendar event.  Invalid user ID. ' + userID);
+      if (!Roles.userIsInRole(user,['teacher','student']))
+        throw new Meteor.Error('notTeacherOrStudent','Only teachers and students may be invited to calendar events. ' + userID);
+      if (_.contains(cE.participants,userID)) {
+        if (Roles.userIsInRole(cU,'teacher')) {
+          Meteor.call('removeFromParticipants',eventID,userID);
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return true;
+    })
+
+    return CalendarEvents.update(eventID,{$addToSet: {invite : {$each: userIDsMinusParticipants}} });
   },
 
-  /***** ADD DIRECTLY TO GROUP ****/
-  addToCalendarGroup: function(eventID,ID) {
+  /***** UNINVITE ****/
+  removeFromCalendarInviteList: function(eventID,userIDs) {
     check(eventID,Match.idString);
-    check(ID,Match.idString);
+    check(userIDs,Match.Optional([Match.idString],Match.idString));
     var cU = Meteor.user(); //currentUser
     if (!cU)  
-      throw new Meteor.Error('notLoggedIn', "You must be logged in to decline an invitation.");
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to remove a user from the invitation list.");
+    if (!Roles.userIsInRole(cU,['teacher','student']))
+      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher remove a user from the invitation list.');
+    //if student, check if frozen
+
+    userIDs = (_.isArray(userIDs)) ? userIDs : [userIDs];
+    if (!userIDs.length)
+      throw new Meteor.Error('emptyList', "Cannot remove users from calendar invite list.  Empty list.");
+
+    var cE = CalendarEvents.findOne(eventID); //calendarEvent
+    if (!cE)
+      throw new Meteor.Error('invalidEventID', "Cannot remove user from invitation list.  Invalid event ID.");
+    if (Roles.userIsInRole(cU,'student')) {
+      if (!_.contains(cE.participants,cU._id))
+        throw new Meteor.Error('mustBeParticipant','Cannot remove a user from this event unless you are already a participant.');
+    }
+
+    userIDs.forEach(function(userID) {
+      var user = Meteor.users.findOne(userID);
+      if (!user)
+        throw new Meteor.Error('invaliduserId','Cannot remove user from calendar event.  Invalid user ID. ' + userID);
+      if (!Roles.userIsInRole(user,['teacher','student']))
+        throw new Meteor.Error('notTeacherOrStudent','Only teachers and students may remove users from calendar events. ' + userID);
+    })
+
+    return CalendarEvents.update(eventID,{$pullAll: {invite : userIDs}});
+  },
+
+  /***** ADD DIRECTLY TO PARTICIPANTS ****/
+  addToParticipants: function(eventID,IDs) {
+    check(eventID,Match.idString);
+    check(IDs,Match.OneOf([Match.idString],Match.idString));
+    var cU = Meteor.user(); //currentUser
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to add users directly to a calendar event.");
     if (!Roles.userIsInRole(cU,'teacher'))
       throw new Meteor.Error('notTeacher', 'You must be a teacher to add users directly to a calendar event.');
 
+    IDs = (_.isArray(IDs)) ? IDs : [IDs];
+    if (!IDs.length)
+      throw new Meteor.Error('emptyList', "Cannot add participants to calendar event.  Empty list.");
+
     var cE = CalendarEvents.findOne(eventID); //calendarEvent
     if (!cE)
-      throw new Meteor.Error('invalidEventID', "Cannot decline invite.  Invalid event ID.");
+      throw new Meteor.Error('invalidEventID', "Cannot add participant to calendar event.  Invalid event ID.");
 
-    var section = Sections.findOne(ID);
-    var site = Site.findOne(ID);
-    var user = Meteor.users.findOne(ID); 
-    if (!(section) && !(site) && !(user))
-      throw new Meteor.Error('invalidID','Can only add a valid section, site or user to a calendar event.');
-    if ((user) && !Roles.userIsInRole(user,['student','teacher']))
-      throw new Meteor.Error('notTeacherOrStudent','Only teachers or students may be added to a calendar event.');
+    IDs.forEach(function(ID) {
+      var section = Sections.findOne(ID);
+      var site = Site.findOne(ID);
+      var user = Meteor.users.findOne(ID); 
+      if (!(section) && !(site) && !(user))
+        throw new Meteor.Error('invalidID','Can only add a valid section, site or user to a calendar event.');
+      if ((user) && !Roles.userIsInRole(user,['student','teacher']))
+        throw new Meteor.Error('notTeacherOrStudent','Only teachers or students may be added to a calendar event.');
+    });
 
-    CalendarEvents.update(eventID,{$addToSet: {group : ID} });
+    CalendarEvents.update(eventID,{$addToSet: {participants : {$each: IDs}} });
+    CalendarEvents.update(eventID,{$pullAll: {invite: IDs}});
+  },
+
+  /***** REMOVE DIRECTLY FROM PARTICIPANTS ****/
+  removeFromParticipants: function(eventID,IDs) {
+    check(eventID,Match.idString);
+    check(IDs,Match.OneOf([Match.idString],Match.idString));
+
+    var cU = Meteor.user(); //currentUser
+    if (!cU)  
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to remove a participant from a calendar event.");
+    if (!Roles.userIsInRole(cU,'teacher'))
+      throw new Meteor.Error('notTeacher', 'You must be a teacher to remove a participant from a calendar event.');
+
+    IDs = (_.isArray(IDs)) ? IDs : [IDs];
+    if (!IDs.length)
+      throw new Meteor.Error('emptyList', "Cannot add participants to calendar event.  Empty list.");
+
+    var cE = CalendarEvents.findOne(eventID); //calendarEvent
+    if (!cE)
+      throw new Meteor.Error('invalidEventID', "Cannot remove participant from calendar event.  Invalid event ID.");
+
+    IDs.forEach(function(ID) {
+      var section = Sections.findOne(ID);
+      var site = Site.findOne(ID);
+      var user = Meteor.users.findOne(ID); 
+      if (!(section) && !(site) && !(user))
+        throw new Meteor.Error('invalidID','Cannot remove participant from event.  Invalid user, section or site. ' + ID);
+    })
+
+    var pulled = CalendarEvents.update(eventID,{$pullAll: {participants: IDs}}); 
+    cE = CalendarEvents.findOne(eventID);
+    if (cE.participants.length == 0) {
+      throw new Meteor.Error('noParticipants','Warning.  There are now no participants left for this calendar event.  If you exit the edit dialog without adding a participant, the event will be effectively deleted, as it will not show up in any calendar.')
+    } else {
+      return pulled;
+    }
   },
 
   /**** UPDATE CALENDAR EVENT ****/
@@ -245,7 +334,7 @@ Meteor.methods({
       date: Match.Optional(Date), //handled by drag/drop sortable1C
       day:  Match.Optional(Match.OneOf('Mon','Tue','Wed','Thu','Fri','Sat','Sun')), //handled in after hook to catch when date is changed by sortable 1C 
                                                                              //NOT YET WRITTEN!
-      group: Match.Optional([Match.idString]), //Only changed by accepting invite, or teacher directlyl adding
+      participants: Match.Optional([Match.idString]), //Only changed by accepting invite, or teacher directlyl adding
       invite: Match.Optional([Match.idString]), //Only changed by add to invite or accept/decline invite
       numberOfTodoItems: Match.Optional(Number),  //handled by todo methods
       numberTodosCompleted: Match.Optional(Number), //handled by todo methods
@@ -262,8 +351,8 @@ Meteor.methods({
       throw new Meteor.Error('notLoggedIn', "You must be logged in to update a calendar event.");
     if (!Roles.userIsInRole(cU,['teacher','student']))
       throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to update a calendar event.') 
-    if (Roles.userIsInRole(cU,'student') && !_.contains(originalCE.group,cU._id))
-      throw new Meteor.Error('canOnlyUpdateOwnEvent','Students cannot change a calendar event unless they are part of the event group.');
+    if (Roles.userIsInRole(cU,'student') && !_.contains(originalCE.participants,cU._id))
+      throw new Meteor.Error('canOnlyUpdateOwnEvent','Students cannot change a calendar event unless they are participants.');
     //if student, check if frozen
 
     calendarEvent.modifiedBy = cU._id;
@@ -291,14 +380,13 @@ Meteor.methods({
   },
 
   /**** DELETE CALENDAR EVENT ****/
-  deleteCalendarEvent: function(eventID,ID) {
+  deleteCalendarEvent: function(eventID) {
     check(eventID,Match.idString);
-    check(ID,Match.OneOf(Match.idString,null));
     var cU = Meteor.user(); //currentUser
     if (!cU)  
-      throw new Meteor.Error('notLoggedIn', "You must be logged in to decline an invitation.");
+      throw new Meteor.Error('notLoggedIn', "You must be logged in to delete a calendar event.");
     if (!Roles.userIsInRole(cU,['teacher','student']))
-      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to invite others to collaborate.');
+      throw new Meteor.Error('notTeacherOrStudent', 'You must be student or teacher to delete a calendar event.');
 
     var cE = CalendarEvents.findOne(eventID); //calendarEvent
     if (!cE)
@@ -307,46 +395,26 @@ Meteor.methods({
     //if student, check if frozen
 
     if (Roles.userIsInRole(cU,'teacher')) {
-      var section = Sections.findOne(ID);
-      var site = Site.findOne(ID);
-      var userToRemove = Meteor.users.findOne(ID);
-      if (section) {
-        var usersInSection = Meteor.sectionMemberIds(ID);
-        usersInSection.push(ID);
-        CalendarEvents.update(eventID,{$pullAll: {group: usersInSection}}); 
-      } else if (site) {
-        var usersInClass = _.pluck(Roles.getUsersInRole('student'),'_id');
-        usersInClass.push(ID);
-        CalendarEvents.update(eventID,{$pullAll: {group: usersInClass}});       
-      } else if (ID) { //not section or site, so trying to remove a single user
-        if (!userToRemove)
-          throw new Meteor.Error('invalidUser','Cannot delete event.  Invalid user.');
-        if (!_.contains(cE.group,userToRemove._id)) 
-          throw new Meteor.Error('userNotInGroup', 'Cannot delete event.  User not in group.');
-        CalendarEvents.update(eventID,{$pull: {group : userToRemove._id}}); 
-      } else if (_.contains(cE.group,cU._id)) { //trying to remove self
-        CalendarEvents.update(eventID,{$pull: {group : cU._id}});
-      } else {
-        throw new Meteor.Error('notInGroup', 'Cannot modify calendar event unless you are part of the group.');
-      }
-    } else {
-      if (_.contains(cE.group,cU._id)) { //student trying to remove self
-        CalendarEvents.update(eventID,{$pull: {group : cU._id}});
-      } else {
-        throw new Meteor.Error('notInGroup', 'Cannot modify calendar event unless you are part of the group.');
-      }
-    }
-
-    cE = CalendarEvents.findOne(eventID);
-    if (cE.group.length == 0) {
       CalendarEvents.remove(eventID);
       Todos.find({calendarEventID:eventID}).forEach(function(todo) {
         Todos.remove(todo._id);
       })
-      return null;
-    } else {
-      return eventID;
-    };
+      return 1;
+    } else { //must be student
+      if (!_.contains(cE.participants,cU._id)) 
+        throw new Meteor.Error('notParticipant', 'Cannot modify calendar event unless you are a participant.');
+      if (cE.participants.length == 1) { //removing last participant, delete event completely
+        CalendarEvents.remove(eventID);
+        Todos.find({calendarEventID:eventID}).forEach(function(todo) {
+          Todos.remove(todo._id);
+        })
+        return 1;
+      } else { //just remove this student from participants list
+        CalendarEvents.update(eventID,{$pull: {participants : cU._id}});
+        return eventID;
+      };
+    }
+
   }
 
 }); 

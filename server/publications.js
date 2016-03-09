@@ -12,9 +12,35 @@ Meteor.publish('standards',function() {
   return Standards.find();
 });
 
-Meteor.publish('calendarEvents',function(userID) {
+Meteor.publish('calendarEvents',function(userOrSectionID) {
+  check(userOrSectionID,Match.idString);
+  var participantList = [];
+  var site = Site.findOne();
+  if (site)
+    participantList.push(site._id);
+  if (Meteor.users.find(userOrSectionID).count()) { 
+    participantList.push(userOrSectionID);
+    var sectionID = Meteor.currentSectionId(userOrSectionID);
+    if (sectionID)
+      participantList.push(sectionID);
+    //if teacher viewing as self, include events for whole sections as well
+    if (Roles.userIsInRole(this.userId,'teacher') && (this.userId == userOrSectionID)) {
+      var sectionIds = _.pluck(Sections.find({},{fields:{_id:1}}).fetch(),'_id');
+      participantList = _.union(participantList,sectionIds);
+    }
+  } else if (Sections.find(userOrSectionID).count() && (Roles.userIsInRole(this.userId,['teacher','parentOrAdvisor']))) {
+    participantList.push(userOrSectionID);
+    //if teacher viewing single section, include events for all students in that section    
+    if (Roles.userIsInRole(this.userId,'teacher'))
+      participantList = _.union(participantList,Meteor.sectionMemberIds(userOrSectionID));
+  }
+
+  return CalendarEvents.find({participants: {$in: participantList}});
+})
+
+Meteor.publish('calendarInvitations',function(userID) {
   check(userID,Match.idString);
-  return CalendarEvents.find({group: {$in: [userID]}});
+  return CalendarEvents.find({invite: {$in:[userID]}});
 })
 
 Meteor.publish('todos',function(calendarEventID) {

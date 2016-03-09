@@ -276,9 +276,11 @@ Meteor.methods({
     if (!user)
       throw new Meteor.Error('invalid user','Cannot remove email.  Invalid user');
     var emailObject = {
-      address:email,
-      verified: false //don't remove verified e-mail
+      address:email
     }
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      emailObject.verified = false; //don't remove verified e-mail
     Meteor.users.update(userID,{$pull: {emails:emailObject}});
   },
   removeChildOrAdvisee: function(userID,studentID) {

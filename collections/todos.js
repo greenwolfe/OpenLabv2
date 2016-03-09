@@ -38,8 +38,8 @@ Meteor.methods({
     if (!calendarEvent)
       throw new Meteor.Error('calendarEventNotFound',"Cannot insert todo item.  Calendar event not found.");
     if (Roles.userIsInRole(cU,'student')) {
-      if (!_.contains(calendarEvent.group,cU._id))
-        throw new Meteor.Error('studentNotInGroup',"A student cannot insert a new todo item unless they are part of that group.");
+      if (!_.contains(calendarEvent.participants,cU._id))
+        throw new Meteor.Error('studentNotParticipant',"A student cannot insert a new todo item unless they are part a participant in the calendar event.");
     }
     var lastTodo = Todos.findOne({calendarEventID: todo.calendarEventID},{
       fields:{order:1},
@@ -89,8 +89,8 @@ Meteor.methods({
     if (!calendarEvent)
       throw new Meteor.Error('calendarEventNotFound',"Cannot update todo item.  Calendar event not found.");
     if (Roles.userIsInRole(cU,'student')) {
-      if (!_.contains(calendarEvent.group,cU._id))
-        throw new Meteor.Error('studentNotInGroup',"A student cannot update a todo item unless they are part of that group.");
+      if (!_.contains(calendarEvent.participants,cU._id))
+        throw new Meteor.Error('studentNotParticipant',"A student cannot update a todo item unless they are a participant in that calendar event.");
     }
 
     if (_.trim(_.stripTags(newTodo.text))) {
@@ -133,8 +133,8 @@ Meteor.methods({
     if (!calendarEvent)
       throw new Meteor.Error('calendarEventNotFound',"Cannot update todo item.  Calendar event not found.");
     if (Roles.userIsInRole(cU,'student')) {
-      if (!_.contains(calendarEvent.group,cU._id))
-        throw new Meteor.Error('studentNotInGroup',"A student cannot update a todo item unless they are part of that group.");
+      if (!_.contains(calendarEvent.participants,cU._id))
+        throw new Meteor.Error('studentNotParticipant',"A student cannot update a todo item unless they are a participant in the calendar event.");
     }
 
     if (!todo.completed) {
@@ -170,8 +170,8 @@ Meteor.methods({
     if (!calendarEvent)
       throw new Meteor.Error('calendarEventNotFound',"Cannot update todo item.  Calendar event not found.");
     if (Roles.userIsInRole(cU,'student')) {
-      if (!_.contains(calendarEvent.group,cU._id))
-        throw new Meteor.Error('studentNotInGroup',"A student cannot update a todo item unless they are part of that group.");
+      if (!_.contains(calendarEvent.participants,cU._id))
+        throw new Meteor.Error('studentNotParticipant',"A student cannot update a todo item unless they are a participant in the calendar event.");
     }
 
     if (todo.completed) {

@@ -246,11 +246,11 @@ var currentStatus = function(activityID,studentID) {
   return ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
 }
 /* currentProgress */
-var currentProgress = function(activityID,studentID) {
+/*var currentProgress = function(activityID,studentID) {
   if (!Roles.userIsInRole(studentID,'student'))
     return undefined;
   return ActivityProgress.findOne({studentID:studentID,activityID:activityID});
-}
+}*/
 
 Template.studentStatus.helpers({
   subactivities: function() {
@@ -261,7 +261,7 @@ Template.studentStatus.helpers({
   isSectionMember: function() {
     return Meteor.isSectionMember(this._id,Meteor.selectedSectionId());
   },
-  progress: function() {
+/*  progress: function() {
     var tmpl = Template.instance();
     var studentID = tmpl.data._id;
     var activityID = this._id;
@@ -269,7 +269,7 @@ Template.studentStatus.helpers({
     if (!progress)
       return 'icon-notStarted'
     return 'icon-' + progress.level;
-  },
+  },*/
   status: function() {
     var tmpl = Template.instance();
     var studentID = tmpl.data._id;
@@ -294,7 +294,7 @@ Template.studentStatus.helpers({
       'done':'Done.'};
     return titleDict[status.level];
   },
-  progressTitle: function() {
+/*  progressTitle: function() {
     var tmpl = Template.instance();
     var studentID = tmpl.data._id;
     var activityID = this._id;
@@ -309,7 +309,7 @@ Template.studentStatus.helpers({
       'fourBars':'80% there',
       'fiveBars':'just about done'};
     return titleDict[progress.level];
-  },
+  },*/
   late: function() {
     var tmpl = Template.instance();
     var studentID = tmpl.data._id;

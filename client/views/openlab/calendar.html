@@ -48,23 +48,33 @@
     </h3>
     <!-- ID ??? -->
      <div class = 'daysEvents'>
-       <p> &nbsp; </p>
-       {{#each daysEvents}}
-          {{> calendarEvent}}        
-       {{/each}}
+      <p> &nbsp; </p>
+      {{#each daysInvitations}}
+        {{> calendarEvent}}
+      {{/each}}
+      {{#each daysEvents}}
+        {{> calendarEvent}}        
+      {{/each}}
      </div>
   </td>
 </template>
 
 <template name = 'calendarEvent'>
-  <p class='calendarEvent text-left'>
-    <!-- need helper for progress level and title -->
-    <i class="calendarEventProgress {{progressIcon}} float-right" title="{{progressMessage}}"></i>
-     <a href="#" class="editCalendarEvent">{{title}}</a>
-    <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}
-    <a class="glyphicon glyphicon-remove deleteCalendarEvent" title="Delete Event"></a>-->
-    {{#with activity}}
-      <a href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}" class="glyphicon glyphicon-link editCalendarEvent" title="{{titleWithTags}}"></a>
-    {{/with}}
-  </p>
+  {{#if isInvite}}
+    <p class='calendarInvite text-left'>
+      Invitation: 
+      <a href="#" class="editCalendarEvent">{{title}}</a>
+    </p>
+  {{else}}
+    <p class='calendarEvent text-left'>
+      <!-- need helper for progress level and title -->
+      <i class="calendarEventProgress {{progressIcon}} float-right" title="{{progressMessage}}"></i>
+       <a href="#" class="editCalendarEvent">{{title}}</a>
+      <!--{{>showHide collection='CalendarEvents' itemName='calendarEvent' item=this}}
+      <a class="glyphicon glyphicon-remove deleteCalendarEvent" title="Delete Event"></a>-->
+      {{#with activity}}
+        <a href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}" class="glyphicon glyphicon-link editCalendarEvent" title="{{titleWithTags}}"></a>
+      {{/with}}
+    </p>
+  {{/if}}
 </template>
