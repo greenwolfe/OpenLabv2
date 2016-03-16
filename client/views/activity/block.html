@@ -191,7 +191,9 @@
         </a>           
       {{else}}
         {{#if currentlyEditing}}
-          <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
+          {{#if inEditedWall ../wallID}}
+            <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
+          {{/if}}
           {{>showHide collection='Activities' itemName='activity' item=this}}
           {{#if canDelete}}
             <a class="glyphicon glyphicon-remove deleteActivity" title="Delete Activity"></a>

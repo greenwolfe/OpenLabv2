@@ -195,11 +195,12 @@ Template.subActivitiesList.helpers({
     return {
       draggable:'.aItem',
       handle: '.sortActivity',
+      group: '.activityColumn',
       collection: 'Activities',
       selectField: 'pointsTo',
       selectValue: activity._id,
       sortField: 'suborder',
-      disabled: (!instance.editingList) 
+      disabled: false //(!instance.editingList.get()) 
       //onAdd: function(evt) {
       //  Meteor.call('denormalizeBlock',evt.data._id,alertOnError);
       //}

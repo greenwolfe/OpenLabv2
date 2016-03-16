@@ -100,11 +100,13 @@
 
 <template name='subActivitiesList'>
   <div id='subactivityList' class='row'>
-      {{#sortable1c items=subactivities options=sortableOpts}}
+      <!--{{#sortable1c items=subactivities options=sortableOpts}}-->
+      {{#each subactivities}}
         <div class = 'activityColumn column col-md-4'>
           {{> subactivityItem}}
         </div>
-      {{/sortable1c}}
+      {{/each}}
+      <!--{{/sortable1c}} sorting not working-->
       {{#if editingList}}
         <div class = 'activityColumn column col-md-4'>
           {{>newSubactivity}}
@@ -113,9 +115,13 @@
       {{#if isInRole 'teacher'}}
         <div class='activityColumn column col-md-4'>
           {{#if editingList}}
-            <button class="btn btn-default stopEditingSubactivities">Done</button>
+            <p class='aItem stopEditingSubactivities text-center'>
+              <a href="#">Done Adding/Editing</a>
+            </p>
           {{else}}
-            <button class="btn btn-default editSubactivities" title = "additional subactivities that will be visible on the front page but point to this activity page.">Add/Edit</button>
+            <p class='aItem editSubactivities text-center' title = "Additional subactivities will be visible on the front page but point to this activity page.">
+              <a href="#">Add/Edit subactivities</a>
+            </p>
            {{/if}}
         </div>
       {{/if}}
