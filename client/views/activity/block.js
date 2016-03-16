@@ -395,6 +395,16 @@ var currentStatus = function(activityID) {
 }*/
 
 Template.subactivityItem.helpers({
+  currentlyEditing: function() {
+    var parent = Template.parentData();
+    if ('wallID' in parent)
+      return (activityPageSession.get('editedWall') == parent.wallID);
+    var instance = Template.instance();
+    parent = instance.parent();
+    if ('editingList' in parent)
+      return parent.editingList.get();
+    return false;
+  },
   canDelete: function() {
     var cU = Meteor.userId();
     if (!Roles.userIsInRole(cU,'teacher')) return false;
@@ -603,6 +613,8 @@ Template.subactivityItem.events({
 Template.newSubactivity.helpers({
   fixedFields: function() {
     var activity = Activities.findOne(this.activityID);
+    if (!activity) 
+      activity = Activities.findOne(Activities.findOne(FlowRouter.getParam('_id')));
     return {
       unitID:activity.unitID,
       pointsTo:activity._id

@@ -190,7 +190,7 @@
           {{{title}}}{{{tags}}}
         </a>           
       {{else}}
-        {{#if inEditedWall ../wallID}}
+        {{#if currentlyEditing}}
           <a class="glyphicon glyphicon-move sortActivity" title="Drag to reorder."></a>
           {{>showHide collection='Activities' itemName='activity' item=this}}
           {{#if canDelete}}
@@ -200,7 +200,7 @@
             <a href="#activityTagsPopoverX" class="glyphicon glyphicon-tag tagActivity" data-toggle="modal" data-backdrop=false title="Click to add tag."></a>
           {{/if}}
           <a>{{{tags}}}</a>
-          {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}
+          {{>plaintexteditor collection='Activities' field='title' _id=_id editable='true'}}      
         {{else}}
           {{> workPeriodButton workPeriod}}
           <!--<i class="activityProgress {{progress}}" title="{{progressTitle}}"></i>-->

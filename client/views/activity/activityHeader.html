@@ -10,7 +10,7 @@
           </button>
       </div>
       <div class="navbar-collapse collapse">
-        <p class="navbar-text">{{{pageTitle}}}</p>
+        <!--<p class="navbar-text">{{{pageTitle}}}</p>-->
           <ul class="nav navbar-nav">
             <!--<li class="{{activeIfEditingMainPage}} {{hiddenIfNotTeacher}}">
               <a href="#" id='editButton'>Edit</a>
@@ -30,6 +30,7 @@
           </ul>
       </div>
   </div>
+  {{> subActivitiesList}}
 </template>
 
 <template name="showWalls">
@@ -95,6 +96,30 @@
       <span>{{title}}{{#if tag}} ({{{tag}}}){{/if}}</span>
     </a>
   </li>
+</template>
+
+<template name='subActivitiesList'>
+  <div id='subactivityList' class='row'>
+      {{#sortable1c items=subactivities options=sortableOpts}}
+        <div class = 'activityColumn column col-md-4'>
+          {{> subactivityItem}}
+        </div>
+      {{/sortable1c}}
+      {{#if editingList}}
+        <div class = 'activityColumn column col-md-4'>
+          {{>newSubactivity}}
+        </div>
+      {{/if}}
+      {{#if isInRole 'teacher'}}
+        <div class='activityColumn column col-md-4'>
+          {{#if editingList}}
+            <button class="btn btn-default stopEditingSubactivities">Done</button>
+          {{else}}
+            <button class="btn btn-default editSubactivities" title = "additional subactivities that will be visible on the front page but point to this activity page.">Add/Edit</button>
+           {{/if}}
+        </div>
+      {{/if}}
+  </div>
 </template>
 
 

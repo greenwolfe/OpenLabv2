@@ -3,7 +3,10 @@
  /******* HELPERS ******/
 /**********************/
 var getBlocks = function(column) {
-  var selector = {columnID:column._id};
+  var selector = {
+    columnID:column._id,
+    type: {$ne: 'subactivities'} //deprecated march 16, 2016
+  };
   if (!inEditedWall(column.wallID)) //if not editing
     selector.visible = true //show only visible blocks
   return Blocks.find(selector,{sort: {order:1}});
