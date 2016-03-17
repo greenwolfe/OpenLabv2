@@ -38,8 +38,21 @@
 
 <template name = 'calendarDay'>
   <td class='calendar-day'>
+    <div class='daysActivities'>
+      {{#each daysActivities}}
+        <p class="aItem">
+          {{#with workPeriod}}
+            <a href="#workPeriodPopoverX" type="button" class="btn workPeriod-gauge"  data-toggle="modal" data-backdrop=false>
+              {{{titleWithTags ..}}}
+            </a>
+          {{else}}
+            {{{titleWithTags}}}
+          {{/with}}
+        </p>
+      {{/each}}
+    </div>
     <!--<i class="{{frozen}}" data-day={{ID}}></i>-->
-    <h3> 
+    <h3 class='dayOfTheWeek'> 
 <!--      {{#if isInRole 'teacher'}}
         <a href="{{pathFor 'attendance2'}}">{{day}}</a> 
       {{else}}-->

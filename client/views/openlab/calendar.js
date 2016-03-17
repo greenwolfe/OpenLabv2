@@ -143,6 +143,57 @@ Template.calendarWeek.helpers({
 /*************************/
 
 Template.calendarDay.helpers({ 
+  daysActivities: function() {
+    var sectionID = Meteor.currentSectionId() || Meteor.selectedSectionId() || null;
+    if (!sectionID)
+      return '';
+    var twelveAM = moment(this.date,'MM/DD/YYYY').hour(0).toDate();
+    var twelvePM = moment(this.date,'MM/DD/YYYY').hour(24).toDate();
+    //endDate > twelveAM and startDate < twelvePM 
+    //guarantees that part of the workperiod happens on this day
+    var activityIDs = _.pluck(WorkPeriods.find({
+        endDate: {$gt: twelveAM},
+        startDate: {$lt: twelvePM},
+        sectionID: sectionID
+      },{fields:{activityID:1}}).fetch(),
+    'activityID');
+    if (!activityIDs.length)
+      return '';
+    return Activities.find({
+      _id: {$in: activityIDs},
+      visible: true
+    })
+  },
+  titleWithTags: function(activity) {
+    activity = activity || this;
+    var studentID = Meteor.impersonatedOrUserId();
+    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activity._id});
+    var tags = '';
+    if (activity.tag) 
+      tags += ' (' + activity.tag + ')';
+    if ((status) && (status.tag))
+      tags += '<strong> (' + status.tag + ')</strong>';
+    var unit = Units.findOne(activity.unitID);
+    return unit.title + ': ' + activity.title + ' ' + tags;  
+  },
+  workPeriod: function() {
+    var cU = Meteor.userId();
+    if (!Roles.userIsInRole(cU,'teacher'))
+      return '';
+    var sectionID = Meteor.currentSectionId() || Meteor.selectedSectionId() || null;
+    if (!sectionID) 
+      return '';
+    var twelveAM = moment(this.date,'MM/DD/YYYY').hour(0).toDate();
+    var twelvePM = moment(this.date,'MM/DD/YYYY').hour(24).toDate();
+    //endDate > twelveAM and startDate < twelvePM 
+    //guarantees that part of the workperiod happens on this day
+    return WorkPeriods.findOne({
+        endDate: {$gt: twelveAM},
+        startDate: {$lt: twelvePM},
+        sectionID: sectionID,
+        activityID:this._id
+      });
+  },
   daysInvitations: function() {
     var dateMin1h = moment(this.date,'MM/DD/YYYY').subtract(1,'hours').toDate();
     var datePlus1h = moment(this.date,'MM/DD/YYYY').add(1,'hours').toDate();
@@ -193,20 +244,15 @@ Template.calendarDay.helpers({
 });
 
 Template.calendarDay.events({
-  'click td.calendar-day': function(event,tmpl) {
+  'click td.calendar-day h3.dayOfTheWeek': function(event,tmpl) {
     var cU = Meteor.userId();
     if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
       return;
     Session.set('dateOrIDForCalendarEventModal',new Date(tmpl.data.date));
     $('#calendarEventModal').modal();
   },
-  'click div.daysEvents p.calendarEvent': function(event,tmpl) {
-    //don't open modal if click on an existing calendar event
-    event.stopPropagation();
-  },
-  'click div.daysEvents p.calendarInvite': function(event,tmpl) {
-    //don't open modal if click on an existing calendar event
-    event.stopPropagation();
+  'click p.aItem a.workPeriod-gauge': function(event,tmpl) {
+    Session.set('workPeriod', this);
   }
 });
 
@@ -243,18 +289,6 @@ Template.calendarEvent.helpers({
   },
   progressMessage: function() {
     return this.numberTodosCompleted + ' out of ' + this.numberOfTodoItems + ' tasks complete.';
-  },
-  titleWithTags: function() {
-    var studentID = Meteor.impersonatedOrUserId();
-    var activityID = this._id;
-    var status = ActivityStatuses.findOne({studentID:studentID,activityID:activityID});
-    var tags = '';
-    if (this.tag) 
-      tags += ' (' + this.tag + ')';
-    if ((status) && (status.tag))
-      tags += '<strong> (' + status.tag + ')</strong>';
-    var unit = Units.findOne(this.unitID);
-    return unit.title + ': ' + this.title + ' ' + tags;  
   },
   pointsToOrID: function() {
     return this.pointsTo || this._id;
