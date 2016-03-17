@@ -138,11 +138,11 @@ Template.calendarWeek.helpers({
   }           
 });
 
-  /*************************/
- /***** CALENDAR DAY ******/
-/*************************/
+  /****************************/
+ /***** DAYS ACTIVITIES ******/
+/****************************/
 
-Template.calendarDay.helpers({ 
+Template.daysActivities.helpers({ 
   daysActivities: function() {
     var sectionID = Meteor.currentSectionId() || Meteor.selectedSectionId() || null;
     if (!sectionID)
@@ -194,6 +194,40 @@ Template.calendarDay.helpers({
         activityID:this._id
       });
   },
+  pointsToOrID: function() {
+    return this.pointsTo || this._id;
+  },
+  studentOrSectionID: function() {
+    var cU = Meteor.userId();
+    if (Roles.userIsInRole(cU,'teacher')) {
+      var studentID = Meteor.impersonatedId();
+      if (studentID)
+        return 'id=' + studentID;
+      var sectionID = Meteor.selectedSectionId();
+      if (sectionID)
+        return 'id=' + sectionID;
+      return '';
+    } else {
+      var studentID = Meteor.impersonatedOrUserId(); //in case is parent viewing as student
+      if (studentID)
+        return 'id=' + studentID; 
+      return '';     
+    }
+  },
+});
+
+Template.daysActivities.events({
+  'click p.aItem a.workPeriod-gauge': function(event,tmpl) {
+    Session.set('workPeriod', this);
+  }
+});
+
+
+  /*************************/
+ /***** CALENDAR DAY ******/
+/*************************/
+
+Template.calendarDay.helpers({ 
   daysInvitations: function() {
     var dateMin1h = moment(this.date,'MM/DD/YYYY').subtract(1,'hours').toDate();
     var datePlus1h = moment(this.date,'MM/DD/YYYY').add(1,'hours').toDate();
@@ -244,15 +278,14 @@ Template.calendarDay.helpers({
 });
 
 Template.calendarDay.events({
-  'click td.calendar-day h3.dayOfTheWeek': function(event,tmpl) {
-    var cU = Meteor.userId();
-    if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
-      return;
-    Session.set('dateOrIDForCalendarEventModal',new Date(tmpl.data.date));
-    $('#calendarEventModal').modal();
-  },
-  'click p.aItem a.workPeriod-gauge': function(event,tmpl) {
-    Session.set('workPeriod', this);
+  'click td.calendar-day': function(event,tmpl) {
+    if ($(event.target).hasClass('calendar-day') || $(event.target).hasClass('dayOfTheWeek')) {
+      var cU = Meteor.userId();
+      if (!cU || !Roles.userIsInRole(cU,['teacher','student']))
+        return;
+      Session.set('dateOrIDForCalendarEventModal',new Date(tmpl.data.date));
+      $('#calendarEventModal').modal();
+    }
   }
 });
 

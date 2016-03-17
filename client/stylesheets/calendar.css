@@ -10,7 +10,14 @@ table#calendar tr td {
   vertical-align: top;
   text-align: center;
 }
+table#calendar tr td.daysActivities {
+  border-bottom: none;
+}
+table#calendar tr td.calendar-day {
+  border-top: none;
+}
 table#calendar tr td h3 {
+  margin-top: 0;
   cursor: pointer;
 }
 table#calendar tr td h3 a {

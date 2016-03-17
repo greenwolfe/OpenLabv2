@@ -31,26 +31,39 @@
 <template name = 'calendarWeek'>
   <tr>
     {{#each weekDays}}
+      {{> daysActivities}}      
+    {{/each}}
+  </tr>
+  <tr>
+    {{#each weekDays}}
       {{> calendarDay}}      
     {{/each}}
   </tr>
 </template>
 
+<template name='daysActivities'>
+  <td class='daysActivities'>
+    {{#each daysActivities}}
+      <p class="aItem">
+        {{#with workPeriod}}
+          <a href="#workPeriodPopoverX" type="button" class="btn workPeriod-gauge"  data-toggle="modal" data-backdrop=false>
+            {{{titleWithTags ..}}}
+          </a>
+        {{else}}
+          <a  href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}">
+            {{{titleWithTags}}}
+          </a> 
+        {{/with}}
+      </p>
+    {{/each}}
+    {{#unless daysActivities}}
+      <p>&nbsp;</p>
+    {{/unless}}
+  </td>
+</template>
+
 <template name = 'calendarDay'>
   <td class='calendar-day'>
-    <div class='daysActivities'>
-      {{#each daysActivities}}
-        <p class="aItem">
-          {{#with workPeriod}}
-            <a href="#workPeriodPopoverX" type="button" class="btn workPeriod-gauge"  data-toggle="modal" data-backdrop=false>
-              {{{titleWithTags ..}}}
-            </a>
-          {{else}}
-            {{{titleWithTags}}}
-          {{/with}}
-        </p>
-      {{/each}}
-    </div>
     <!--<i class="{{frozen}}" data-day={{ID}}></i>-->
     <h3 class='dayOfTheWeek'> 
 <!--      {{#if isInRole 'teacher'}}
@@ -61,12 +74,11 @@
     </h3>
     <!-- ID ??? -->
      <div class = 'daysEvents'>
-      <p> &nbsp; </p>
-      {{#each daysInvitations}}
-        {{> calendarEvent}}
-      {{/each}}
       {{#each daysEvents}}
         {{> calendarEvent}}        
+      {{/each}}
+      {{#each daysInvitations}}
+        {{> calendarEvent}}
       {{/each}}
      </div>
   </td>
