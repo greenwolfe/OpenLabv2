@@ -94,21 +94,32 @@
                     </ul>
                   </div>
                 </div>
-                {{#if isInRole 'teacher'}}
-                  <div class="btn-group">
+                {{#if editingTimePeriods}}
+                  <div class="btn-group input-group">
                     <div class="input-group-btn">
-                      <button class="btn btn-primary"  id="addNewTimePeriod">
-                        Add New
-                      </button>
-                      <button class="btn btn-primary"  id="addNewTimePeriod">
-                        Change
-                      </button>
-                      <button class="btn btn-primary"  id="addNewTimePeriod">
-                        Remove
-                      </button>                  
+                      {{#each daysOfTheWeek}}
+                        <button class="btn btn-primary setClearDay">
+                          {{abbreviation}}
+                        </button>
+                      {{/each}}
                     </div>
                   </div>
-                {{/if}}
+                  <div class="btn-group input-group">
+                    <div class="input-group-btn">
+                      <button class="btn btn-primary"  id="setTimePeriod">
+                        Set
+                      </button>
+                      <button class="btn btn-primary"  id="clearTimePeriod">
+                        Clear
+                      </button>     
+                      <button class="btn btn-primary"  id="stopEditingTimePeriod">
+                        X
+                      </button>                
+                    </div>
+                  </div>
+                {{else}} {{#if isInRole 'teacher'}}
+                  <a href="#" id="editTimePeriod" class="glyphicon glyphicon-edit"></a>              
+                {{/if}} {{/if}}
               </form>
               <div class="row">
                 <div class="col-xs-1">

@@ -1,3 +1,7 @@
+#startEndDates {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 table#calendar {
   width: 98%;
   margin-left: 1%;
@@ -19,6 +23,7 @@ table#calendar tr td.calendar-day {
 table#calendar tr td h3 {
   margin-top: 0;
   cursor: pointer;
+  white-space: nowrap;
 }
 table#calendar tr td h3 a {
   color: black;

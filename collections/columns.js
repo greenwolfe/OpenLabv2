@@ -15,12 +15,12 @@ Meteor.methods({
       return Columns.insert({
         wallID:wallID,
         activityID: wall.activityID,
-        width:4,
+        width:6, //was 4, but trying out 6 to insert two columns in new walls
         order: 0,
         visible: true
       });
     }
-    var width = Math.min(12-totalWidth,4);
+    var width = Math.min(12-totalWidth,6); //was 4, see above
     if (width < 2) return; // not enough space to add a column
 
     var ids = [];

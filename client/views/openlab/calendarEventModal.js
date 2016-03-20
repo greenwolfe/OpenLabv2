@@ -14,7 +14,9 @@ Template.calendarEventModal.onCreated(function() {
   instance.activeGroup = new ReactiveVar(Meteor.currentGroupId());
   instance.choseTeachers = new ReactiveVar(false);
   instance.choseParents = new ReactiveVar(false);
+  instance.editingTimePeriods = new ReactiveVar(false);
 
+  /** set calendar event **/
   instance.calendarEvent = new ReactiveVar({});
   instance.setCalendarEventFields = function(newFields) {
     var cE = instance.calendarEvent.get();
@@ -47,6 +49,7 @@ Template.calendarEventModal.onCreated(function() {
       }
     }
   }
+  /** add to calendar invite list **/
   instance.addToCalendarInviteList = function(userIDs) {
     var cU = Meteor.userId();
     var cE = instance.calendarEvent.get();
@@ -89,6 +92,7 @@ Template.calendarEventModal.onCreated(function() {
       instance.calendarEvent.set(cE);
     }
   }
+  /** remove from calendar invite list **/
   instance.removeFromCalendarInviteList = function(userIDs) {
     var cE = instance.calendarEvent.get();
     userIDs = (_.isArray(userIDs)) ? userIDs : [userIDs];
@@ -110,6 +114,7 @@ Template.calendarEventModal.onCreated(function() {
       instance.calendarEvent.set(cE);
     }      
   }
+  /** add to participants **/
   instance.addToParticipants = function(IDs) {
     var cU = Meteor.userId();
     if (!Roles.userIsInRole(cU,'teacher'))
@@ -141,6 +146,7 @@ Template.calendarEventModal.onCreated(function() {
       }
     }   
   }
+  /** remove from participants **/
   instance.removeFromParticipants = function(IDs) {
     //issue warning if trying to close the dialogue with no users
     var cU = Meteor.userId();
@@ -173,6 +179,7 @@ Template.calendarEventModal.onCreated(function() {
       instance.calendarEvent.set(cE);   
     }
   }
+  /** accept calendar invite **/
   instance.acceptCalendarInvite = function() {
     var cE = instance.calendarEvent.get();
     if (('_id' in cE) && Match.test(cE._id,Match.idString)) {
@@ -196,6 +203,7 @@ Template.calendarEventModal.onCreated(function() {
       instance.calendarEvent.set(cE);  
     }    
   }
+  /** decline calendar invite **/
   instance.declineCalendarInvite = function() {
     var cE = instance.calendarEvent.get();
     if (('_id' in cE) && Match.test(cE._id,Match.idString)) {
@@ -217,6 +225,24 @@ Template.calendarEventModal.onCreated(function() {
     }  
   }
 
+  /** set time period **/
+  instance.setTimePeriod = function() {
+    //read selected time period name and days
+    //read start and end values
+    //call set time period method, which handles whether a time period of that name already exists
+    //no need to pass ID, as name must be unique
+  }
+  /** clear time period **/
+  instance.clearTimePeriod = function() {
+    //read name and days
+    //call clear time period method
+    //method throws informative error in the only exceptional case - trying to clear days from a time period that doesn't exist
+    //no need to pass ID, as name must be unique
+  }
+  /* need object  for holding list of days 
+  and handlers for setting and clearing (or just toggling?)*/
+
+  /** insert todo **/
   instance.Todos = new ReactiveVar([]); //only used if there is not yet a calendar Event
   instance.insertTodo = function(text) {
     if (Match.test(text,Match.nonEmptyString)) {
@@ -232,6 +258,7 @@ Template.calendarEventModal.onCreated(function() {
       }
     }
   }
+  /** update todo **/
   instance.updateTodo = function(text,order) {
     var Todos = instance.Todos.get();
     if (Match.test(text,Match.nonEmptyString)) {
@@ -245,6 +272,7 @@ Template.calendarEventModal.onCreated(function() {
     instance.Todos.set(Todos);
   }
 
+  /** initialization **/
   instance.backgroundColor = new ReactiveVar('');
   instance.message = new ReactiveVar('');
 
@@ -269,6 +297,7 @@ Template.calendarEventModal.onCreated(function() {
 
 var timeFormat = "h:mm a";
 
+/** on rendered **/
 Template.calendarEventModal.onRendered(function() {
   var instance = this;
   instance.$calEventModalNote = instance.$('#calEventModalNote');
@@ -330,6 +359,7 @@ Template.calendarEventModal.onRendered(function() {
   })
 })
 
+/** initialization tasks when model is activated **/
 Template.calendarEventModal.events({
   'show.bs.modal #calendarEventModal': function(event,tmpl) {
     tmpl.activeUnit.set(openlabSession.get('activeUnit'));
@@ -370,6 +400,7 @@ Template.calendarEventModal.events({
   }
 })
 
+/** data validated helper **/
 var dateTimeFormat = "ddd, MMM D YYYY [at] h:mm a";
 var dateFormat = "ddd, MMM D YYYY";
 var dataValidated = function(tmpl) {
@@ -411,6 +442,7 @@ var dataValidated = function(tmpl) {
   })
 }
 
+/** add names fields to group objects **/
 var groupsWithNames = function(groupIDs) {
   var pastGroups = [];
   groupIDs.forEach(function(groupID) {
@@ -428,6 +460,7 @@ var groupsWithNames = function(groupIDs) {
   return pastGroups;  
 }
 
+/** potential participants ids helper **/
 var potentialParticipantIds = function() {
   var tmpl = Template.instance();
   if (tmpl.choseTeachers.get()) {
@@ -455,6 +488,7 @@ var potentialParticipantIds = function() {
   }
 }
 
+/** potential participants helper **/
 var potentialParticipants = function() {
   var tmpl = Template.instance();
   if (tmpl.choseTeachers.get()) {
@@ -481,6 +515,7 @@ var potentialParticipants = function() {
 }
 
 Template.calendarEventModal.helpers({
+  //header
   calendarEvent: function() {
     var tmpl = Template.instance();
     return tmpl.calendarEvent.get();
@@ -523,6 +558,19 @@ Template.calendarEventModal.helpers({
   },
   //title
   //time period
+  editingTimePeriods: function() {
+    var instance = Template.instance();
+    var cU = Meteor.userId();
+    return (Roles.userIsInRole(cU,'teacher') && instance.editingTimePeriods.get());
+  },
+  daysOfTheWeek: function() {
+    return [{day:'Mon',abbreviation:'M'},
+            {day:'Tue',abbreviation:'T'},
+            {day:'Wed',abbreviation: 'W'},
+            {day:'Thu',abbreviation: 'Th'},
+            {day: 'Fri',abbreviation: 'F'}
+           ]
+  },
   //participants
   participants: function() {
     var numberOfParticipants = this.participants.length;
@@ -704,6 +752,7 @@ Template.calendarEventModal.helpers({
   }
 })
 
+/** events **/
 Template.calendarEventModal.events({
   //linked activity
   'click .unitTitle' : function(event,tmpl) {
@@ -733,6 +782,16 @@ Template.calendarEventModal.events({
     tmpl.setCalendarEventFields({title:text});
   },
   //time period
+  'click #editTimePeriod' : function(event,tmpl) {
+    tmpl.editingTimePeriods.set(true);
+    event.preventDefault();
+  },
+  'click #stopEditingTimePeriod' : function(event,tmpl) {
+    tmpl.editingTimePeriods.set(false);
+    event.preventDefault();
+  },
+  /* need events for when dates are changed */
+  /* need events for edit buttons */
   //participants
   'click .chooseTeachers': function(event,tmpl) {
     tmpl.choseTeachers.set(true);

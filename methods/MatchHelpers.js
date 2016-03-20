@@ -106,3 +106,26 @@ Match.scaleString = Match.Where(function(scaleHelp) {
     \) : match closing parentheses
 */
 });
+
+Match.timePeriod = Match.Where(function(tP) {
+  if (!Match.test(tP,{
+    Mon:Match.Optional({start:String,end:String}),
+    Tue:Match.Optional({start:String,end:String}),
+    Wed:Match.Optional({start:String,end:String}),
+    Thu:Match.Optional({start:String,end:String}),
+    Fri:Match.Optional({start:String,end:String}),
+  }))
+    return false;
+  if (!_.keys(tP).length)
+    return false;
+
+  _.each(tP,function(times,day) {
+    var start = moment(times.start,'h:mm a');
+    var end = moment(times.end,'h:mm a');
+    if (end.isBefore(start))
+      return false;
+    if (!start.isBefore(end))
+      return false;
+  })
+  return true;
+})

@@ -177,14 +177,15 @@ Template.daysActivities.helpers({
     return unit.title + ': ' + activity.title + ' ' + tags;  
   },
   workPeriod: function() {
+    var weekDay = Template.parentData();
     var cU = Meteor.userId();
     if (!Roles.userIsInRole(cU,'teacher'))
       return '';
     var sectionID = Meteor.currentSectionId() || Meteor.selectedSectionId() || null;
     if (!sectionID) 
       return '';
-    var twelveAM = moment(this.date,'MM/DD/YYYY').hour(0).toDate();
-    var twelvePM = moment(this.date,'MM/DD/YYYY').hour(24).toDate();
+    var twelveAM = moment(weekDay.date,'MM/DD/YYYY').hour(0).toDate();
+    var twelvePM = moment(weekDay.date,'MM/DD/YYYY').hour(24).toDate();
     //endDate > twelveAM and startDate < twelvePM 
     //guarantees that part of the workperiod happens on this day
     return WorkPeriods.findOne({

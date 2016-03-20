@@ -46,7 +46,7 @@ Meteor.methods({
       if ( _id ) {
         Meteor.call('insertColumn',_id,-1,'right');
         Meteor.call('insertColumn',_id,0,'right');
-        Meteor.call('insertColumn',_id,1,'right');
+        //Meteor.call('insertColumn',_id,1,'right'); //trying out just inserting two columns on new walls with default width of 6
       }
     });
   },
