@@ -44,16 +44,18 @@
 <template name='daysActivities'>
   <td class='daysActivities'>
     {{#each daysActivities}}
-      <p class="aItem">
-        {{#with workPeriod}}
-          <a href="#workPeriodPopoverX" type="button" class="btn workPeriod-gauge"  data-toggle="modal" data-backdrop=false>
-            {{{titleWithTags ..}}}
-          </a>
+      <p class="aItem {{due}}">
+        {{#if isInRole 'teacher'}}
+          {{#with workPeriod}} 
+            <a href="#workPeriodPopoverX" type="button" class="btn workPeriod-gauge"  data-toggle="modal" data-backdrop=false>
+              {{{titleWithTags ..}}}
+            </a>
+          {{/with}}
         {{else}}
           <a  href="{{pathFor 'activityPage' _id=pointsToOrID query=studentOrSectionID}}">
             {{{titleWithTags}}}
           </a> 
-        {{/with}}
+        {{/if}}
       </p>
     {{/each}}
     {{#unless daysActivities}}

@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"no",
+				"nowrap"
+			],
+			[
 				"too",
 				"tooltipElements"
 			],
@@ -47,23 +51,42 @@
 			"file": "client/views/openlab/calendar.html",
 			"settings":
 			{
-				"buffer_size": 2081,
+				"buffer_size": 3236,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/addCalendarEventModal.html",
+			"file": "client/views/openlab/calendarEventModal.html",
 			"settings":
 			{
-				"buffer_size": 6458,
+				"buffer_size": 13834,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/activities_list.html",
+			"file": "collections/timePeriods.js",
 			"settings":
 			{
-				"buffer_size": 5779,
+				"buffer_size": 2084,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+			"settings":
+			{
+				"buffer_size": 19124,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "#startEndDates {\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\ntable#calendar {\n  width: 98%;\n  margin-left: 1%;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\ntable#calendar tr td {\n  border: thin black solid;\n  width:  20%;\n  vertical-align: top;\n  text-align: center;\n}\ntable#calendar tr td.daysActivities {\n  border-bottom: none;\n}\ntable#calendar tr td.calendar-day {\n  border-top: none;\n}\ntable#calendar tr td h3 {\n  margin-top: 0;\n  cursor: pointer;\n  white-space: nowrap;\n}\ntable#calendar tr td h3 a {\n  color: black;\n}\ntable#calendar tr td p.aItem {\n  background-color: #afafaf;\n  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#afafaf));\n  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #afafaf);\n  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  background-image: linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  margin: 5px;\n}\ntable#calendar tr td p.aItem.due {\n  background-color: #afafaf;\n  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), color-stop(25%, #ffffff), to(#afafaf));\n  background-image: -webkit-linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  background-image: -moz-linear-gradient(top, #ffffff, #ffffff 25%, #afafaf);\n  background-image: -ms-linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  background-image: -o-linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  background-image: linear-gradient(#ffffff, #ffffff 25%, #afafaf);\n  margin: 5px;\n}\ntable#calendar tr td p.aItem a {\n  color: black;\n}\ntable#calendar tr td ul.dropdown-menu li.selected {\n  background-color: #EEDC94;\n  margin-bottom: 5px;\n}\ntable#calendar tr td p.calendarEvent {\n  background-color: #dfdfdf;\n/*\n  background-color: #9f9f9f;\n  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#efefef), color-stop(25%, #efefef), to(#9f9f9f));\n  background-image: -webkit-linear-gradient(#efefef, #efefef 25%, #9f9f9f);\n  background-image: -moz-linear-gradient(top, #efefef, #efefef 25%, #9f9f9f);\n  background-image: -ms-linear-gradient(#efefef, #efefef 25%, #9f9f9f);\n  background-image: -o-linear-gradient(#efefef, #efefef 25%, #9f9f9f);\n  background-image: linear-gradient(#efefef, #efefef 25%, #9f9f9f);\n  line-height: 20px;\n*/\n  padding: 4px;\n  padding-bottom: 0;\n  margin-left: 6px;\n  margin-right: 6px;\n}\ntable#calendar tr td p.calendarEvent a {\n  color: black;\n}\ntable#calendar tr td p.calendarEvent a.editCalenderEvent {\n  cursor: pointer;\n}\ntable#calendar tr td p.calendarInvite {\n  margin-left: 6px;\n  margin-right: 6px;\n  padding: 4px;\n  padding-bottom: 0;\n  background-color: #dfdfdf;\n  color: gray;\n}\ntable#calendar tr td p.calendarInvite a {\n  color: gray;\n}",
+			"file": "client/stylesheets/calendar.css",
+			"file_size": 2278,
+			"file_write_time": 131027076806902752,
+			"settings":
+			{
+				"buffer_size": 2837,
 				"line_ending": "Unix"
 			}
 		},
@@ -71,31 +94,15 @@
 			"file": "client/views/openlab/calendar.js",
 			"settings":
 			{
-				"buffer_size": 5108,
+				"buffer_size": 11793,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "client/views/openlab/addCalendarEventModal.js",
+			"file": "client/views/openlab/calendarEventModal.js",
 			"settings":
 			{
-				"buffer_size": 10866,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "client/views/openlab/activities_list.js",
-			"settings":
-			{
-				"buffer_size": 17731,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "collections/todos.js",
-			"settings":
-			{
-				"buffer_size": 8652,
+				"buffer_size": 38443,
 				"line_ending": "Unix"
 			}
 		},
@@ -103,7 +110,39 @@
 			"file": "collections/calendarEvents.js",
 			"settings":
 			{
-				"buffer_size": 16794,
+				"buffer_size": 20154,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "collections/todos.js",
+			"settings":
+			{
+				"buffer_size": 8702,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "methods/MatchHelpers.js",
+			"settings":
+			{
+				"buffer_size": 5057,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "client/stylesheets/calendarEventModal.css",
+			"settings":
+			{
+				"buffer_size": 662,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "collections/workPeriods.js",
+			"settings":
+			{
+				"buffer_size": 6844,
 				"line_ending": "Unix"
 			}
 		}
@@ -147,42 +186,69 @@
 	[
 		"/home/solargreen/meteor/OpenLabv2",
 		"/home/solargreen/meteor/OpenLabv2/client",
-		"/home/solargreen/meteor/OpenLabv2/client/sortable1c",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets",
 		"/home/solargreen/meteor/OpenLabv2/client/views",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod",
 		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX",
 		"/home/solargreen/meteor/OpenLabv2/collections",
-		"/home/solargreen/meteor/OpenLabv2/lib",
 		"/home/solargreen/meteor/OpenLabv2/methods",
 		"/home/solargreen/meteor/OpenLabv2/server"
 	],
 	"file_history":
 	[
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.html",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/application.css",
-		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/sortable1cMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activityTagsPopoverX.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/groups.js",
-		"/home/solargreen/meteor/OpenLabv2/methods/groupMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activities_list.css",
+		"/home/solargreen/meteor/OpenLabv2/collections/walls.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/columns.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/calendar.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/workPeriods.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activities_list.html",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/sectionMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.js",
+		"/home/solargreen/meteor/OpenLabv2/methods/groupMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/wall.html",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/application.css",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/calendarEventModal.css",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
+		"/home/solargreen/meteor/OpenLabv2/server/users.js",
+		"/home/solargreen/meteor/OpenLabv2/server/init.js",
+		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
+		"/home/solargreen/meteor/OpenLabv2/server/schoolAccountsPublications.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/login_buttons.html",
+		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/groups.html",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/groups.js",
+		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/group_helpers.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/calendarEvents.js",
+		"/home/solargreen/meteor/OpenLabv2/collections/blocks.js",
+		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_statuses.css",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.html",
+		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/addCalendarEventModal.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/addCalendarEventModal.html",
+		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.html",
+		"/home/solargreen/meteor/OpenLabv2/methods/sortable1cMethods.js",
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activityTagsPopoverX.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/MatchHelpers.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/todos.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/levelsOfMastery.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/tags.js",
-		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/activity_page.css",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/openlab.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/standards_list.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardPage.js",
@@ -196,11 +262,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/assessment/assessmentPage.js",
 		"/home/solargreen/meteor/OpenLabv2/client/summernote/summernote.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/openlabSession.js",
-		"/home/solargreen/meteor/OpenLabv2/server/publications.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/columns.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/block.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/standards_list.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/standards_list.css",
 		"/home/solargreen/meteor/OpenLabv2/client/plaintexteditor/plaintexteditor.html",
@@ -208,9 +269,6 @@
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/summernote.css",
 		"/home/solargreen/meteor/OpenLabv2/collections/memberships.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/groups.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/groups.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/column.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/headers.css",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers/wallHelpers.js",
@@ -220,28 +278,18 @@
 		"/home/solargreen/meteor/OpenLabv2/server/membershipsAddFields.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/server/cleanUpGroups.js",
 		"/home/solargreen/meteor/OpenLabv2/server/membershipsAddFields.js",
-		"/home/solargreen/meteor/OpenLabv2/server/users.js",
-		"/home/solargreen/meteor/OpenLabv2/server/schoolAccountsPublications.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/activityStatuses.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/activityProgress.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/activities.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/calendarEvents.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/categories.js",
 		"/home/solargreen/meteor/OpenLabv2/server/anonymizeUsernames.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/server/anonymizeUsernames.js",
-		"/home/solargreen/meteor/OpenLabv2/lib/routes.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityPage.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlab.html",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/section_helpers.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers/activityPageSession.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/standards.js",
-		"/home/solargreen/meteor/OpenLabv2/collections/workPeriods.js",
 		"/home/solargreen/meteor/OpenLabv2/server/calendarEventAddField.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/client/main.html",
-		"/home/solargreen/meteor/OpenLabv2/methods/sectionMethods.js",
-		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/helpers/login_buttons_session.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/activity/activityHeader.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.js",
 		"/home/solargreen/meteor/OpenLabv2/client/custom-accounts-ui/viewAs.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/activityTagsPopoverX.html",
@@ -250,15 +298,12 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/chooseStandardsModal.html",
 		"/home/solargreen/meteor/OpenLabv2/client/summernote/toolbars.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/calendar.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/addCalendarEventModal.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/calendar.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/addCalendarEventModal.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/activity/helpers/clipboard.js",
 		"/home/solargreen/meteor/OpenLabv2/methods/blockMethods.js",
 		"/home/solargreen/meteor/OpenLabv2/server/calendarEventAddField.js",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/helpers/temporaryCalendarEvent.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/temporaryCalendarEvent.js",
-		"/home/solargreen/meteor/OpenLabv2/server/fixtures.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/chooseStandardsModal.css",
 		"/home/solargreen/meteor/OpenLabv2/server/activityStatusAddField.js.bak",
 		"/home/solargreen/meteor/OpenLabv2/server/repairNullStatus.js",
@@ -266,8 +311,6 @@
 		"/home/solargreen/meteor/OpenLabv2/server/activityStatusAddField.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/recentTags.js",
 		"/home/solargreen/meteor/OpenLabv2/server/users.js.bak",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.html",
-		"/home/solargreen/meteor/OpenLabv2/client/workPeriod/workPeriodPopoverX/workPeriodButton.js",
 		"/home/solargreen/meteor/OpenLabv2/client/stylesheets/workPeriod.css",
 		"/home/solargreen/meteor/OpenLabv2/collections/files.js",
 		"/home/solargreen/meteor/OpenLabv2/collections/sections.js",
@@ -284,9 +327,7 @@
 		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/assessment/standardHeader.html",
 		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.html",
-		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/standard/standardHeader.js",
-		"/home/solargreen/meteor/OpenLabv2/client/views/siteAdmin/siteAdmin.js"
+		"/home/solargreen/meteor/OpenLabv2/client/views/openlab/openlabHeader.js"
 	],
 	"find":
 	{
@@ -304,6 +345,35 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"editingTime",
+			"calEventModalTimeperiodName",
+			"workPeriod",
+			"aItem",
+			"fields",
+			"Match.oneOf",
+			"Match.",
+			"potentialParticipant",
+			"potentialPa",
+			"potentialParticipants",
+			"removeParticipant",
+			"currentPro",
+			"curentPro",
+			"currentPro",
+			"dataValidated",
+			"text",
+			"dataValidated()",
+			"instance.message.set",
+			"Template.calen",
+			"&",
+			"group",
+			"userToShow",
+			"group",
+			"name",
+			"required fields:",
+			"cursor",
+			"hover",
+			"console.",
+			"calEventMo",
 			"dateOrIDFor",
 			"dateORIDFor",
 			"addCalendarEventMOdal",
@@ -402,36 +472,7 @@
 			"'abc'",
 			"Meteor.Collection.ObjectID",
 			"inEdited",
-			"summernoteOptions",
-			"editing",
-			"blockTitle",
-			"editing",
-			"inEditedWall()",
-			"editing",
-			"inEditedWall",
-			"inEditedWall()",
-			"fileCount",
-			"Session.get('editedWall')",
-			"cursor: p",
-			".block",
-			"block",
-			"block-",
-			" p ",
-			"p ",
-			"summernote",
-			"bg-",
-			"position",
-			".inEditedWall",
-			"console.log",
-			".editTitle",
-			"fontsize",
-			"this.fontsize",
-			"styleWithSpan",
-			"');\n",
-			"inEditedWall",
-			"icon-list",
-			"list",
-			"button"
+			"summernoteOptions"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -439,6 +480,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"participantList",
 			"Meteor.Collection.ObjectID()"
 		],
 		"reverse": false,
@@ -450,7 +492,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 4,
 			"sheets":
 			[
 				{
@@ -459,15 +501,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2081,
+						"buffer_size": 3236,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1881,
-								1881
+								1206,
+								1206
 							]
 						],
 						"settings":
@@ -477,57 +519,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 867.0,
+						"translation.y": 714.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "client/views/openlab/addCalendarEventModal.html",
+					"file": "client/views/openlab/calendarEventModal.html",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6458,
+						"buffer_size": 13834,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5719,
-								5719
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/HTML/HTML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 2754.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "client/views/openlab/activities_list.html",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5779,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3614,
-								3614
+								4579,
+								4579
 							]
 						],
 						"settings":
@@ -540,60 +552,24 @@
 						"translation.y": 2040.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 2,
-			"sheets":
-			[
-				{
-					"buffer": 3,
-					"file": "client/views/openlab/calendar.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5108,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3843,
-								3843
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1793.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
+					"stack_index": 11,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "client/views/openlab/addCalendarEventModal.js",
+					"buffer": 2,
+					"file": "collections/timePeriods.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10866,
+						"buffer_size": 2084,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								10766,
-								10766
+								1785,
+								1785
 							]
 						],
 						"settings":
@@ -603,57 +579,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4471.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "client/views/openlab/activities_list.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 17731,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								16136,
-								16136
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 7956.0,
+						"translation.y": 408.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "collections/todos.js",
+					"buffer": 3,
+					"file": "client/workPeriod/workPeriodPopoverX/workPeriodPopoverX.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8652,
+						"buffer_size": 19124,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8645,
-								8645
+								0,
+								0
 							]
 						],
 						"settings":
@@ -663,10 +609,106 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2499.0,
+						"translation.y": 5202.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "client/stylesheets/calendar.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2837,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1111,
+								1111
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1020.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 5,
+					"file": "client/views/openlab/calendar.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11793,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6724,
+								6724
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3009.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "client/views/openlab/calendarEventModal.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 38443,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10437,
+								10437
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3621.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -675,15 +717,133 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16794,
+						"buffer_size": 20154,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								356,
-								356
+								8386,
+								8386
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2652.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "collections/todos.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8702,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1580,
+								1580
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 204.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "methods/MatchHelpers.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5057,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4900,
+								4900
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1428.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "client/stylesheets/calendarEventModal.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 662,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								392,
+								392
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "collections/workPeriods.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6844,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
 							]
 						],
 						"settings":
@@ -696,7 +856,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 7,
 					"type": "text"
 				}
 			]
@@ -748,7 +908,7 @@
 	"project": "OpenLabv2.sublime-project",
 	"replace":
 	{
-		"height": 46.0
+		"height": 64.0
 	},
 	"save_all_on_build": true,
 	"select_file":
